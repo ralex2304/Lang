@@ -1,0 +1,11 @@
+.vscode
+/main
+/main.exe
+/build
+/log
+/releases
+/trees/*
+!/trees/example.txt
+/tex/*
+*.code-workspace
+/*/build
