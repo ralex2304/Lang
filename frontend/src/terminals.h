@@ -9,13 +9,14 @@ DEF_TERMINAL(1,  CMD_SEPARATOR,  false, "\n")               //< ;
 DEF_TERMINAL(2,  VAR,            true,  "мой")              //< var
 DEF_TERMINAL(3,  CONST,          true,  "грубый")           //< const
 DEF_TERMINAL(4,  ASSIGNMENT,     false, "=")
-DEF_TERMINAL(5,  RETURN,         true,  "свергаю_кумира")   //< return
 
-DEF_TERMINAL(6,  OPEN_SCOPE,     false, "{")
-DEF_TERMINAL(7,  CLOSE_SCOPE,    false, "}")
-DEF_TERMINAL(8,  OPEN_BRACE,     false, "(")
-DEF_TERMINAL(9,  CLOSE_BRACE,    false, ")")
-DEF_TERMINAL(10, VAR_SEPARATOR,  false, ",")
+DEF_TERMINAL(10, RETURN,         true,  "свергаю_кумира")   //< return
+
+DEF_TERMINAL(11, OPEN_SCOPE,     false, "{")
+DEF_TERMINAL(12, CLOSE_SCOPE,    false, "}")
+DEF_TERMINAL(13, OPEN_BRACE,     false, "(")
+DEF_TERMINAL(14, CLOSE_BRACE,    false, ")")
+DEF_TERMINAL(15, VAR_SEPARATOR,  false, ",")
 
 DEF_TERMINAL(20, MATH_ADD,       false, "+")
 DEF_TERMINAL(21, MATH_SUB,       false, "-")
@@ -24,6 +25,7 @@ DEF_TERMINAL(23, MATH_DIV,       false, "/")
 DEF_TERMINAL(24, MATH_SQRT,      true,  "sqrt")
 DEF_TERMINAL(25, MATH_SIN,       true,  "sin")
 DEF_TERMINAL(26, MATH_COS,       true,  "cos")
+DEF_TERMINAL(27, MATH_DIFF,      true,  "золото_святое")
 
 DEF_TERMINAL(30, LOGIC_GREATER,  false, ">")
 DEF_TERMINAL(31, LOGIC_LOWER,    false, "<")
@@ -35,10 +37,12 @@ DEF_TERMINAL(52, DO_WHILE_WHILE, true,  "тысячи_рек")          //< (do)
 DEF_TERMINAL(53, IF,             true,  "что_это_такое")       //< if
 DEF_TERMINAL(54, DO_IF_DO,       true,  "что")                 //< do (if)
 DEF_TERMINAL(55, DO_IF_IF,       true,  "это_такое")           //< (do) if
-DEF_TERMINAL(56, BREAK,          true,  "тяжело")              //< break
-DEF_TERMINAL(57, CONTINUE,       true,  "амням")               //< continue
+DEF_TERMINAL(56, ELSE,           true,  "никто_не_знает")      //< else
+DEF_TERMINAL(57, BREAK,          true,  "тяжело")              //< break
+DEF_TERMINAL(58, CONTINUE,       true,  "амням")               //< continue
 
 DEF_TERMINAL(70, IN,             true,  "слушай")
 DEF_TERMINAL(71, OUT,            true,  "серенада")
 DEF_TERMINAL(72, SHOW,           true,  "мелькнуло")
 DEF_TERMINAL(73, SET_FPS,        true,  "мелькнуло_столько_раз")
+

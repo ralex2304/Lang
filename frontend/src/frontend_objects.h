@@ -53,7 +53,7 @@ struct Token {
         TerminalNum term = TerminalNum::NONE;
         double num;
         size_t var;
-    } data;
+    } data = {};
 
     DebugInfo debug_info = {};
 };
@@ -62,5 +62,24 @@ struct String {
     const char* s = nullptr;
     size_t len = 0;
 };
+
+struct ParseData {
+    Vector tokens = {};
+    Vector vars = {};
+
+    Tree tree = {};
+
+    inline bool ctor() {
+        if (!tokens.ctor(sizeof(Token))) return false;
+        if (!vars.ctor(sizeof(String)))  return false;
+        return true;
+    };
+
+    inline void dtor() {
+        tokens.dtor();
+        vars.dtor();
+    }
+};
+
 
 #endif //< #ifndef FRONTEND_OBJECTS_H_

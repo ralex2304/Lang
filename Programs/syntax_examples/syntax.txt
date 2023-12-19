@@ -1,0 +1,51 @@
+// 'CH_' - means that function exits without error (gives choice)
+
+Main := Def* 'TERMINATOR'
+
+Def := 'CONST'? 'VAR' VarName {'ASSIGNMENT' Expr | 'OPEN_BRACE' FuncArgsDef 'CLOSE_BRACE' 'CMD_SEPARATOR'? CH_Commands} 'CMD_SEPARATOR'
+
+FuncArgsDef := 'VAR' VarName {'VAR_SEPARATOR' 'VAR' VarName}*
+
+CH_Commands := 'OPEN_SCOPE' Command {'CMD_SEPARATOR' Command}* 'CMD_SEPARATOR'? 'CLOSE_SCOPE'
+
+CH_FuncCall := VarName 'OPEN_BRACE' FuncArgs 'CLOSE_BRACE'
+
+FuncArgs := Expr {'VAR_SEPARATOR' Expr}*
+
+Command := {CH_Commands | CH_CommandWithArg | CH_ComplexCommand | SimpleCommand}
+
+SimpleCommand := {'BREAK' | 'CONTINUE' | 'OUT' | 'SHOW' | Expr}
+
+CH_ComplexCommand := {CH_SimpleClause | CH_PostClause}
+
+Clause := 'OPEN_BRACE' Expr 'CLOSE_BRACE'
+
+ClauseAction := 'CMD_SEPARATOR'? {CH_Commands | Command}
+
+CH_SimpleClause := {'WHILE' | 'IF'} Clause ClauseAction {'ELSE' ClauseAction}?
+
+CH_PostClause := {{'DO_WHILE_DO' ClauseAction 'DO_WHILE_WHILE'} | {'DO_IF_DO' ClauseAction 'DO_IF_IF'}} Clause
+
+CH_CommandWithArg := {'RETURN' | 'SET_FPS'} Expr
+
+// ---------------------------------------------MATHS------------------------------------------------
+
+Expr := {{VarName {'ASSIGNMENT' | {'MATH_ADD' | 'MATH_SUB' | 'MATH_MUL' | 'MATH_DIV'} 'ASSIGNMENT'} Expr} | {MathLvl1}}
+
+MathLvl1 := MathLvl2 {{{{'ASSIGNMENT' | 'LOGIC_NOT' | 'LOGIC_LOWER' | 'LOGIC_GREATER'} 'ASSIGNMENT'} | {'LOGIC_LOWER' | 'LOGIC_GREATER'}} MathLvl2}*
+
+MathLvl2 := MathLvl3 {{'MATH_ADD' | 'MATH_SUB'} MathLvl3}*
+
+MathLvl3 := MathLvl4 {{'MATH_MUL' | 'MATH_DIV'} MathLvl4}*
+
+MathLvl4 := {'MATH_SUB'}? {{'OPEN_BRACE' Expr 'CLOSE_BRACE'} | Binary | Unary | Primary }
+
+Binary := {'MATH_DIFF'} 'OPEN_BRACE' Expr 'VAR_SEPARATOR' Expr 'CLOSE_BRACE'
+
+Unary := {'MATH_SQRT' | 'MATH_SIN' | 'MATH_COS'} 'OPEN_BRACE' Expr 'CLOSE_BRACE'
+
+Primary := {'IN' | CH_Double | CH_FuncCall | Prefix}
+
+Prefix := {{'MATH_ADD''MATH_ADD' | 'MATH_SUB''MATH_SUB'} Prefix} | Postfix
+
+Postfix := VarName {'MATH_ADD''MATH_ADD' | 'MATH_SUB''MATH_SUB'}*

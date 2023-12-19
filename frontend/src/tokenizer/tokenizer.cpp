@@ -26,7 +26,7 @@ Status::Statuses tokenizer_process(const char* text, Vector* tokens, Vector* var
 
     size_t pos = 0;
     size_t line_pos = 0;
-    size_t line = 1;
+    size_t line = 0;
 
     while (text[pos]) {
         if (text[pos] == '\n') {
@@ -89,6 +89,10 @@ Status::Statuses tokenizer_process(const char* text, Vector* tokens, Vector* var
 
         return Status::SYNTAX_ERROR;
     }
+
+    Token term_token = {.type = TokenType::TERM, .data = {.term = TerminalNum::TERMINATOR}};
+    if (!tokens->push_back(&term_token))
+        return Status::MEMORY_EXCEED;
 
     return Status::NORMAL_WORK;
 }

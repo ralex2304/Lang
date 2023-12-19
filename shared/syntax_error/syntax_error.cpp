@@ -3,7 +3,7 @@
 static Status::Statuses syntax_error_without_src_(DebugInfo* info, const char* format, va_list* arg_list);
 
 #define PRINTF_(...)    do {                                            \
-                            if (fprintf(stderr, __VA_ARGS__) <= 0) {    \
+                            if (fprintf(stderr, __VA_ARGS__) < 0) {    \
                                 FREE(src_text);                         \
                                 return Status::OUTPUT_ERROR;            \
                             }                                           \
@@ -34,12 +34,12 @@ Status::Statuses syntax_error(DebugInfo info, const char* format, ...) {
     const int line_end_pos = line_end == nullptr ? (int)src_text_len
                                                  : (int)(line_end - src_text);
 
-    const int token_begin = (int)(info.symbol - 1 + info.line_position);
+    const int token_begin = (int)(info.symbol + info.line_position);
     int token_end = token_begin;
     while (src_text[token_end] && !isspace(src_text[token_end])) token_end++;
 
     PRINTF_(CONSOLE_STYLE(STYLE_BOLD, "%s:%zu:%zu " COLOR_RED "syntax error: "),
-                        info.filename, info.line, info.symbol);
+                        info.filename, info.line + 1, info.symbol + 1);
 
     if (vfprintf(stderr, format, arg_list) <= 0) {
         FREE(src_text);
@@ -48,7 +48,7 @@ Status::Statuses syntax_error(DebugInfo info, const char* format, ...) {
     va_end(arg_list);
     PRINTF_("\n");
 
-    PRINTF_("%5zu | ", info.line);
+    PRINTF_("%5zu | ", info.line + 1);
 
     PRINTF_("%.*s", token_begin - (int)info.line_position, src_text + info.line_position);
     PRINTF_(CONSOLE_STYLE(STYLE_BOLD COLOR_RED, "%.*s"), token_end - token_begin, src_text + token_begin);
