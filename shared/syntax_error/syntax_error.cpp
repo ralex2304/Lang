@@ -56,7 +56,7 @@ Status::Statuses syntax_error(DebugInfo info, const char* format, ...) {
 
     PRINTF_("%5s | ", "");
 
-    PRINTF_("%*s", token_begin, "");
+    PRINTF_("%*s", token_begin - (int)info.line_position, "");
     PRINTF_(COLOR_RED STYLE_BOLD "^");
     for (ssize_t i = 0; i < token_end - token_begin - 1; i++)
         PRINTF_("~");

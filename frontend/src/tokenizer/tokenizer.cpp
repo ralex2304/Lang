@@ -30,8 +30,8 @@ Status::Statuses tokenizer_process(const char* text, Vector* tokens, Vector* var
 
     while (text[pos]) {
         if (text[pos] == '\n') {
-            if (tokens->size() && ((Token*)((*tokens)[tokens->size() - 1]))->type != TokenType::TERM &&
-                ((Token*)((*tokens)[tokens->size() - 1]))->data.term != TerminalNum::CMD_SEPARATOR) {
+            if (tokens->size() && !(((Token*)((*tokens)[tokens->size() - 1]))->type == TokenType::TERM &&
+                ((Token*)((*tokens)[tokens->size() - 1]))->data.term == TerminalNum::CMD_SEPARATOR)) {
 
                 Token new_token = {.type = TokenType::TERM, .data = {.term = TerminalNum::CMD_SEPARATOR},
                                    .debug_info = DEBUG_INFO_};
@@ -53,23 +53,23 @@ Status::Statuses tokenizer_process(const char* text, Vector* tokens, Vector* var
         Token new_token = {};
         size_t token_len = 0;
 
-        double num = NAN;
-
-        STATUS_CHECK(tokenizer_read_num_(text, pos, &token_len, &num));
-
-        if (isfinite(num)) {
-            new_token = {.type = TokenType::NUM, .data = {.num = num}, .debug_info = DEBUG_INFO_};
-
-            PUSH_NEW_TOKEN_();
-            continue;
-        }
-
         TerminalNum term_num = TerminalNum::NONE;
 
         STATUS_CHECK(tokenizer_search_terminal_(text, pos, &token_len, &term_num));
 
         if (term_num != TerminalNum::NONE) {
             new_token = {.type = TokenType::TERM, .data = {.term = term_num}, .debug_info = DEBUG_INFO_};
+
+            PUSH_NEW_TOKEN_();
+            continue;
+        }
+
+        double num = NAN;
+
+        STATUS_CHECK(tokenizer_read_num_(text, pos, &token_len, &num));
+
+        if (isfinite(num)) {
+            new_token = {.type = TokenType::NUM, .data = {.num = num}, .debug_info = DEBUG_INFO_};
 
             PUSH_NEW_TOKEN_();
             continue;
@@ -90,7 +90,8 @@ Status::Statuses tokenizer_process(const char* text, Vector* tokens, Vector* var
         return Status::SYNTAX_ERROR;
     }
 
-    Token term_token = {.type = TokenType::TERM, .data = {.term = TerminalNum::TERMINATOR}};
+    Token term_token = {.type = TokenType::TERM, .data = {.term = TerminalNum::TERMINATOR},
+                                                 .debug_info = DEBUG_INFO_};
     if (!tokens->push_back(&term_token))
         return Status::MEMORY_EXCEED;
 
@@ -146,6 +147,8 @@ static Status::Statuses tokenizer_add_var_(const char* text, const size_t pos, s
 
     if (!vars->push_back(&new_var))
         return Status::MEMORY_EXCEED;
+
+    *num = vars->size() - 1;
 
     return Status::NORMAL_WORK;
 }

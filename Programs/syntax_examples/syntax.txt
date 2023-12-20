@@ -4,11 +4,11 @@ Main := Def* 'TERMINATOR'
 
 Def := 'CONST'? 'VAR' VarName {'ASSIGNMENT' Expr | 'OPEN_BRACE' FuncArgsDef 'CLOSE_BRACE' 'CMD_SEPARATOR'? CH_Commands} 'CMD_SEPARATOR'
 
-FuncArgsDef := 'VAR' VarName {'VAR_SEPARATOR' 'VAR' VarName}*
+FuncArgsDef := {'VAR' VarName {'VAR_SEPARATOR' 'VAR' VarName}*}?
 
-CH_Commands := 'OPEN_SCOPE' Command {'CMD_SEPARATOR' Command}* 'CMD_SEPARATOR'? 'CLOSE_SCOPE'
+CH_Commands := 'OPEN_SCOPE' 'CMD_SEPARATOR'? {Command {'CMD_SEPARATOR' Command}*}? 'CMD_SEPARATOR'? 'CLOSE_SCOPE'
 
-CH_FuncCall := VarName 'OPEN_BRACE' FuncArgs 'CLOSE_BRACE'
+CH_FuncCall := VarName 'OPEN_BRACE' {FuncArgs}? 'CLOSE_BRACE'
 
 FuncArgs := Expr {'VAR_SEPARATOR' Expr}*
 
@@ -38,13 +38,13 @@ MathLvl2 := MathLvl3 {{'MATH_ADD' | 'MATH_SUB'} MathLvl3}*
 
 MathLvl3 := MathLvl4 {{'MATH_MUL' | 'MATH_DIV'} MathLvl4}*
 
-MathLvl4 := {'MATH_SUB'}? {{'OPEN_BRACE' Expr 'CLOSE_BRACE'} | Binary | Unary | Primary }
+MathLvl4 := {'MATH_SUB'}? {{'OPEN_BRACE' Expr 'CLOSE_BRACE'} | CH_Binary | CH_Unary | Primary }
 
-Binary := {'MATH_DIFF'} 'OPEN_BRACE' Expr 'VAR_SEPARATOR' Expr 'CLOSE_BRACE'
+CH_Binary := {'MATH_DIFF'} 'OPEN_BRACE' Expr 'VAR_SEPARATOR' VarName 'CLOSE_BRACE'
 
-Unary := {'MATH_SQRT' | 'MATH_SIN' | 'MATH_COS'} 'OPEN_BRACE' Expr 'CLOSE_BRACE'
+CH_Unary := {'MATH_SQRT' | 'MATH_SIN' | 'MATH_COS'} 'OPEN_BRACE' Expr 'CLOSE_BRACE'
 
-Primary := {'IN' | CH_Double | CH_FuncCall | Prefix}
+Primary := {'IN' | Double | CH_FuncCall | Prefix}
 
 Prefix := {{'MATH_ADD''MATH_ADD' | 'MATH_SUB''MATH_SUB'} Prefix} | Postfix
 

@@ -3,6 +3,11 @@
 
 #include <stdlib.h>
 
+struct String {
+    const char* s = nullptr;
+    size_t len = 0;
+};
+
 struct DebugInfo {
     const char* filename = nullptr;
     size_t line = 0;
@@ -58,6 +63,7 @@ inline bool tree_elem_dtor(void* elem) {
 }
 
 inline bool tree_elem_verify(void* elem) {
+    (void) elem;
     return true;
 }
 

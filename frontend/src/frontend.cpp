@@ -2,8 +2,7 @@
 
 
 #define LOCAL_DTOR_()   FREE(text);     \
-                        tokens.dtor();  \
-                        vars.dtor()
+                        data.dtor()
 
 Status::Statuses front_process(const char* input_filename, const char* output_filename) {
     assert(input_filename);
@@ -12,16 +11,15 @@ Status::Statuses front_process(const char* input_filename, const char* output_fi
     char* text = nullptr;
     STATUS_CHECK(file_open_read_close(input_filename, &text));
 
-    Vector tokens = {};
-    if (!tokens.ctor(sizeof(Token)))
+    ParseData data = {};
+    if (!data.ctor())
         return Status::MEMORY_EXCEED;
 
-    Vector vars = {};
-    if (!vars.ctor(sizeof(String)))
-        return Status::MEMORY_EXCEED;
+    STATUS_CHECK(tokenizer_process(text, &data.tokens, &data.vars, input_filename), LOCAL_DTOR_());
 
-    STATUS_CHECK(tokenizer_process(text, &tokens, &vars, input_filename), LOCAL_DTOR_());
+    STATUS_CHECK(parse_text(&data), LOCAL_DTOR_());
 
+    STATUS_CHECK(tree_output_write(&data, output_filename), LOCAL_DTOR_());
 
     LOCAL_DTOR_();
 

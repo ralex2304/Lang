@@ -1,8 +1,14 @@
 .vscode
 /main
+/frontend/main
+/middleend/main
+/backend/main
 /main.exe
 /build
 /log
+/frontend/log
+/middleend/log
+/backend/log
 /releases
 /trees/*
 !/trees/example.txt

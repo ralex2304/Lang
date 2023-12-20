@@ -5,6 +5,10 @@
 
 #include "utils/macros.h"
 #include "objects.h"
+#include "utils/vector.h"
+
+#include "config.h"
+#include TREE_INCLUDE
 
 
 enum class TerminalNum {
@@ -58,11 +62,6 @@ struct Token {
     DebugInfo debug_info = {};
 };
 
-struct String {
-    const char* s = nullptr;
-    size_t len = 0;
-};
-
 struct ParseData {
     Vector tokens = {};
     Vector vars = {};
@@ -72,12 +71,18 @@ struct ParseData {
     inline bool ctor() {
         if (!tokens.ctor(sizeof(Token))) return false;
         if (!vars.ctor(sizeof(String)))  return false;
+        if (TREE_CTOR(&tree, sizeof(TreeElem), &tree_elem_dtor,
+                                               &tree_elem_verify,
+                                               &tree_elem_str_val) != Tree::OK)
+            return false;
+
         return true;
     };
 
     inline void dtor() {
         tokens.dtor();
         vars.dtor();
+        tree_dtor(&tree);
     }
 };
 
