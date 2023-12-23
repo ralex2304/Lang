@@ -19,7 +19,7 @@ Status::Statuses front_process(const char* input_filename, const char* output_fi
 
     STATUS_CHECK(parse_text(&data), LOCAL_DTOR_());
 
-    STATUS_CHECK(tree_output_write(&data, output_filename), LOCAL_DTOR_());
+    STATUS_CHECK(tree_output_write(&data.tree, &data.vars, output_filename), LOCAL_DTOR_());
 
     LOCAL_DTOR_();
 

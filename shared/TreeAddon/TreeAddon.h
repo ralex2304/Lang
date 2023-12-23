@@ -11,4 +11,6 @@
 
 Status::Statuses tree_dtor_untied_subtree(TreeNode** node);
 
+void tree_is_damaged(Tree* tree);
+
 #endif //< #ifndef LANG_TREE_ADDON_H_

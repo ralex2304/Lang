@@ -18,7 +18,7 @@ Status::Statuses parse_text(ParseData* data);
 namespace TextParser {
     Status::Statuses Main(ParseData* data, size_t* const pos, TreeNode** dest, size_t* const size);
 
-    Status::Statuses Def(ParseData* data, size_t* const pos, TreeNode** dest, size_t* const size);
+    Status::Statuses CH_Def(ParseData* data, size_t* const pos, TreeNode** dest, size_t* const size);
 
     Status::Statuses FuncArgsDef(ParseData* data, size_t* const pos, TreeNode** dest, size_t* const size);
 
@@ -30,19 +30,27 @@ namespace TextParser {
 
     Status::Statuses Command(ParseData* data, size_t* const pos, TreeNode** dest, size_t* const size);
 
-    Status::Statuses SimpleCommand(ParseData* data, size_t* const pos, TreeNode** dest, size_t* const size);
+    Status::Statuses SimpleCommand(ParseData* data, size_t* const pos, TreeNode** dest,
+                                   size_t* const size);
 
-    Status::Statuses CH_ComplexCommand(ParseData* data, size_t* const pos, TreeNode** dest, size_t* const size);
+    Status::Statuses CH_ComplexCommand(ParseData* data, size_t* const pos, TreeNode** dest,
+                                       size_t* const size);
 
     Status::Statuses Clause(ParseData* data, size_t* const pos, TreeNode** dest, size_t* const size);
 
     Status::Statuses ClauseAction(ParseData* data, size_t* const pos, TreeNode** dest, size_t* const size);
 
-    Status::Statuses CH_SimpleClause(ParseData* data, size_t* const pos, TreeNode** dest, size_t* const size);
+    Status::Statuses CH_SimpleClause(ParseData* data, size_t* const pos, TreeNode** dest,
+                                     size_t* const size);
 
-    Status::Statuses CH_PostClause(ParseData* data, size_t* const pos, TreeNode** dest, size_t* const size);
+    Status::Statuses CH_PostClause(ParseData* data, size_t* const pos, TreeNode** dest,
+                                   size_t* const size);
 
-    Status::Statuses CH_CommandWithArg(ParseData* data, size_t* const pos, TreeNode** dest, size_t* const size);
+    Status::Statuses CH_CommandWithArg(ParseData* data, size_t* const pos, TreeNode** dest,
+                                       size_t* const size);
+
+    Status::Statuses CH_CommandWithConstArg(ParseData* data, size_t* const pos, TreeNode** dest,
+                                            size_t* const size);
 
     Status::Statuses Expr(ParseData* data, size_t* const pos, TreeNode** dest, size_t* const size);
 

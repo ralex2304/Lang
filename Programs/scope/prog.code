@@ -1,0 +1,48 @@
+; Regs initialisation
+push 0
+pop rax
+push 0
+pop rbx
+; Regs initialisation end
+
+; func call
+push rbx
+push rbx + 0
+pop rbx
+call ___func_0
+pop rbx
+; func call end
+
+hlt
+; =========================== Function definition =========================
+___func_0:
+push 5
+pop [rbx + 0]
+push 1
+; if begin
+push 0
+je ___if_1_exit
+push [rbx + 0]
+out
+push 10
+pop [rbx + 1]
+push [rbx + 1]
+out
+push [rbx + 1]
+push 10
+add
+pop [rbx + 1]
+push [rbx + 1]
+out
+___if_1_exit:
+; if end
+
+push [rbx + 0]
+out
+push 0
+pop rax
+ret
+ret
+; ------------------------- Function definition end -----------------------
+
+

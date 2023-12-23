@@ -9,9 +9,9 @@
 #include "config.h"
 #include TREE_INCLUDE
 #include "objects.h"
-#include "../frontend_objects.h"
 #include "file/file.h"
+#include "utils/vector.h"
 
-Status::Statuses tree_output_write(ParseData* data, const char* filename);
+Status::Statuses tree_output_write(Tree* tree, Vector* data, const char* filename);
 
 #endif //< #ifndef TREE_OUTPUT_H_

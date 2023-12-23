@@ -1,5 +1,14 @@
 #include "text_parser.h"
 
+#include "text_parser_dsl.h"
+
+static Status::Statuses CH_Def_var_(ParseData* data, size_t* const pos, TreeNode** dest,
+                                    size_t* const size, size_t var_num, DebugInfo* var_debug_info);
+
+static Status::Statuses CH_Def_func_(ParseData* data, size_t* const pos, TreeNode** dest,
+                                     size_t* const size, size_t var_num, DebugInfo* var_debug_info);
+
+
 Status::Statuses parse_text(ParseData* data) {
     assert(data);
 
@@ -13,34 +22,8 @@ Status::Statuses parse_text(ParseData* data) {
     data->tree.root = result;
     data->tree.size = size;
 
-    TREE_DUMP(&data->tree);
-
     return Status::NORMAL_WORK;
 }
-
-#define IS_TOKEN_TYPE(token_, type_) ((token_).type == type_)
-
-#define IS_TOKEN_TERM_EQ(token_, term_) (IS_TOKEN_TYPE(token_, TokenType::TERM) && (token_).data.term == term_)
-
-#define CUR_TOKEN (*(Token*)(data->tokens[*pos]))
-
-#define NEXT_TOKEN (*(Token*)(data->tokens[*pos + 1]))
-
-#define CUR_TOKEN_DEBUG_INFO CUR_TOKEN.debug_info
-
-#define TREE_INSERT(node_, parent_, elem_)                                      \
-            if (tree_insert(&data->tree, node_, parent_, elem_) != Tree::OK)    \
-                return Status::TREE_ERROR
-
-#define L(node_) (&(node_)->left)
-#define R(node_) (&(node_)->right)
-
-#define NUM_ELEM(val_, debug_)      {.type = TreeElemType::NUM,  .data = {.num  = val_},    \
-                                     .debug_info = debug_}
-#define OPER_ELEM(oper_, debug_)    {.type = TreeElemType::OPER, .data = {.oper = oper_},   \
-                                     .debug_info = debug_}
-#define VAR_ELEM(var_num_, debug_)  {.type = TreeElemType::VAR,  .data = {.var = var_num_}, \
-                                     .debug_info = debug_}
 
 using namespace TextParser;
 
@@ -55,9 +38,14 @@ Status::Statuses TextParser::Main(ParseData* data, size_t* const pos, TreeNode**
 
     while ((ssize_t)(*pos) < data->tokens.size() && !IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::TERMINATOR)) {
 
+        if (IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::CMD_SEPARATOR))
+            (*pos)++;
+
         TreeNode* new_node = nullptr;
-        STATUS_CHECK(Def(data, pos, &new_node, size),
+        STATUS_CHECK(CH_Def(data, pos, &new_node, size),
                                         tree_dtor_untied_subtree(&new_node));
+        if (new_node == nullptr)
+            break;
 
         STATUS_CHECK(new_oper_node(dest, OperNum::CMD_SEPARATOR, CUR_TOKEN_DEBUG_INFO,
                                    new_node, nullptr),
@@ -80,8 +68,8 @@ Status::Statuses TextParser::Main(ParseData* data, size_t* const pos, TreeNode**
     return Status::SYNTAX_ERROR;
 }
 
-Status::Statuses TextParser::Def(ParseData* data, size_t* const pos, TreeNode** dest,
-                                 size_t* const size) {
+Status::Statuses TextParser::CH_Def(ParseData* data, size_t* const pos, TreeNode** dest,
+                                    size_t* const size) {
     assert(data);
     assert(dest);
     assert(*dest == nullptr);
@@ -89,7 +77,9 @@ Status::Statuses TextParser::Def(ParseData* data, size_t* const pos, TreeNode** 
 
     TreeNode* parent = nullptr;
 
-    if (IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::CONST)) {
+    if (IS_TOKEN_TERM_EQ(CUR_TOKEN,  TerminalNum::CONST) &&
+        IS_TOKEN_TERM_EQ(NEXT_TOKEN, TerminalNum::VAR)) {
+
         STATUS_CHECK(new_oper_node(dest, OperNum::CONST_VAR_DEF, CUR_TOKEN_DEBUG_INFO,
                                    nullptr, nullptr));
         (*size)++;
@@ -99,10 +89,8 @@ Status::Statuses TextParser::Def(ParseData* data, size_t* const pos, TreeNode** 
         dest = R(*dest);
     }
 
-    if (!IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::VAR)) {
-        STATUS_CHECK(syntax_error(CUR_TOKEN_DEBUG_INFO, "Expected var or function declaration"));
-        return Status::SYNTAX_ERROR;
-    }
+    if (!IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::VAR))
+        return Status::NORMAL_WORK;
     (*pos)++;
 
     if (!IS_TOKEN_TYPE(CUR_TOKEN, TokenType::VAR)) {
@@ -114,62 +102,12 @@ Status::Statuses TextParser::Def(ParseData* data, size_t* const pos, TreeNode** 
     (*pos)++;
 
     if (IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::ASSIGNMENT)) {
-        DebugInfo debug_info = CUR_TOKEN_DEBUG_INFO;
-        (*pos)++;
 
-        TreeNode* var_definition = nullptr;
-        STATUS_CHECK(Expr(data, pos, &var_definition, size),
-                                                        tree_dtor_untied_subtree(&var_definition));
-        assert(var_definition);
-
-        TreeNode* new_var = nullptr;
-        STATUS_CHECK(new_var_node(&new_var, var_num, var_debug_info),
-                                                        tree_dtor_untied_subtree(&var_definition));
-        (*size)++;
-
-        STATUS_CHECK(new_oper_node(dest, OperNum::VAR_DEFINITION, debug_info,
-                                   new_var, var_definition),
-                                                        tree_dtor_untied_subtree(&var_definition);
-                                                        tree_dtor_untied_subtree(&new_var));
-        (*size)++;
+        STATUS_CHECK(CH_Def_var_(data, pos, dest, size, var_num, &var_debug_info));
 
     } else if (IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::OPEN_BRACE)) {
-        (*pos)++;
 
-        TreeNode* args = nullptr;
-        STATUS_CHECK(FuncArgsDef(data, pos, &args, size),
-                                                        tree_dtor_untied_subtree(&args));
-
-        TreeNode* func_name = nullptr;
-        STATUS_CHECK(new_var_node(&func_name, var_num, var_debug_info),
-                                                        tree_dtor_untied_subtree(&args));
-        (*size)++;
-
-        TreeNode* left_subtree = nullptr;
-        STATUS_CHECK(new_oper_node(&left_subtree, OperNum::VAR_SEPARATOR, CUR_TOKEN_DEBUG_INFO,
-                                   func_name, args),    tree_dtor_untied_subtree(&func_name);
-                                                        tree_dtor_untied_subtree(&args));
-        (*size)++;
-
-        if (!IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::CLOSE_BRACE)) {
-            tree_dtor_untied_subtree(&left_subtree);
-            STATUS_CHECK(syntax_error(CUR_TOKEN_DEBUG_INFO, "Expected separator"));
-            return Status::SYNTAX_ERROR;
-        }
-        (*pos)++;
-
-        if (IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::CMD_SEPARATOR))
-            (*pos)++;
-
-        TreeNode* commands = nullptr;
-        STATUS_CHECK(CH_Commands(data, pos, &commands, size),
-                                                            tree_dtor_untied_subtree(&left_subtree);
-                                                            tree_dtor_untied_subtree(&commands));
-
-        STATUS_CHECK(new_oper_node(dest, OperNum::FUNC_DEFINITION, CUR_TOKEN_DEBUG_INFO,
-                                   left_subtree, commands), tree_dtor_untied_subtree(&left_subtree);
-                                                            tree_dtor_untied_subtree(&commands));
-        (*size)++;
+        STATUS_CHECK(CH_Def_func_(data, pos, dest, size, var_num, &var_debug_info));
 
     } else {
         STATUS_CHECK(syntax_error(CUR_TOKEN_DEBUG_INFO, "Expected var or function defenition"));
@@ -179,11 +117,83 @@ Status::Statuses TextParser::Def(ParseData* data, size_t* const pos, TreeNode** 
     if (parent != nullptr)
         (*dest)->parent = parent;
 
-    if (!IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::CMD_SEPARATOR)) {
+    return Status::NORMAL_WORK;
+}
+
+static Status::Statuses CH_Def_var_(ParseData* data, size_t* const pos, TreeNode** dest,
+                                   size_t* const size, size_t var_num, DebugInfo* var_debug_info) {
+    assert(data);
+    assert(dest);
+    assert(*dest == nullptr);
+    assert(pos);
+    assert(var_debug_info);
+
+    DebugInfo debug_info = CUR_TOKEN_DEBUG_INFO;
+        (*pos)++;
+
+    TreeNode* var_definition = nullptr;
+    STATUS_CHECK(Expr(data, pos, &var_definition, size),
+                                                    tree_dtor_untied_subtree(&var_definition));
+    assert(var_definition);
+
+    TreeNode* new_var = nullptr;
+    STATUS_CHECK(new_var_node(&new_var, var_num, *var_debug_info),
+                                                    tree_dtor_untied_subtree(&var_definition));
+    (*size)++;
+
+    STATUS_CHECK(new_oper_node(dest, OperNum::VAR_DEFINITION, debug_info,
+                                new_var, var_definition),
+                                                    tree_dtor_untied_subtree(&var_definition);
+                                                    tree_dtor_untied_subtree(&new_var));
+    (*size)++;
+
+    return Status::NORMAL_WORK;
+}
+
+static Status::Statuses CH_Def_func_(ParseData* data, size_t* const pos, TreeNode** dest,
+                                   size_t* const size, size_t var_num, DebugInfo* var_debug_info) {
+    assert(data);
+    assert(dest);
+    assert(*dest == nullptr);
+    assert(pos);
+    assert(var_debug_info);
+
+    (*pos)++;
+
+    TreeNode* args = nullptr;
+    STATUS_CHECK(FuncArgsDef(data, pos, &args, size),
+                                                    tree_dtor_untied_subtree(&args));
+
+    TreeNode* func_name = nullptr;
+    STATUS_CHECK(new_var_node(&func_name, var_num, *var_debug_info),
+                                                    tree_dtor_untied_subtree(&args));
+    (*size)++;
+
+    TreeNode* left_subtree = nullptr;
+    STATUS_CHECK(new_oper_node(&left_subtree, OperNum::VAR_SEPARATOR, CUR_TOKEN_DEBUG_INFO,
+                                func_name, args),    tree_dtor_untied_subtree(&func_name);
+                                                    tree_dtor_untied_subtree(&args));
+    (*size)++;
+
+    if (!IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::CLOSE_BRACE)) {
+        tree_dtor_untied_subtree(&left_subtree);
         STATUS_CHECK(syntax_error(CUR_TOKEN_DEBUG_INFO, "Expected separator"));
         return Status::SYNTAX_ERROR;
     }
     (*pos)++;
+
+    if (IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::CMD_SEPARATOR))
+        (*pos)++;
+
+    TreeNode* commands = nullptr;
+    STATUS_CHECK(CH_Commands(data, pos, &commands, size),
+                                                        tree_dtor_untied_subtree(&left_subtree);
+                                                        tree_dtor_untied_subtree(&commands));
+
+    STATUS_CHECK(new_oper_node(dest, OperNum::FUNC_DEFINITION, CUR_TOKEN_DEBUG_INFO,
+                                left_subtree, commands), tree_dtor_untied_subtree(&left_subtree);
+                                                        tree_dtor_untied_subtree(&commands));
+    (*size)++;
 
     return Status::NORMAL_WORK;
 }
@@ -371,11 +381,19 @@ Status::Statuses TextParser::Command(ParseData* data, size_t* const pos, TreeNod
     if (*dest != nullptr)
         return Status::NORMAL_WORK;
 
+    STATUS_CHECK(CH_Def(data, pos, dest, size));
+    if (*dest != nullptr)
+        return Status::NORMAL_WORK;
+
     STATUS_CHECK(CH_CommandWithArg(data, pos, dest, size));
     if (*dest != nullptr)
         return Status::NORMAL_WORK;
 
     STATUS_CHECK(CH_ComplexCommand(data, pos, dest, size));
+    if (*dest != nullptr)
+        return Status::NORMAL_WORK;
+
+    STATUS_CHECK(CH_CommandWithConstArg(data, pos, dest, size));
     if (*dest != nullptr)
         return Status::NORMAL_WORK;
 
@@ -401,9 +419,6 @@ Status::Statuses TextParser::SimpleCommand(ParseData* data, size_t* const pos, T
 
     } else if (IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::CONTINUE)) {
         STATUS_CHECK(new_oper_node(dest, OperNum::CONTINUE, CUR_TOKEN_DEBUG_INFO, nullptr, nullptr));
-
-    } else if (IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::OUT)) {
-        STATUS_CHECK(new_oper_node(dest, OperNum::OUT, CUR_TOKEN_DEBUG_INFO, nullptr, nullptr));
 
     } else if (IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::SHOW)) {
         STATUS_CHECK(new_oper_node(dest, OperNum::SHOW, CUR_TOKEN_DEBUG_INFO, nullptr, nullptr));
@@ -594,8 +609,8 @@ Status::Statuses TextParser::CH_CommandWithArg(ParseData* data, size_t* const po
 
     if (IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::RETURN))
         oper = OperNum::RETURN;
-    else if (IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::SET_FPS))
-        oper = OperNum::SET_FPS;
+    else if (IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::OUT))
+        oper = OperNum::OUT;
     else
         return Status::NORMAL_WORK;
 
@@ -608,6 +623,30 @@ Status::Statuses TextParser::CH_CommandWithArg(ParseData* data, size_t* const po
 
     STATUS_CHECK(new_oper_node(dest, oper, debug_info, nullptr, expr),
                                                                 tree_dtor_untied_subtree(&expr));
+    (*size)++;
+
+    return Status::NORMAL_WORK;
+}
+
+Status::Statuses TextParser::CH_CommandWithConstArg(ParseData* data, size_t* const pos, TreeNode** dest,
+                                                    size_t* const size) {
+    assert(data);
+    assert(dest);
+    assert(*dest == nullptr);
+    assert(pos);
+
+    if (!IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::SET_FPS))
+        return Status::NORMAL_WORK;
+
+    DebugInfo debug_info = CUR_TOKEN_DEBUG_INFO;
+    (*pos)++;
+
+    TreeNode* num = nullptr;
+    STATUS_CHECK(Double(data, pos, &num, size),                 tree_dtor_untied_subtree(&num));
+    assert(num);
+
+    STATUS_CHECK(new_oper_node(dest, OperNum::SET_FPS, debug_info, nullptr, num),
+                                                                tree_dtor_untied_subtree(&num));
     (*size)++;
 
     return Status::NORMAL_WORK;
@@ -628,7 +667,9 @@ Status::Statuses TextParser::Expr(ParseData* data, size_t* const pos, TreeNode**
         OperNum oper = OperNum::NONE;
         DebugInfo debug_info = CUR_TOKEN_DEBUG_INFO;
 
-        if (IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::ASSIGNMENT)) {
+        if (IS_TOKEN_TERM_EQ(CUR_TOKEN,  TerminalNum::ASSIGNMENT) &&
+           !IS_TOKEN_TERM_EQ(NEXT_TOKEN, TerminalNum::ASSIGNMENT)) {
+
             oper = OperNum::ASSIGNMENT;
             (*pos)++;
         } else if ((ssize_t)(*pos) + 1 < data->tokens.size() &&
@@ -1149,6 +1190,7 @@ Status::Statuses TextParser::Postfix(ParseData* data, size_t* const pos, TreeNod
         return Status::SYNTAX_ERROR;
     }
     size_t var_num = CUR_TOKEN.data.var;
+    DebugInfo var_debug_info = CUR_TOKEN_DEBUG_INFO;
     (*pos)++;
 
     TreeNode* parent = nullptr;
@@ -1167,7 +1209,7 @@ Status::Statuses TextParser::Postfix(ParseData* data, size_t* const pos, TreeNod
             oper = OperNum::NONE;
 
         if (oper == OperNum::NONE) {
-            STATUS_CHECK(new_var_node(dest, var_num, debug_info));
+            STATUS_CHECK(new_var_node(dest, var_num, var_debug_info));
             (*size)++;
             if (parent)
                 (*dest)->parent = parent;

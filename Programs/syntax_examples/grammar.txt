@@ -1,8 +1,8 @@
 // 'CH_' - means that function exits without error (gives choice)
 
-Main := Def* 'TERMINATOR'
+Main := {'CMD_SEPARATOR'? CH_Def 'CMD_SEPARATOR'?}* 'TERMINATOR'
 
-Def := 'CONST'? 'VAR' VarName {'ASSIGNMENT' Expr | 'OPEN_BRACE' FuncArgsDef 'CLOSE_BRACE' 'CMD_SEPARATOR'? CH_Commands} 'CMD_SEPARATOR'
+CH_Def := 'CONST'? 'VAR' VarName {'ASSIGNMENT' Expr | 'OPEN_BRACE' FuncArgsDef 'CLOSE_BRACE' 'CMD_SEPARATOR'? CH_Commands}
 
 FuncArgsDef := {'VAR' VarName {'VAR_SEPARATOR' 'VAR' VarName}*}?
 
@@ -12,9 +12,9 @@ CH_FuncCall := VarName 'OPEN_BRACE' {FuncArgs}? 'CLOSE_BRACE'
 
 FuncArgs := Expr {'VAR_SEPARATOR' Expr}*
 
-Command := {CH_Commands | CH_CommandWithArg | CH_ComplexCommand | SimpleCommand}
+Command := {CH_Commands | CH_Def | CH_CommandWithArg | CH_ComplexCommand | CH_CommandWithConstArg | SimpleCommand}
 
-SimpleCommand := {'BREAK' | 'CONTINUE' | 'OUT' | 'SHOW' | Expr}
+SimpleCommand := {'BREAK' | 'CONTINUE' | 'SHOW' | Expr}
 
 CH_ComplexCommand := {CH_SimpleClause | CH_PostClause}
 
@@ -26,11 +26,13 @@ CH_SimpleClause := {'WHILE' | 'IF'} Clause ClauseAction {'ELSE' ClauseAction}?
 
 CH_PostClause := {{'DO_WHILE_DO' ClauseAction 'DO_WHILE_WHILE'} | {'DO_IF_DO' ClauseAction 'DO_IF_IF'}} Clause
 
-CH_CommandWithArg := {'RETURN' | 'SET_FPS'} Expr
+CH_CommandWithArg := {'RETURN' | 'OUT'} Expr
+
+CH_CommandWithConstArg := 'SET_FPS' Double
 
 // ---------------------------------------------MATHS------------------------------------------------
 
-Expr := {{VarName {'ASSIGNMENT' | {'MATH_ADD' | 'MATH_SUB' | 'MATH_MUL' | 'MATH_DIV'} 'ASSIGNMENT'} Expr} | {MathLvl1}}
+Expr := {{VarName {'ASSIGNMENT' !'ASSIGNMENT' | {'MATH_ADD' | 'MATH_SUB' | 'MATH_MUL' | 'MATH_DIV'} 'ASSIGNMENT'} Expr} | {MathLvl1}}
 
 MathLvl1 := MathLvl2 {{{{'ASSIGNMENT' | 'LOGIC_NOT' | 'LOGIC_LOWER' | 'LOGIC_GREATER'} 'ASSIGNMENT'} | {'LOGIC_LOWER' | 'LOGIC_GREATER'}} MathLvl2}*
 

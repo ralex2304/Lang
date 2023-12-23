@@ -20,3 +20,9 @@ Status::Statuses tree_dtor_untied_subtree(TreeNode** node) {
 
     return Status::NORMAL_WORK;
 }
+
+void tree_is_damaged(Tree* tree) {
+    assert(tree);
+
+    TREE_DUMP(tree);
+}

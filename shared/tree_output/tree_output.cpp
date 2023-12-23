@@ -1,12 +1,12 @@
 #include "tree_output.h"
 
-static Status::Statuses write_tree_(ParseData* data, FILE* file);
+static Status::Statuses write_tree_(Tree* tree, FILE* file);
 
 static Status::Statuses write_tree_print_debug_data_(FILE* file, DebugInfo* info);
 
-static Status::Statuses write_tree_traversal_(ParseData* data, FILE* file, TreeNode* node);
+static Status::Statuses write_tree_traversal_(Tree* tree, FILE* file, TreeNode* node);
 
-static Status::Statuses write_vars_(ParseData* data, FILE* file);
+static Status::Statuses write_vars_(Vector* vars, FILE* file);
 
 
 
@@ -15,17 +15,18 @@ static Status::Statuses write_vars_(ParseData* data, FILE* file);
                                 return Status::OUTPUT_ERROR;        \
                         } while (0)
 
-Status::Statuses tree_output_write(ParseData* data, const char* filename) {
-    assert(data);
+Status::Statuses tree_output_write(Tree* tree, Vector* vars, const char* filename) {
+    assert(tree);
+    assert(vars);
     assert(filename);
 
     FILE* file = {};
     if (!file_open(&file, filename, "wb"))
         return Status::OUTPUT_ERROR;
 
-    STATUS_CHECK(write_tree_(data, file), file_close(file));
+    STATUS_CHECK(write_tree_(tree, file), file_close(file));
 
-    STATUS_CHECK(write_vars_(data, file), file_close(file));
+    STATUS_CHECK(write_vars_(vars, file), file_close(file));
 
     if (!file_close(file))
         return Status::OUTPUT_ERROR;
@@ -33,12 +34,12 @@ Status::Statuses tree_output_write(ParseData* data, const char* filename) {
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses write_vars_(ParseData* data, FILE* file) {
-    assert(data);
+static Status::Statuses write_vars_(Vector* vars, FILE* file) {
+    assert(vars);
     assert(file);
 
-    for (ssize_t i = 0; i < data->vars.size(); i++) {
-        String* str = (String*)(data->vars[i]);
+    for (ssize_t i = 0; i < vars->size(); i++) {
+        String* str = (String*)((*vars)[i]);
 
         PRINT_("%.*s\n", (int)str->len, str->s);
     }
@@ -46,19 +47,19 @@ static Status::Statuses write_vars_(ParseData* data, FILE* file) {
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses write_tree_(ParseData* data, FILE* file) {
-    assert(data);
+static Status::Statuses write_tree_(Tree* tree, FILE* file) {
+    assert(tree);
     assert(file);
 
-    STATUS_CHECK(write_tree_traversal_(data, file, data->tree.root));
+    STATUS_CHECK(write_tree_traversal_(tree, file, tree->root));
 
     PRINT_("\n");
 
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses write_tree_traversal_(ParseData* data, FILE* file, TreeNode* node) {
-    assert(data);
+static Status::Statuses write_tree_traversal_(Tree* tree, FILE* file, TreeNode* node) {
+    assert(tree);
     assert(file);
 
     if (node == nullptr) {
@@ -92,11 +93,11 @@ static Status::Statuses write_tree_traversal_(ParseData* data, FILE* file, TreeN
 
     PRINT_(", ");
 
-    STATUS_CHECK(write_tree_traversal_(data, file, node->left));
+    STATUS_CHECK(write_tree_traversal_(tree, file, node->left));
 
     PRINT_(" ");
 
-    STATUS_CHECK(write_tree_traversal_(data, file, node->right));
+    STATUS_CHECK(write_tree_traversal_(tree, file, node->right));
 
     PRINT_(")");
 

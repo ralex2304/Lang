@@ -2,9 +2,23 @@
 DOCS_DIR = docs
 
 
-.PHONY: frontend middleend backend build_front build_middle build_back
+.PHONY: main frontend middleend backend build_front build_middle build_back
 
-build: build_front build_middle build_back
+main: build frontend backend
+
+PROG_PATH = Programs/$(prog)
+
+frontend:
+	LANG=ru_RU.CP1251 luit ./frontend/./main -i $(PROG_PATH)/prog.snb -o $(PROG_PATH)/prog.tre
+
+middleend:
+	LANG=ru_RU.CP1251 luit ./middleend/./main
+
+backend:
+	LANG=ru_RU.CP1251 luit ./backend/./main -i $(PROG_PATH)/prog.tre -o $(PROG_PATH)/prog.code
+
+
+build: build_front build_back
 
 build_front:
 	@cd ./frontend && make

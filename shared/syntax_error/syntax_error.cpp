@@ -79,7 +79,7 @@ static Status::Statuses syntax_error_without_src_(DebugInfo* info, const char* f
 
     PRINTF_("Can't open source file\n");
     PRINTF_(CONSOLE_STYLE(STYLE_BOLD, "%s:%zu:%zu " COLOR_RED "syntax error: "),
-                       info->filename, info->line, info->symbol);
+                       info->filename, info->line + 1, info->symbol + 1);
 
     if (vfprintf(stderr, format, *arg_list) <= 0) {
         return Status::OUTPUT_ERROR;

@@ -1,179 +1,202 @@
 #include "tokenizer.h"
 
-static Status::Statuses tokenizer_read_num_(const char* text, const size_t pos, size_t* len, double* num);
-
-static Status::Statuses tokenizer_add_var_(const char* text, const size_t pos, size_t* len, size_t* num,
-                                           Vector* vars);
-
-static Status::Statuses tokenizer_search_terminal_(const char* text, const size_t pos, size_t* term_len,
-                                                   TerminalNum* num);
-
-static bool can_be_var_symbol_(char c);
-
-#define DEBUG_INFO_ {.filename = filename, .line = line, .symbol = pos - line_pos, .line_position = line_pos}
-
-#define PUSH_NEW_TOKEN_()   if (!tokens->push_back(&new_token)) \
-                                return Status::MEMORY_EXCEED;   \
-                                                                \
-                            pos += token_len
-
-Status::Statuses tokenizer_process(const char* text, Vector* tokens, Vector* vars,
-                                   const char* filename) {
-    assert(text);
-    assert(tokens);
-    assert(vars);
-    assert(filename);
-
+struct TextData {
+    const char* str = nullptr;
     size_t pos = 0;
     size_t line_pos = 0;
     size_t line = 0;
 
-    while (text[pos]) {
-        if (text[pos] == '\n') {
-            if (tokens->size() && !(((Token*)((*tokens)[tokens->size() - 1]))->type == TokenType::TERM &&
-                ((Token*)((*tokens)[tokens->size() - 1]))->data.term == TerminalNum::CMD_SEPARATOR)) {
+    const char* filename = nullptr;
+};
 
-                Token new_token = {.type = TokenType::TERM, .data = {.term = TerminalNum::CMD_SEPARATOR},
-                                   .debug_info = DEBUG_INFO_};
+static Status::Statuses add_cmd_separator_(TextData* text, Vector* tokens, Vector* vars);
 
-                if (!tokens->push_back(&new_token))
-                    return Status::MEMORY_EXCEED;
-            }
-            line++;
-            pos++;
-            line_pos = pos;
+static Status::Statuses tokenizer_read_num_(TextData* text, Vector* tokens, bool* is_found);
+
+static Status::Statuses tokenizer_add_var_(TextData* text, Vector* tokens, Vector* vars,
+                                           bool* is_found);
+
+static Status::Statuses tokenizer_read_terminal_(TextData* text, Vector* tokens, bool* is_found);
+
+static bool can_be_var_symbol_(char c);
+
+
+#define DEBUG_INFO(text_)  {.filename = (text_).filename, .line = (text_).line, \
+                           .symbol = (text_).pos - (text_).line_pos,            \
+                           .line_position = (text_).line_pos}
+
+Status::Statuses tokenizer_process(const char* text_str, Vector* tokens, Vector* vars,
+                                   const char* filename) {
+    assert(text_str);
+    assert(tokens);
+    assert(vars);
+    assert(filename);
+
+    TextData text = {.str = text_str, .filename = filename};
+
+    while (text_str[text.pos]) {
+        if (text_str[text.pos] == '\n') {
+            STATUS_CHECK(add_cmd_separator_(&text, tokens, vars));
+            text.line++;
+            text.pos++;
+            text.line_pos = text.pos;
             continue;
         }
 
-        if (isspace(text[pos])) {
-            pos++;
+        if (isspace(text_str[text.pos])) {
+            text.pos++;
             continue;
         }
 
-        Token new_token = {};
-        size_t token_len = 0;
+        bool is_found = false;
 
-        TerminalNum term_num = TerminalNum::NONE;
+        STATUS_CHECK(tokenizer_read_terminal_(&text, tokens, &is_found));
+        if (is_found) continue;
 
-        STATUS_CHECK(tokenizer_search_terminal_(text, pos, &token_len, &term_num));
+        STATUS_CHECK(tokenizer_read_num_(&text, tokens, &is_found));
+        if (is_found) continue;
 
-        if (term_num != TerminalNum::NONE) {
-            new_token = {.type = TokenType::TERM, .data = {.term = term_num}, .debug_info = DEBUG_INFO_};
+        STATUS_CHECK(tokenizer_add_var_(&text, tokens, vars, &is_found));
+        if (is_found) continue;
 
-            PUSH_NEW_TOKEN_();
-            continue;
-        }
-
-        double num = NAN;
-
-        STATUS_CHECK(tokenizer_read_num_(text, pos, &token_len, &num));
-
-        if (isfinite(num)) {
-            new_token = {.type = TokenType::NUM, .data = {.num = num}, .debug_info = DEBUG_INFO_};
-
-            PUSH_NEW_TOKEN_();
-            continue;
-        }
-
-        size_t var_num = 0;
-        STATUS_CHECK(tokenizer_add_var_(text, pos, &token_len, &var_num, vars));
-
-        if (token_len != 0) {
-            new_token = {.type = TokenType::VAR, .data = {.var = var_num}, .debug_info = DEBUG_INFO_};
-
-            PUSH_NEW_TOKEN_();
-            continue;
-        }
-
-        STATUS_CHECK(syntax_error(DEBUG_INFO_, "unknown symbol"));
+        STATUS_CHECK(syntax_error(DEBUG_INFO(text), "unknown symbol"));
 
         return Status::SYNTAX_ERROR;
     }
 
     Token term_token = {.type = TokenType::TERM, .data = {.term = TerminalNum::TERMINATOR},
-                                                 .debug_info = DEBUG_INFO_};
+                                                 .debug_info = DEBUG_INFO(text)};
     if (!tokens->push_back(&term_token))
         return Status::MEMORY_EXCEED;
 
     return Status::NORMAL_WORK;
 }
-#undef DEBUG_INFO_
-#undef PUSH_NEW_TOKEN_
 
-static Status::Statuses tokenizer_read_num_(const char* text, const size_t pos, size_t* len, double* num) {
+static Status::Statuses add_cmd_separator_(TextData* text, Vector* tokens, Vector* vars) {
     assert(text);
-    assert(len);
-    assert(num);
+    assert(tokens);
+    assert(vars);
 
-    *num = NAN;
-    *len = 0;
+    if (tokens->size() && !(((Token*)((*tokens)[tokens->size() - 1]))->type == TokenType::TERM &&
+        ((Token*)((*tokens)[tokens->size() - 1]))->data.term == TerminalNum::CMD_SEPARATOR)) {
 
-    int n = 0;
+        Token new_token = {.type = TokenType::TERM, .data = {.term = TerminalNum::CMD_SEPARATOR},
+                            .debug_info = DEBUG_INFO(*text)};
 
-    if (sscanf(text + pos, "%lf%n", num, &n) == 1) {
-        assert(n > 0);
-        assert(isfinite(*num));
-        *len = (size_t)n;
+        if (!tokens->push_back(&new_token))
+            return Status::MEMORY_EXCEED;
     }
 
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses tokenizer_add_var_(const char* text, const size_t pos, size_t* len, size_t* num,
-                                           Vector* vars) {
-    assert(text);
-    assert(len);
-    assert(vars);
+#define PUSH_NEW_TOKEN_(text_)  if (!tokens->push_back(&new_token)) \
+                                    return Status::MEMORY_EXCEED;   \
+                                                                \
+                                (text_).pos += token_len
 
-    if (can_be_var_symbol_(text[pos]) && !isdigit(text[pos]))
-        *len = 1;
-    else {
-        *len = 0;
-        return Status::NORMAL_WORK;
+static Status::Statuses tokenizer_read_num_(TextData* text, Vector* tokens, bool* is_found) {
+    assert(text);
+    assert(tokens);
+    assert(is_found);
+    assert(!*is_found);
+
+    double num = NAN;
+    size_t token_len = 0;
+
+    int n = 0;
+    if (sscanf(text->str + text->pos, "%lf%n", &num, &n) == 1) {
+        assert(n > 0);
+        assert(isfinite(num));
+        token_len = (size_t)n;
     }
 
-    while (can_be_var_symbol_(text[pos + *len])) (*len)++;
+    if (isfinite(num)) {
+        Token new_token = {.type = TokenType::NUM, .data = {.num = num},
+                           .debug_info = DEBUG_INFO(*text)};
+
+        PUSH_NEW_TOKEN_(*text);
+        *is_found = true;
+    }
+
+    return Status::NORMAL_WORK;
+}
+
+static Status::Statuses tokenizer_add_var_(TextData* text, Vector* tokens, Vector* vars,
+                                           bool* is_found) {
+    assert(text);
+    assert(tokens);
+    assert(vars);
+    assert(is_found);
+    assert(!*is_found);
+
+    if (!can_be_var_symbol_(text->str[text->pos]) || isdigit(text->str[text->pos]))
+        return Status::NORMAL_WORK;
+
+    size_t token_len = 1;
+    size_t var_num = 0;
+
+    while (can_be_var_symbol_(text->str[text->pos + token_len])) token_len++;
 
     for (ssize_t i = 0; i < vars->size(); i++) {
-        if (((String*)((*vars)[i]))->len == *len &&
-            strncmp(text + pos, ((String*)((*vars)[i]))->s, *len) == 0) {
 
-            *num = i;
-            return Status::NORMAL_WORK;
+        String* str = (String*)((*vars)[i]);
+        if (str->len == token_len && strncmp(text->str + text->pos, str->s, token_len) == 0) {
+            var_num = i;
+            *is_found = true;
+            break;
         }
     }
 
-    String new_var = {.s = text + pos, .len = *len};
+    if (!*is_found) {
+        String new_var = {.s = text->str + text->pos, .len = token_len};
+        if (!vars->push_back(&new_var))
+            return Status::MEMORY_EXCEED;
 
-    if (!vars->push_back(&new_var))
-        return Status::MEMORY_EXCEED;
+        var_num = vars->size() - 1;
+    }
 
-    *num = vars->size() - 1;
+    Token new_token = {.type = TokenType::VAR, .data = {.var = var_num},
+                       .debug_info = DEBUG_INFO(*text)};
+
+    PUSH_NEW_TOKEN_(*text);
+    *is_found = true;
 
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses tokenizer_search_terminal_(const char* text, const size_t pos, size_t* term_len,
-                                                   TerminalNum* num) {
+static Status::Statuses tokenizer_read_terminal_(TextData* text, Vector* tokens, bool* is_found) {
     assert(text);
-    assert(term_len);
-    assert(num);
+    assert(tokens);
+    assert(is_found);
+    assert(!*is_found);
 
-    *num = TerminalNum::NONE;
-    *term_len = 0;
+    TerminalNum term_num = TerminalNum::NONE;
+    size_t token_len = 0;
 
     for (size_t i = 0; i < TERMINALS_SIZE; i++) {
-        if (strncmp(text + pos, TERMINALS[i].name, TERMINALS[i].name_len) == 0 &&
-            !(TERMINALS[i].is_text_name && can_be_var_symbol_(text[pos + TERMINALS[i].name_len]))) {
-            if (TERMINALS[i].name_len > *term_len) {
-                *num = TERMINALS[i].num;
-                *term_len = TERMINALS[i].name_len;
+        if (strncmp(text->str + text->pos, TERMINALS[i].name, TERMINALS[i].name_len) == 0 &&
+            !(TERMINALS[i].is_text_name &&
+              can_be_var_symbol_(text->str[text->pos + TERMINALS[i].name_len]))) {
+
+            if (TERMINALS[i].name_len > token_len) {
+                term_num = TERMINALS[i].num;
+                token_len = TERMINALS[i].name_len;
             }
         }
     }
 
+    if (term_num != TerminalNum::NONE) {
+        Token new_token = {.type = TokenType::TERM, .data = {.term = term_num},
+                           .debug_info = DEBUG_INFO(*text)};
+
+        PUSH_NEW_TOKEN_(*text);
+        *is_found = true;
+    }
+
     return Status::NORMAL_WORK;
 }
+#undef PUSH_NEW_TOKEN_
 
 static bool can_be_var_symbol_(char c) {
     return c == '_' || isalnum(c) || isrusalpha(c);

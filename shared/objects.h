@@ -2,6 +2,10 @@
 #define OBJECTS_H_
 
 #include <stdlib.h>
+#include <assert.h>
+#include <stdio.h>
+
+const char* const MAIN_FUNC_NAME = "остров_в_океане";
 
 struct String {
     const char* s = nullptr;
