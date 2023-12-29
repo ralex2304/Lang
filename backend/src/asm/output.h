@@ -43,10 +43,14 @@ Status::Statuses asm_if_end(FILE* file, size_t cnt);
 
 Status::Statuses asm_if_else_begin(FILE* file, size_t cnt);
 
-size_t asm_count_addr_offset(Stack* var_tables);
+Status::Statuses asm_if_else_middle(FILE* file, size_t cnt);
 
-VarTable* asm_create_var_table(Stack* var_tables);
+inline Status::Statuses asm_if_else_end(FILE* file, size_t cnt) { return asm_if_end(file, cnt); }
 
-Status::Statuses asm_pop_var_table(Stack* var_tables);
+size_t asm_count_addr_offset(Stack* scopes);
+
+ScopeData* asm_create_scope(Stack* scopes, size_t* scope_num = nullptr, bool is_loop = false);
+
+Status::Statuses asm_pop_var_table(Stack* scopes);
 
 #endif //< #ifndef ASM_OUTPUT_H_

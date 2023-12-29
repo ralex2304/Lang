@@ -11,6 +11,7 @@
 #include "syntax_error/syntax_error.h"
 #include "../output.h"
 
-Status::Statuses asm_command_traversal(BackData* data, FILE* file, TreeNode* node);
+Status::Statuses asm_command_traversal(BackData* data, FILE* file, TreeNode* node,
+                                       bool is_val_needed);
 
 #endif //< #ifndef FUNC_DEF_TRAVERSAL_H_

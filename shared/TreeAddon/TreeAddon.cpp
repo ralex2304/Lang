@@ -2,6 +2,8 @@
 
 #include "dsl.h"
 
+extern LogFileData log_file;
+
 Status::Statuses tree_dtor_untied_subtree(TreeNode** node) {
     assert(node);
 
@@ -21,8 +23,14 @@ Status::Statuses tree_dtor_untied_subtree(TreeNode** node) {
     return Status::NORMAL_WORK;
 }
 
-void tree_is_damaged(Tree* tree) {
+void tree_is_damaged(Tree* tree, const char* err_msg) {
     assert(tree);
+
+    if (err_msg == nullptr)
+        err_msg = "message was not specified";
+
+    fprintf(stderr, "Tree is damaged: %s\n", err_msg);
+    log_printf(&log_file, HTML_RED("Tree is damaged:") " %s\n", err_msg);
 
     TREE_DUMP(tree);
 }

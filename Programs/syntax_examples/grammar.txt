@@ -22,7 +22,7 @@ Clause := 'OPEN_BRACE' Expr 'CLOSE_BRACE'
 
 ClauseAction := 'CMD_SEPARATOR'? {CH_Commands | Command}
 
-CH_SimpleClause := {'WHILE' | 'IF'} Clause ClauseAction {'ELSE' ClauseAction}?
+CH_SimpleClause := {'WHILE' | 'IF'} Clause ClauseAction {'CMD_SEPARATOR'? 'ELSE' ClauseAction}?
 
 CH_PostClause := {{'DO_WHILE_DO' ClauseAction 'DO_WHILE_WHILE'} | {'DO_IF_DO' ClauseAction 'DO_IF_IF'}} Clause
 

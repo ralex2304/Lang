@@ -528,12 +528,19 @@ Status::Statuses TextParser::CH_SimpleClause(ParseData* data, size_t* const pos,
     STATUS_CHECK(ClauseAction(data, pos, &clause_action, size), tree_dtor_untied_subtree(&clause);
                                                                 tree_dtor_untied_subtree(&clause_action));
 
-    if (IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::ELSE)) {
+    size_t tmp_pos = *pos;
+
+    if (IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::CMD_SEPARATOR))
+        (*pos)++;
+
+    if (!IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::ELSE)) {
+        *pos = tmp_pos;
+    } else {
         DebugInfo else_debug_info = CUR_TOKEN_DEBUG_INFO;
         (*pos)++;
 
         TreeNode* else_action = nullptr;
-        STATUS_CHECK(ClauseAction(data, pos, &clause_action, size),
+        STATUS_CHECK(ClauseAction(data, pos, &else_action, size),
                                                                 tree_dtor_untied_subtree(&clause);
                                                                 tree_dtor_untied_subtree(&clause_action);
                                                                 tree_dtor_untied_subtree(&else_action));

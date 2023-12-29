@@ -47,7 +47,7 @@ ___compare_1_true:
 ___compare_1_end:
         ; if begin
         push 0
-        je ___if_1_exit
+        je ___if_5_end
         push [rbx + 0]
         push 1
         sub
@@ -65,7 +65,7 @@ ___compare_1_end:
         mul
         pop rax
         ret
-___if_1_exit:
+___if_5_end:
         ; if end
         
         push 1

@@ -14,9 +14,9 @@
 //#define CANARY_PROTECT  //< Enables canary protection
 //#define HASH_PROTECT    //< Enables hash protection
 
-#include "../var_table.h"
+#include "../scopes.h"
 
-typedef VarTable Elem_t;                                         //< stack elements type
+typedef ScopeData Elem_t;                                        //< stack elements type
 static const Elem_t ELEM_T_POISON = {};                          //< poison value for stack
 
 typedef unsigned long long Canary_t;                             //< canary type

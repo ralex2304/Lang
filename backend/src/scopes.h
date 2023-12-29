@@ -15,14 +15,31 @@ struct Var {
     size_t addr_offset = 0;
 };
 
-struct VarTable {
+enum class ScopeType {
+    NONE    = -1,
+    GLOBAL  = 1,
+    NEUTRAL = 2,
+    LOOP    = 3,
+};
+
+struct ScopeData {
     bool is_initialised = false;
+
+    ScopeType type = ScopeType::NONE;
+    size_t scope_num = 0;
 
     Vector vars = {};
 
-    inline bool ctor() {
+    inline bool ctor(ScopeType type_) {
+        static size_t counter = 0;
+        scope_num = counter++;
+
+        assert(type_ != ScopeType::NONE);
+
         if (!vars.ctor(sizeof(Var)))
             return false;
+
+        type = type_;
 
         is_initialised = true;
         return true;
@@ -31,7 +48,9 @@ struct VarTable {
     inline void dtor() {
         vars.dtor();
         is_initialised = false;
-    }
+        type = ScopeType::NONE;
+        scope_num = 0;
+    };
 
     inline Var* find_var(size_t var_num) {
         for (ssize_t i = 0; i < vars.size(); i++)

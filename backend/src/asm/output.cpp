@@ -2,7 +2,7 @@
 
 #include "dsl.h"
 
-static Status::Statuses declare_global_var_(BackData* data, FILE* file, VarTable* var_table,
+static Status::Statuses declare_global_var_(BackData* data, FILE* file, ScopeData* var_table,
                                                TreeNode* def);
 
 static Status::Statuses asm_eval_global_expr_(BackData* data, FILE* file, TreeNode* expr);
@@ -68,14 +68,14 @@ Status::Statuses asm_initialise_global_scope(BackData* data, FILE* file) {
     assert(data);
     assert(file);
 
-    assert(data->var_tables.size == 0);
+    assert(data->scopes.size == 0);
 
-    if (stk_push(&data->var_tables, {.is_initialised = true}) != Stack::OK)
+    if (stk_push(&data->scopes, {.is_initialised = true}) != Stack::OK)
         return Status::STACK_ERROR;
 
-    VarTable* var_table = &data->var_tables.data[0];
+    ScopeData* var_table = &data->scopes.data[0];
 
-    if (!var_table->ctor())
+    if (!var_table->ctor(ScopeType::GLOBAL))
         return Status::MEMORY_EXCEED;
 
     TreeNode* cur_cmd = data->tree.root;
@@ -83,7 +83,7 @@ Status::Statuses asm_initialise_global_scope(BackData* data, FILE* file) {
     while (cur_cmd != nullptr) {
         if (!NODE_IS_OPER(cur_cmd, OperNum::CMD_SEPARATOR)) {
             var_table->dtor();
-            tree_is_damaged(&data->tree);
+            tree_is_damaged(&data->tree, "commands list is damaged (expected CMD_SEPARATOR)");
             return Status::TREE_ERROR;
         }
 
@@ -95,7 +95,7 @@ Status::Statuses asm_initialise_global_scope(BackData* data, FILE* file) {
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses declare_global_var_(BackData* data, FILE* file, VarTable* var_table,
+static Status::Statuses declare_global_var_(BackData* data, FILE* file, ScopeData* var_table,
                                             TreeNode* def) {
     assert(data);
     assert(file);
@@ -118,7 +118,7 @@ static Status::Statuses declare_global_var_(BackData* data, FILE* file, VarTable
     if (NODE_IS_OPER(def, OperNum::VAR_DEFINITION)) {
 
         if (NODE_TYPE(def->left) != TreeElemType::VAR) {
-            tree_is_damaged(&data->tree);
+            tree_is_damaged(&data->tree, "incorrect var definition hierarchy");
             return Status::TREE_ERROR;
         }
 
@@ -139,7 +139,7 @@ static Status::Statuses declare_global_var_(BackData* data, FILE* file, VarTable
         if (!NODE_IS_OPER(def->left, OperNum::VAR_SEPARATOR) ||
             (NODE_TYPE(def->left->left) != TreeElemType::VAR)) {
 
-            tree_is_damaged(&data->tree);
+            tree_is_damaged(&data->tree, "incorrect func definition hierarchy");
             return Status::TREE_ERROR;
         }
 
@@ -157,7 +157,7 @@ static Status::Statuses declare_global_var_(BackData* data, FILE* file, VarTable
         return Status::NORMAL_WORK;
     }
 
-    tree_is_damaged(&data->tree);
+    tree_is_damaged(&data->tree, "unexpected operator in global scope");
     return Status::TREE_ERROR;
 }
 
@@ -182,7 +182,7 @@ static Status::Statuses asm_initialise_global_var_(BackData* data, FILE* file, T
 
     STATUS_CHECK(asm_eval_global_expr_(data, file, expr));
 
-    if (!data->var_tables.data[0].vars.push_back(var))
+    if (!data->scopes.data[0].vars.push_back(var))
         return Status::MEMORY_EXCEED;
 
     STATUS_CHECK(asm_pop_var_value(file, var->addr_offset, true));
@@ -249,7 +249,7 @@ static Status::Statuses asm_eval_global_expr_(BackData* data, FILE* file, TreeNo
 
     if (NODE_TYPE(expr) == TreeElemType::VAR) {
 
-        Var* var = data->var_tables.data[0].find_var(ELEM(expr)->data.var);
+        Var* var = data->scopes.data[0].find_var(ELEM(expr)->data.var);
 
         if (var == nullptr) {
             STATUS_CHECK(syntax_error(ELEM(expr)->debug_info, "Unknown variable"));
@@ -267,7 +267,7 @@ static Status::Statuses asm_eval_global_expr_(BackData* data, FILE* file, TreeNo
         return Status::NORMAL_WORK;
     }
 
-    tree_is_damaged(&data->tree);
+    tree_is_damaged(&data->tree, "unexpected node type in global scope");
     return Status::TREE_ERROR;
 }
 
@@ -372,13 +372,13 @@ Status::Statuses asm_logic_compare(FILE* file, const char* jump) {
     return Status::NORMAL_WORK;
 }
 
-size_t asm_count_addr_offset(Stack* var_tables) {
-    assert(var_tables);
+size_t asm_count_addr_offset(Stack* scopes) {
+    assert(scopes);
 
     size_t ans = 0;
 
-    for (ssize_t i = 1; i < var_tables->size; i++) //< 0 table is global scope
-        ans += (size_t)var_tables->data[i].vars.size();
+    for (ssize_t i = 1; i < scopes->size; i++) //< 0 table is global scope
+        ans += (size_t)scopes->data[i].vars.size();
 
     return ans;
 }
@@ -418,7 +418,7 @@ Status::Statuses asm_if_begin(FILE* file, size_t cnt) {
     PRINTF_("; if begin\n");
 
     PRINTF_("push 0\n"
-            "je ___if_%zu_exit\n", cnt);
+            "je ___if_%zu_end\n", cnt);
 
     return Status::NORMAL_WORK;
 }
@@ -426,7 +426,7 @@ Status::Statuses asm_if_begin(FILE* file, size_t cnt) {
 Status::Statuses asm_if_end(FILE* file, size_t cnt) {
     assert(file);
 
-    PRINTF_LABEL_("___if_%zu_exit:\n", cnt);
+    PRINTF_LABEL_("___if_%zu_end:\n", cnt);
 
     PRINTF_("; if end\n\n");
 
@@ -439,31 +439,47 @@ Status::Statuses asm_if_else_begin(FILE* file, size_t cnt) {
     PRINTF_("; if-else begin\n");
 
     PRINTF_("push 0\n"
-            "je ___if_else_%zu_else\n", cnt);
+            "je ___if_%zu_else\n", cnt);
 
     return Status::NORMAL_WORK;
 }
 
-VarTable* asm_create_var_table(Stack* var_tables) {
-    assert(var_tables);
+Status::Statuses asm_if_else_middle(FILE* file, size_t cnt) {
+    assert(file);
 
-    if (stk_push(var_tables, {.is_initialised = true}) != Stack::OK)
-        return nullptr;
+    PRINTF_("jmp ___if_%zu_end\n", cnt);
 
-    VarTable* new_table = &var_tables->data[var_tables->size - 1];
 
-    if (!new_table->ctor())
-        return nullptr;
+    PRINTF_("; if-else else\n");
 
-    return new_table;
+    PRINTF_LABEL_("___if_%zu_else:\n");
+
+    return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_pop_var_table(Stack* var_tables) {
-    assert(var_tables);
+ScopeData* asm_create_scope(Stack* scopes, size_t* scope_num, bool is_loop) {
+    assert(scopes);
 
-    VarTable res = {};
+    if (stk_push(scopes, {.is_initialised = true}) != Stack::OK)
+        return nullptr;
 
-    if (stk_pop(var_tables, &res) != Stack::OK)
+    ScopeData* new_scope = &scopes->data[scopes->size - 1];
+
+    if (!new_scope->ctor(is_loop ? ScopeType::LOOP : ScopeType::NEUTRAL))
+        return nullptr;
+
+    if (scope_num != nullptr)
+        *scope_num = new_scope->scope_num;
+
+    return new_scope;
+}
+
+Status::Statuses asm_pop_var_table(Stack* scopes) {
+    assert(scopes);
+
+    ScopeData res = {};
+
+    if (stk_pop(scopes, &res) != Stack::OK)
         return Status::STACK_ERROR;
 
     res.dtor();

@@ -15,7 +15,7 @@ struct BackData {
     Tree tree = {};
     Vector vars = {};
 
-    Stack var_tables = {};
+    Stack scopes = {};
 
     FuncTable func_table = {};
 
@@ -27,10 +27,10 @@ struct BackData {
         if (!vars.ctor(sizeof(const char*)))
             return false;
 
-        for (ssize_t i = 0; i < var_tables.size; i++)
-            var_tables.data[i].dtor();
+        for (ssize_t i = 0; i < scopes.size; i++)
+            scopes.data[i].dtor();
 
-        if (STK_CTOR(&var_tables) != Stack::OK)
+        if (STK_CTOR(&scopes) != Stack::OK)
             return false;
 
         if (!func_table.ctor())
@@ -45,7 +45,7 @@ struct BackData {
 
         vars.dtor();
 
-        if (stk_dtor(&var_tables))
+        if (stk_dtor(&scopes))
             return false;
 
         func_table.dtor();

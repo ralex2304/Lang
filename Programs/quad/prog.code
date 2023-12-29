@@ -55,7 +55,7 @@ ___compare_1_true:
 ___compare_1_end:
         ; if begin
         push 0
-        je ___if_1_exit
+        je ___if_5_end
         push [rbx + 1]
         pop [rbx + 3]
         push [rbx + 2]
@@ -71,7 +71,7 @@ ___compare_1_end:
         push rax
         pop rax
         ret
-___if_1_exit:
+___if_5_end:
         ; if end
         
         push [rbx + 1]
@@ -94,13 +94,13 @@ ___compare_2_true:
 ___compare_2_end:
         ; if begin
         push 0
-        je ___if_2_exit
+        je ___if_6_end
         push 0
         out
         push 0
         pop rax
         ret
-___if_2_exit:
+___if_6_end:
         ; if end
         
         push [rbx + 3]
@@ -113,7 +113,7 @@ ___compare_3_true:
 ___compare_3_end:
         ; if begin
         push 0
-        je ___if_3_exit
+        je ___if_7_end
         push 1
         out
         push [rbx + 1]
@@ -127,7 +127,7 @@ ___compare_3_end:
         push 0
         pop rax
         ret
-___if_3_exit:
+___if_7_end:
         ; if end
         
         push [rbx + 3]
@@ -174,7 +174,7 @@ ___compare_4_true:
 ___compare_4_end:
         ; if begin
         push 0
-        je ___if_4_exit
+        je ___if_10_end
         push [rbx + 1]
         push 0
         je ___compare_5_true
@@ -185,7 +185,7 @@ ___compare_5_true:
 ___compare_5_end:
         ; if begin
         push 0
-        je ___if_5_exit
+        je ___if_11_end
         push 1
         push -1
         mul
@@ -193,7 +193,7 @@ ___compare_5_end:
         push 0
         pop rax
         ret
-___if_5_exit:
+___if_11_end:
         ; if end
         
         push 0
@@ -201,7 +201,7 @@ ___if_5_exit:
         push 0
         pop rax
         ret
-___if_4_exit:
+___if_10_end:
         ; if end
         
         push 1
