@@ -2,7 +2,8 @@
 static_assert(0 && "DEF_OPER is not defined");
 #endif //< #ifndef DEF_OPER
 
-//     NUM | NAME | TYPE |
+//   | NUM |      NAME      | TYPE |
+
 DEF_OPER(1,  CMD_SEPARATOR,   LIST, {
 
     EVAL_SUBTREE_NO_VAL(*L(node));
@@ -36,7 +37,6 @@ DEF_OPER(5,  ASSIGNMENT,      BINARY, {
 
     ASSIGN_VAR_VAL(*L(node));
 })
-
 DEF_OPER(6,  ASSIGNMENT_ADD,  BINARY, {
     CHECK_VAR_FOR_ASSIGNMENT(*L(node));
 
@@ -69,15 +69,13 @@ DEF_OPER(9,  ASSIGNMENT_DIV,  BINARY {
 DEF_OPER(10, RETURN,          UNARY, {
     EVAL_SUBTREE_GET_VAL(*R(node));
 
-    ASM_PRINT_COMMAND("pop rax");
-    ASM_PRINT_COMMAND("ret");
+    ASM_PRINT_COMMAND(0, "pop rax\n\n");
+    ASM_PRINT_COMMAND(0, "ret\n\n");
 })
 
-DEF_OPER(15, VAR_SEPARATOR,   LIST, { DAMAGED_TREE("unexpected VAR_SEPARATOR"); })
+DEF_OPER(15, VAR_SEPARATOR,   LIST,   { DAMAGED_TREE("unexpected VAR_SEPARATOR"); })
 
-DEF_OPER(16, FUNC_CALL,       BINARY, {
-    PROVIDE_FUNC_CALL();
-})
+DEF_OPER(16, FUNC_CALL,       BINARY, { PROVIDE_FUNC_CALL(); })
 
 DEF_OPER(20, MATH_ADD,        BINARY, { BINARY_MATH("add"); })
 DEF_OPER(21, MATH_SUB,        BINARY, { BINARY_MATH("sub"); })
@@ -88,8 +86,8 @@ DEF_OPER(25, MATH_SIN,        UNARY,  { UNARY_MATH("sin");  })
 DEF_OPER(26, MATH_COS,        UNARY,  { UNARY_MATH("cos");  })
 
 DEF_OPER(27, MATH_NEGATIVE,   UNARY,  {
-    UNARY_MATH("push -1");
-    ASM_PRINT_COMMAND("mul");
+    ASM_PRINT_COMMAND(0, "push -1\n");
+    UNARY_MATH(          "mul");
 })
 
 DEF_OPER(28, MATH_DIFF,       BINARY, { DAMAGED_TREE("unexpected MATH_DIFF"); })
@@ -121,24 +119,18 @@ DEF_OPER(53, IF,              BINARY, {
 
 DEF_OPER(54, DO_IF,           BINARY)
 
-DEF_OPER(56, ELSE,            BINARY, {
-    ASM_MAKE_IF_ELSE(node);
-})
+DEF_OPER(56, ELSE,            BINARY, { ASM_MAKE_IF_ELSE(node); })
 
 DEF_OPER(57, BREAK,           LEAF)
 DEF_OPER(58, CONTINUE,        LEAF)
 
-DEF_OPER(70, IN,              LEAF, { ASM_PRINT_COMMAND("in"); })
+DEF_OPER(70, IN,              LEAF,  { ASM_PRINT_COMMAND(0, "in\n"); })
 
 DEF_OPER(71, OUT,             UNARY, {
     EVAL_SUBTREE_GET_VAL(*R(node));
-    ASM_PRINT_COMMAND("out");
+    ASM_PRINT_COMMAND(0, "out\n\n");
 })
 
-DEF_OPER(72, SHOW,            LEAF, {
-    ASM_PRINT_COMMAND("shw");
-})
+DEF_OPER(72, SHOW,            LEAF,  { ASM_PRINT_COMMAND(0, "shw\n\n"); })
 
-DEF_OPER(73, SET_FPS,         UNARY, {
-    // TODO asm print num
-})
+DEF_OPER(73, SET_FPS,         UNARY, { ASM_SET_FPS(*R(node)); })

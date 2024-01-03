@@ -35,7 +35,7 @@ static Status::Statuses make_asm_process_(BackData* data, FILE* file) {
 
     STATUS_CHECK(asm_initialise_global_scope(data, file));
 
-    STATUS_CHECK(asm_call_function(file, main_func, data->scopes.data[0].vars.size()));
+    STATUS_CHECK(asm_call_function(data, file, main_func, data->scopes.data[0].vars.size()));
 
     STATUS_CHECK(asm_halt(file));
 

@@ -1,77 +1,89 @@
-        ; Regs initialisation
-        push 0
-        pop rax
-        push 0
-        pop rbx
-        ; Regs initialisation end
-        
-        ; func call
-        push rbx
-        push rbx + 0
-        pop rbx
-        call ___func_0
-        pop rbx
-        ; func call end
-        
-        hlt
+; Regs initialisation
+    push 0
+    pop rax
+    push 0
+    pop rbx
+; Regs initialisation end
+
+; func call
+    push rbx
+    push rbx + 0
+    pop rbx
+    call ___func_0
+    pop rbx
+; func call end
+hlt
+
 ; =========================== Function definition =========================
 ___func_0:
-        in
-        pop [rbx + 0]
-        ; func call
+    in
+    pop [rbx + 0]
+
+    ; func call
         push rbx
         push rbx + 0
         pop rbx
         call ___func_1
         pop rbx
-        ; func call end
-        
-        push rax
-        out
-        push 0
-        pop rax
-        ret
-        ret
+    ; func call end
+    push rax
+
+    out
+
+    push 0
+    pop rax
+
+    ret
+
+ret
 ; ------------------------- Function definition end -----------------------
 
 
 ; =========================== Function definition =========================
 ___func_1:
-        push [rbx + 0]
-        push 1
-        ja ___compare_1_true
+    push [rbx + 0]
+    push 1
+    ja ___compare_1_true
         push 0
-        jmp ___compare_1_end
-___compare_1_true:
+    jmp ___compare_1_end
+    ___compare_1_true:
         push 1
-___compare_1_end:
-        ; if begin
-        push 0
-        je ___if_5_end
+    ___compare_1_end:
+
+    ; if begin
+    push 0
+    je ___if_5_end
         push [rbx + 0]
         push 1
         sub
+
         pop [rbx + 1]
+
         ; func call
-        push rbx
-        push rbx + 1
-        pop rbx
-        call ___func_1
-        pop rbx
+            push rbx
+            push rbx + 1
+            pop rbx
+            call ___func_1
+            pop rbx
         ; func call end
-        
         push rax
+
         push [rbx + 0]
         mul
+
         pop rax
+
         ret
-___if_5_end:
-        ; if end
-        
-        push 1
-        pop rax
-        ret
-        ret
+
+    ___if_5_end:
+    ; if end
+
+    push 1
+    pop rax
+
+    ret
+
+ret
 ; ------------------------- Function definition end -----------------------
 
 

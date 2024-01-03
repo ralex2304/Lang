@@ -33,7 +33,7 @@ inline bool dsl_is_double_equal(const double a, const double b) {
 #define ASSIGNMENT_WITH_ACTION(cmd_)                            \
             EVAL_SUBTREE_GET_VAL(*L(node)); /* get var value*/  \
             EVAL_SUBTREE_GET_VAL(*R(node));                     \
-            ASM_PRINT_COMMAND(cmd_)
+            ASM_PRINT_COMMAND(0, cmd_ "\n")
 
 #define LOGIC(jump_)                \
             EVAL_SUBTREE_GET_VAL(*L(node)); \
@@ -59,18 +59,16 @@ inline bool dsl_is_double_equal(const double a, const double b) {
             STATUS_CHECK(asm_add_var_(data, node_, true))
 
 #define ASSIGN_VAR_VAL(node_)       \
-            do {                                                                                    \
-                bool is_global_ = false;                                                            \
-                Var* var_ = (asm_search_var_(&data->scopes, NODE_DATA(node_).var, &is_global_));    \
-                assert(var_);                                                                       \
-                STATUS_CHECK(asm_pop_var_value(file, var_->addr_offset, is_global_));               \
-            } while (0)
+            STATUS_CHECK(asm_assign_var(data, file, node_))
 
 #define CHECK_VAR_FOR_ASSIGNMENT(node_) \
             STATUS_CHECK(asm_check_var_for_assign_(data, node_))
 
-#define ASM_PRINT_COMMAND(cmd_)     \
-            STATUS_CHECK(asm_print_command(file, cmd_))
+#define ASM_PRINT_COMMAND(lvl_change_, ...)     \
+            STATUS_CHECK(asm_print_command(lvl_change_, file, __VA_ARGS__))
+
+#define ASM_PRINT_COMMAND_NO_TAB(...)  \
+            STATUS_CHECK(asm_print_command_no_tab(file, __VA_ARGS__))
 
 #define BINARY_MATH(cmd_)                   \
             STATUS_CHECK(asm_binary_math_(data, file, node, cmd_, is_val_needed))
@@ -102,6 +100,9 @@ inline bool dsl_is_double_equal(const double a, const double b) {
 
 #define PROVIDE_FUNC_CALL()    \
             STATUS_CHECK(asm_provide_func_call_(data, file, node, is_val_needed))
+
+#define ASM_SET_FPS(value_node_)    \
+            STATUS_CHECK(asm_make_set_fps_(data, file, value_node_))
 
 #define ASM_MAKE_IF(node_)  \
             STATUS_CHECK(asm_make_if_(data, file, node_))

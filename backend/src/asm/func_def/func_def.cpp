@@ -37,7 +37,7 @@ Status::Statuses asm_func_def(BackData* data, FILE* file) {
 
         STATUS_CHECK(asm_add_func_args_var_table_(data, args_subtree));
 
-        STATUS_CHECK(asm_begin_func_defenition(file, func_num));
+        STATUS_CHECK(asm_begin_func_defenition(data, file, func_num));
 
         STATUS_CHECK(asm_func_def_make_body_(data, file, def->right));
 

@@ -9,13 +9,13 @@ main: build frontend backend
 PROG_PATH = Programs/$(prog)
 
 frontend:
-	LANG=ru_RU.CP1251 luit ./frontend/./main -i $(PROG_PATH)/prog.snb -o $(PROG_PATH)/prog.tre
+	@LANG=ru_RU.CP1251 luit ./frontend/./main -i $(PROG_PATH)/prog.snb -o $(PROG_PATH)/prog.tre
 
 middleend:
-	LANG=ru_RU.CP1251 luit ./middleend/./main
+	@LANG=ru_RU.CP1251 luit ./middleend/./main
 
 backend:
-	LANG=ru_RU.CP1251 luit ./backend/./main -i $(PROG_PATH)/prog.tre -o $(PROG_PATH)/prog.code
+	@LANG=ru_RU.CP1251 luit ./backend/./main -i $(PROG_PATH)/prog.tre -o $(PROG_PATH)/prog.code
 
 
 build: build_front build_back

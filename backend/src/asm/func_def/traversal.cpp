@@ -2,8 +2,6 @@
 
 #include "dsl.h"
 
-static Var* asm_search_var_(Stack* scopes, size_t var_num, bool* is_global);
-
 static Status::Statuses asm_add_var_(BackData* data, TreeNode* node, bool is_const);
 
 static Status::Statuses asm_check_var_for_assign_(BackData* data, TreeNode* node);
@@ -21,6 +19,8 @@ static Status::Statuses asm_binary_math_(BackData* data, FILE* file, TreeNode* n
 static Status::Statuses asm_unary_math_(BackData* data, FILE* file, TreeNode* node, const char* math_op,
                                         bool is_val_needed);
 
+static Status::Statuses asm_make_set_fps_(BackData* data, FILE* file, TreeNode* val_node);
+
 static Status::Statuses asm_make_if_else_(BackData* data, FILE* file, TreeNode* node);
 
 static Status::Statuses asm_make_if_(BackData* data, FILE* file, TreeNode* node);
@@ -31,7 +31,9 @@ Status::Statuses asm_command_traversal(BackData* data, FILE* file, TreeNode* nod
                                        bool is_val_needed) {
     assert(data);
     assert(file);
-    assert(node);
+
+    if (node == nullptr)
+        return Status::NORMAL_WORK;
 
     if (NODE_TYPE(node) == TreeElemType::NUM) {
         if (is_val_needed)
@@ -43,7 +45,7 @@ Status::Statuses asm_command_traversal(BackData* data, FILE* file, TreeNode* nod
     if (NODE_TYPE(node) == TreeElemType::VAR) {
 
         bool is_global = false;
-        Var* var = asm_search_var_(&data->scopes, NODE_DATA(node).var, &is_global);
+        Var* var = asm_search_var(&data->scopes, NODE_DATA(node).var, &is_global);
 
         if (var == nullptr) {
             STATUS_CHECK(syntax_error(ELEM(node)->debug_info, "Unknown var name"));
@@ -83,27 +85,6 @@ Status::Statuses asm_command_traversal(BackData* data, FILE* file, TreeNode* nod
     return Status::NORMAL_WORK;
 }
 
-static Var* asm_search_var_(Stack* scopes, size_t var_num, bool* is_global) {
-    assert(scopes);
-    assert(scopes->size >= 1);
-
-    Var* res = nullptr;
-
-    if (is_global != nullptr)
-        *is_global = false;
-
-    for (ssize_t i = scopes->size - 1; i >= 1; i--) {
-        res = scopes->data[i].find_var(var_num);
-        if (res)
-            return res;
-    }
-
-    if (is_global != nullptr)
-        *is_global = true;
-
-    return scopes->data[0].find_var(var_num);
-}
-
 static Status::Statuses asm_add_var_(BackData* data, TreeNode* node, bool is_const) {
     assert(data);
     assert(node);
@@ -134,7 +115,7 @@ static Status::Statuses asm_check_var_for_assign_(BackData* data, TreeNode* node
         return Status::TREE_ERROR;
     }
 
-    Var* var = asm_search_var_(&data->scopes, NODE_DATA(node).var, nullptr);
+    Var* var = asm_search_var(&data->scopes, NODE_DATA(node).var, nullptr);
 
     if (var == nullptr) {
         STATUS_CHECK(syntax_error(ELEM(node)->debug_info, "Var was not declared in this scope"));
@@ -197,10 +178,12 @@ static Status::Statuses asm_provide_func_call_(BackData* data, FILE* file, TreeN
         DAMAGED_TREE("incorrect var arguments list in function call");
     }
 
-    STATUS_CHECK(asm_call_function(file, func_num, offset));
+    STATUS_CHECK(asm_call_function(data, file, func_num, offset));
 
     if (is_val_needed)
-        ASM_PRINT_COMMAND("push rax");
+        ASM_PRINT_COMMAND(0, "push rax\n");
+
+    ASM_PRINT_COMMAND_NO_TAB("\n");
 
     return Status::NORMAL_WORK;
 }
@@ -215,8 +198,10 @@ static Status::Statuses asm_binary_math_(BackData* data, FILE* file, TreeNode* n
     EVAL_SUBTREE(*L(node), is_val_needed);
     EVAL_SUBTREE(*R(node), is_val_needed);
 
-    if (is_val_needed)
-        ASM_PRINT_COMMAND(math_op);
+    if (is_val_needed) {
+        ASM_PRINT_COMMAND(0, math_op);
+        ASM_PRINT_COMMAND_NO_TAB("\n\n");
+    }
 
     return Status::NORMAL_WORK;
 }
@@ -232,8 +217,10 @@ static Status::Statuses asm_unary_math_(BackData* data, FILE* file, TreeNode* no
 
     EVAL_SUBTREE(*R(node), is_val_needed);
 
-    if (is_val_needed)
-        ASM_PRINT_COMMAND(math_op);
+    if (is_val_needed) {
+        ASM_PRINT_COMMAND(0, math_op);
+        ASM_PRINT_COMMAND_NO_TAB("\n\n");
+    }
 
     return Status::NORMAL_WORK;
 }
@@ -269,11 +256,28 @@ static Status::Statuses asm_make_if_else_(BackData* data, FILE* file, TreeNode* 
 
     STATUS_CHECK(asm_if_else_middle(file, scope_num));
 
+    EXIT_SCOPE();
+    ENTER_SCOPE(nullptr);
+
     EVAL_SUBTREE_GET_VAL(*R(node));
 
     STATUS_CHECK(asm_if_else_end(file, scope_num));
 
     EXIT_SCOPE();
+
+    return Status::NORMAL_WORK;
+}
+
+static Status::Statuses asm_make_set_fps_(BackData* data, FILE* file, TreeNode* val_node) {
+    assert(data);
+    assert(file);
+    assert(val_node);
+
+    if (NODE_TYPE(val_node) != TreeElemType::NUM) {
+        DAMAGED_TREE("Set fps must have const argument");
+    }
+
+    ASM_PRINT_COMMAND(0, "fps %d\n", NODE_DATA(val_node).num);
 
     return Status::NORMAL_WORK;
 }
