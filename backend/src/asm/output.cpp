@@ -614,6 +614,24 @@ Status::Statuses asm_while_else_else(FILE* file, size_t cnt) {
     return Status::NORMAL_WORK;
 }
 
+Status::Statuses asm_continue(FILE* file, size_t cnt) {
+    assert(file);
+
+    PRINTF_( 0, "; continue\n");
+    PRINTF_( 0, "jmp ___while_%zu_begin\n\n", cnt);
+
+    return Status::NORMAL_WORK;
+}
+
+Status::Statuses asm_break(FILE* file, size_t cnt) {
+    assert(file);
+
+    PRINTF_( 0, "; break\n");
+    PRINTF_( 0, "jmp ___while_%zu_end\n\n", cnt);
+
+    return Status::NORMAL_WORK;
+}
+
 ScopeData* asm_create_scope(Stack* scopes, size_t* scope_num, bool is_loop) {
     assert(scopes);
 
@@ -643,3 +661,15 @@ Status::Statuses asm_pop_var_table(Stack* scopes) {
 
     return Status::NORMAL_WORK;
 }
+
+ssize_t find_loop_scope_num(BackData* data) {
+    assert(data);
+
+    for (ssize_t i = data->scopes.size - 1; i > 0; i--) {
+
+        if (data->scopes.data[i].type == ScopeType::LOOP)
+            return data->scopes.data[i].scope_num;
+    }
+
+    return -1;
+};

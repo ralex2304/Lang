@@ -4,12 +4,12 @@ static_assert(0 && "DEF_OPER is not defined");
 
 //   | NUM |      NAME      | TYPE |
 
-DEF_OPER(1,  CMD_SEPARATOR,   LIST, {
-
+DEF_OPER(1,  CMD_SEPARATOR,   LIST,   {
     EVAL_SUBTREE_NO_VAL(*L(node));
 
-    if (*R(node) != nullptr)
+    if (*R(node) != nullptr) {
         EVAL_SUBTREE_NO_VAL(*R(node));
+    }
 })
 
 
@@ -20,7 +20,7 @@ DEF_OPER(2,  VAR_DEFINITION,  BINARY, {
 
     ASSIGN_VAR_VAL(*L(node));
 })
-DEF_OPER(3,  CONST_VAR_DEF,   UNARY, {
+DEF_OPER(3,  CONST_VAR_DEF,   UNARY,  {
     ADD_CONST_VAR(*L(*R(node)));
 
     EVAL_SUBTREE_GET_VAL(*R(*R(node)));
@@ -44,21 +44,21 @@ DEF_OPER(6,  ASSIGNMENT_ADD,  BINARY, {
 
     ASSIGN_VAR_VAL(*L(node));
 })
-DEF_OPER(7,  ASSIGNMENT_SUB,  BINARY {
+DEF_OPER(7,  ASSIGNMENT_SUB,  BINARY, {
     CHECK_VAR_FOR_ASSIGNMENT(*L(node));
 
     ASSIGNMENT_WITH_ACTION("sub");
 
     ASSIGN_VAR_VAL(*L(node));
 })
-DEF_OPER(8,  ASSIGNMENT_MUL,  BINARY {
+DEF_OPER(8,  ASSIGNMENT_MUL,  BINARY, {
     CHECK_VAR_FOR_ASSIGNMENT(*L(node));
 
     ASSIGNMENT_WITH_ACTION("mul");
 
     ASSIGN_VAR_VAL(*L(node));
 })
-DEF_OPER(9,  ASSIGNMENT_DIV,  BINARY {
+DEF_OPER(9,  ASSIGNMENT_DIV,  BINARY, {
     CHECK_VAR_FOR_ASSIGNMENT(*L(node));
 
     ASSIGNMENT_WITH_ACTION("div");
@@ -66,7 +66,7 @@ DEF_OPER(9,  ASSIGNMENT_DIV,  BINARY {
     ASSIGN_VAR_VAL(*L(node));
 })
 
-DEF_OPER(10, RETURN,          UNARY, {
+DEF_OPER(10, RETURN,          UNARY,  {
     EVAL_SUBTREE_GET_VAL(*R(node));
 
     ASM_PRINT_COMMAND(0, "pop rax\n\n");
@@ -99,7 +99,7 @@ DEF_OPER(33, LOGIC_EQUAL,     BINARY, { LOGIC("je");  })
 DEF_OPER(34, LOGIC_GREAT_EQ,  BINARY, { LOGIC("jae"); })
 DEF_OPER(35, LOGIC_LOWER_EQ,  BINARY, { LOGIC("jbe"); })
 
-DEF_OPER(40, PREFIX_ADD,      UNARY)
+DEF_OPER(40, PREFIX_ADD,      UNARY) // TODO PREFIX
 DEF_OPER(41, PREFIX_SUB,      UNARY)
 DEF_OPER(42, POSTFIX_ADD,     UNARY)
 DEF_OPER(43, POSTFIX_SUB,     UNARY)
@@ -112,7 +112,7 @@ DEF_OPER(50, WHILE,           BINARY, {
     }
 })
 
-DEF_OPER(51, DO_WHILE,        BINARY)
+DEF_OPER(51, DO_WHILE,        BINARY) // TODO DO_WHILE
 
 DEF_OPER(53, IF,              BINARY, {
     EVAL_SUBTREE_GET_VAL(*L(node));
@@ -124,20 +124,20 @@ DEF_OPER(53, IF,              BINARY, {
     }
 })
 
-DEF_OPER(54, DO_IF,           BINARY)
+DEF_OPER(54, DO_IF,           BINARY) // TODO DO_IF
 
 DEF_OPER(56, ELSE,            BINARY, { DAMAGED_TREE("unexpected ELSE node"); })
 
-DEF_OPER(57, BREAK,           LEAF)
-DEF_OPER(58, CONTINUE,        LEAF)
+DEF_OPER(57, BREAK,           LEAF,   { ASM_MAKE_BREAK(node); })
+DEF_OPER(58, CONTINUE,        LEAF,   { ASM_MAKE_CONTINUE(node); })
 
-DEF_OPER(70, IN,              LEAF,  { ASM_PRINT_COMMAND(0, "in\n"); })
+DEF_OPER(70, IN,              LEAF,   { ASM_PRINT_COMMAND(0, "in\n"); })
 
-DEF_OPER(71, OUT,             UNARY, {
+DEF_OPER(71, OUT,             UNARY,  {
     EVAL_SUBTREE_GET_VAL(*R(node));
     ASM_PRINT_COMMAND(0, "out\n\n");
 })
 
-DEF_OPER(72, SHOW,            LEAF,  { ASM_PRINT_COMMAND(0, "shw\n\n"); })
+DEF_OPER(72, SHOW,            LEAF,   { ASM_PRINT_COMMAND(0, "shw\n\n"); })
 
-DEF_OPER(73, SET_FPS,         UNARY, { ASM_SET_FPS(*R(node)); })
+DEF_OPER(73, SET_FPS,         UNARY,  { ASM_SET_FPS(*R(node)); })

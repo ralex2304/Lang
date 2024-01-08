@@ -61,6 +61,10 @@ Status::Statuses asm_while_else_check_clause(FILE* file, size_t cnt);
 
 Status::Statuses asm_while_else_else(FILE* file, size_t cnt);
 
+Status::Statuses asm_continue(FILE* file, size_t cnt);
+
+Status::Statuses asm_break(FILE* file, size_t cnt);
+
 inline Status::Statuses asm_if_else_end(FILE* file, size_t cnt) { return asm_if_end(file, cnt); }
 
 size_t asm_count_addr_offset(Stack* scopes);
@@ -68,5 +72,7 @@ size_t asm_count_addr_offset(Stack* scopes);
 ScopeData* asm_create_scope(Stack* scopes, size_t* scope_num = nullptr, bool is_loop = false);
 
 Status::Statuses asm_pop_var_table(Stack* scopes);
+
+ssize_t find_loop_scope_num(BackData* data);
 
 #endif //< #ifndef ASM_OUTPUT_H_

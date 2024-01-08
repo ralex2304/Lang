@@ -29,6 +29,11 @@ static Status::Statuses asm_make_while_(BackData* data, FILE* file, TreeNode* pa
 
 static Status::Statuses asm_make_while_else_(BackData* data, FILE* file, TreeNode* parent_node);
 
+static Status::Statuses asm_make_continue_(BackData* data, FILE* file, TreeNode* node);
+
+static Status::Statuses asm_make_break_(BackData* data, FILE* file, TreeNode* node);
+
+
 Status::Statuses asm_command_traversal(BackData* data, FILE* file, TreeNode* node,
                                        bool is_val_needed) {
     assert(data);
@@ -333,6 +338,38 @@ static Status::Statuses asm_make_set_fps_(BackData* data, FILE* file, TreeNode* 
     }
 
     ASM_PRINT_COMMAND(0, "fps %d\n", NODE_DATA(val_node).num);
+
+    return Status::NORMAL_WORK;
+}
+
+static Status::Statuses asm_make_continue_(BackData* data, FILE* file, TreeNode* node) {
+    assert(data);
+    assert(file);
+
+    ssize_t scope_num = find_loop_scope_num(data);
+
+    if (scope_num < 0) {
+        syntax_error(ELEM(node)->debug_info, "\"continue\" must be inside loop");
+        return Status::SYNTAX_ERROR;
+    }
+
+    STATUS_CHECK(asm_continue(file, scope_num));
+
+    return Status::NORMAL_WORK;
+}
+
+static Status::Statuses asm_make_break_(BackData* data, FILE* file, TreeNode* node) {
+    assert(data);
+    assert(file);
+
+    ssize_t scope_num = find_loop_scope_num(data);
+
+    if (scope_num < 0) {
+        syntax_error(ELEM(node)->debug_info, "\"break\" must be inside loop");
+        return Status::SYNTAX_ERROR;
+    }
+
+    STATUS_CHECK(asm_break(file, scope_num));
 
     return Status::NORMAL_WORK;
 }
