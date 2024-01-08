@@ -25,7 +25,9 @@ static Status::Statuses asm_make_if_else_(BackData* data, FILE* file, TreeNode* 
 
 static Status::Statuses asm_make_if_(BackData* data, FILE* file, TreeNode* node);
 
+static Status::Statuses asm_make_while_(BackData* data, FILE* file, TreeNode* parent_node);
 
+static Status::Statuses asm_make_while_else_(BackData* data, FILE* file, TreeNode* parent_node);
 
 Status::Statuses asm_command_traversal(BackData* data, FILE* file, TreeNode* node,
                                        bool is_val_needed) {
@@ -262,6 +264,59 @@ static Status::Statuses asm_make_if_else_(BackData* data, FILE* file, TreeNode* 
     EVAL_SUBTREE_GET_VAL(*R(node));
 
     STATUS_CHECK(asm_if_else_end(file, scope_num));
+
+    EXIT_SCOPE();
+
+    return Status::NORMAL_WORK;
+}
+
+static Status::Statuses asm_make_while_(BackData* data, FILE* file, TreeNode* parent_node) {
+    assert(data);
+    assert(file);
+    assert(parent_node);
+
+    size_t scope_num = 0;
+    ENTER_SCOPE(&scope_num);
+
+    STATUS_CHECK(asm_while_begin(file, scope_num));
+
+    EVAL_SUBTREE_GET_VAL(*L(parent_node));
+
+    STATUS_CHECK(asm_while_check_clause(file, scope_num));
+
+    EVAL_SUBTREE_NO_VAL(*R(parent_node));
+
+    STATUS_CHECK(asm_while_end(file, scope_num));
+
+    EXIT_SCOPE();
+
+    return Status::NORMAL_WORK;
+}
+
+static Status::Statuses asm_make_while_else_(BackData* data, FILE* file, TreeNode* parent_node) {
+    assert(data);
+    assert(file);
+    assert(parent_node);
+
+    size_t scope_num = 0;
+    ENTER_SCOPE(&scope_num);
+
+    STATUS_CHECK(asm_while_begin(file, scope_num));
+
+    EVAL_SUBTREE_GET_VAL(*L(parent_node));
+
+    STATUS_CHECK(asm_while_else_check_clause(file, scope_num));
+
+    EVAL_SUBTREE_NO_VAL(*L(*R(parent_node)));
+
+    EXIT_SCOPE();
+    ENTER_SCOPE(nullptr);
+
+    STATUS_CHECK(asm_while_else_else(file, scope_num));
+
+    EVAL_SUBTREE_NO_VAL(*R(*R(parent_node)));
+
+    STATUS_CHECK(asm_while_end(file, scope_num));
 
     EXIT_SCOPE();
 

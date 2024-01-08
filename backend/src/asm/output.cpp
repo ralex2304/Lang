@@ -563,6 +563,57 @@ Status::Statuses asm_if_else_middle(FILE* file, size_t cnt) {
     return Status::NORMAL_WORK;
 }
 
+Status::Statuses asm_while_begin(FILE* file, size_t cnt) {
+    assert(file);
+
+    PRINTF_( 0, "; while begin\n");
+
+    PRINTF_(+1, "___while_%zu_begin:\n", cnt);
+
+    return Status::NORMAL_WORK;
+}
+
+Status::Statuses asm_while_check_clause(FILE* file, size_t cnt) {
+    assert(file);
+
+    PRINTF_( 0, "; while clause check\n");
+
+    PRINTF_( 0, "push 0\n");
+    PRINTF_( 0, "je ___while_%zu_end\n\n", cnt);
+
+    return Status::NORMAL_WORK;
+}
+
+Status::Statuses asm_while_end(FILE* file, size_t cnt) {
+    assert(file);
+
+    PRINTF_(-1, "___while_%zu_end:\n", cnt);
+    PRINTF_( 0, "; while end\n\n");
+
+    return Status::NORMAL_WORK;
+}
+
+Status::Statuses asm_while_else_check_clause(FILE* file, size_t cnt) {
+    assert(file);
+
+    PRINTF_( 0, "; while-else clause check\n");
+
+    PRINTF_( 0, "push 0\n");
+    PRINTF_( 0, "je ___while_%zu_else\n\n", cnt);
+
+    return Status::NORMAL_WORK;
+}
+
+Status::Statuses asm_while_else_else(FILE* file, size_t cnt) {
+    assert(file);
+
+    PRINTF_(-1, "; while-else else\n");
+
+    PRINTF_(+1, "___while_%zu_else:\n", cnt);
+
+    return Status::NORMAL_WORK;
+}
+
 ScopeData* asm_create_scope(Stack* scopes, size_t* scope_num, bool is_loop) {
     assert(scopes);
 

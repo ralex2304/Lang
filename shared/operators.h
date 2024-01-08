@@ -104,14 +104,21 @@ DEF_OPER(41, PREFIX_SUB,      UNARY)
 DEF_OPER(42, POSTFIX_ADD,     UNARY)
 DEF_OPER(43, POSTFIX_SUB,     UNARY)
 
-DEF_OPER(50, WHILE,           BINARY)
+DEF_OPER(50, WHILE,           BINARY, {
+    if (NODE_IS_OPER(*R(node), OperNum::ELSE)) {
+        ASM_MAKE_WHILE_ELSE(node);
+    } else {
+        ASM_MAKE_WHILE(node);
+    }
+})
+
 DEF_OPER(51, DO_WHILE,        BINARY)
 
 DEF_OPER(53, IF,              BINARY, {
     EVAL_SUBTREE_GET_VAL(*L(node));
 
     if (NODE_IS_OPER(*R(node), OperNum::ELSE)) {
-        EVAL_SUBTREE_NO_VAL(*R(node));
+        ASM_MAKE_IF_ELSE(*R(node));
     } else {
         ASM_MAKE_IF(*R(node));
     }
@@ -119,7 +126,7 @@ DEF_OPER(53, IF,              BINARY, {
 
 DEF_OPER(54, DO_IF,           BINARY)
 
-DEF_OPER(56, ELSE,            BINARY, { ASM_MAKE_IF_ELSE(node); })
+DEF_OPER(56, ELSE,            BINARY, { DAMAGED_TREE("unexpected ELSE node"); })
 
 DEF_OPER(57, BREAK,           LEAF)
 DEF_OPER(58, CONTINUE,        LEAF)

@@ -110,4 +110,10 @@ inline bool dsl_is_double_equal(const double a, const double b) {
 #define ASM_MAKE_IF_ELSE(node_)     \
             STATUS_CHECK(asm_make_if_else_(data, file, node_))
 
+#define ASM_MAKE_WHILE(node_)   \
+            STATUS_CHECK(asm_make_while_(data, file, node_))
+
+#define ASM_MAKE_WHILE_ELSE(node_)   \
+            STATUS_CHECK(asm_make_while_else_(data, file, node_))
+
 #endif //< #ifndef LANG_DSL_H_

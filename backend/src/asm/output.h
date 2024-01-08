@@ -51,6 +51,16 @@ Status::Statuses asm_if_else_begin(FILE* file, size_t cnt);
 
 Status::Statuses asm_if_else_middle(FILE* file, size_t cnt);
 
+Status::Statuses asm_while_begin(FILE* file, size_t cnt);
+
+Status::Statuses asm_while_check_clause(FILE* file, size_t cnt);
+
+Status::Statuses asm_while_end(FILE* file, size_t cnt);
+
+Status::Statuses asm_while_else_check_clause(FILE* file, size_t cnt);
+
+Status::Statuses asm_while_else_else(FILE* file, size_t cnt);
+
 inline Status::Statuses asm_if_else_end(FILE* file, size_t cnt) { return asm_if_end(file, cnt); }
 
 size_t asm_count_addr_offset(Stack* scopes);

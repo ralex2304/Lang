@@ -5,7 +5,7 @@
     pop rbx
 ; Regs initialisation end
 
-; func call
+; func call: остров_в_океане
     push rbx
     push rbx + 0
     pop rbx
@@ -15,11 +15,12 @@
 hlt
 
 ; =========================== Function definition =========================
+; func name: остров_в_океане
 ___func_0:
     in
     pop [rbx + 0]
 
-    ; func call
+    ; func call: факториал
         push rbx
         push rbx + 0
         pop rbx
@@ -40,6 +41,7 @@ ret
 
 
 ; =========================== Function definition =========================
+; func name: факториал
 ___func_1:
     push [rbx + 0]
     push 1
@@ -59,7 +61,7 @@ ___func_1:
 
         pop [rbx + 1]
 
-        ; func call
+        ; func call: факториал
             push rbx
             push rbx + 1
             pop rbx
