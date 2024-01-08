@@ -587,6 +587,8 @@ Status::Statuses asm_while_check_clause(FILE* file, size_t cnt) {
 Status::Statuses asm_while_end(FILE* file, size_t cnt) {
     assert(file);
 
+    PRINTF_( 0, "jmp ___while_%zu_begin\n\n", cnt);
+
     PRINTF_(-1, "___while_%zu_end:\n", cnt);
     PRINTF_( 0, "; while end\n\n");
 

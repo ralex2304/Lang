@@ -401,8 +401,6 @@ Status::Statuses TextParser::Command(ParseData* data, size_t* const pos, TreeNod
     if (*dest != nullptr)
         return Status::NORMAL_WORK;
 
-    // REVIEW possibly unreachable code
-    assert(0 && "test");
     STATUS_CHECK(syntax_error(CUR_TOKEN_DEBUG_INFO, "Expected command or commands"));
     return Status::SYNTAX_ERROR;
 }
@@ -496,8 +494,6 @@ Status::Statuses TextParser::ClauseAction(ParseData* data, size_t* const pos, Tr
     if (*dest != nullptr)
         return Status::NORMAL_WORK;
 
-    // REVIEW possibly unreachable code
-    assert(0 && "test");
     STATUS_CHECK(syntax_error(CUR_TOKEN_DEBUG_INFO, "Expected command or commands"));
     return Status::SYNTAX_ERROR;
 }

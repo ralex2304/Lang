@@ -112,7 +112,7 @@ DEF_OPER(50, WHILE,           BINARY, {
     }
 })
 
-DEF_OPER(51, DO_WHILE,        BINARY) // TODO DO_WHILE
+DEF_OPER(51, DO_WHILE,        BINARY, { ASM_MAKE_DO_WHILE(node); })
 
 DEF_OPER(53, IF,              BINARY, {
     EVAL_SUBTREE_GET_VAL(*L(node));

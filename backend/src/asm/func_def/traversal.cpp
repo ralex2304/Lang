@@ -281,7 +281,7 @@ static Status::Statuses asm_make_while_(BackData* data, FILE* file, TreeNode* pa
     assert(parent_node);
 
     size_t scope_num = 0;
-    ENTER_SCOPE(&scope_num);
+    ENTER_LOOP_SCOPE(&scope_num);
 
     STATUS_CHECK(asm_while_begin(file, scope_num));
 
@@ -298,13 +298,36 @@ static Status::Statuses asm_make_while_(BackData* data, FILE* file, TreeNode* pa
     return Status::NORMAL_WORK;
 }
 
+static Status::Statuses asm_make_do_while_(BackData* data, FILE* file, TreeNode* node) {
+    assert(data);
+    assert(file);
+    assert(node);
+
+    size_t scope_num = 0;
+    ENTER_LOOP_SCOPE(&scope_num);
+
+    STATUS_CHECK(asm_while_begin(file, scope_num));
+
+    EVAL_SUBTREE_NO_VAL(*R(node));
+
+    EXIT_SCOPE();
+
+    EVAL_SUBTREE_GET_VAL(*L(node));
+
+    STATUS_CHECK(asm_while_check_clause(file, scope_num));
+
+    STATUS_CHECK(asm_while_end(file, scope_num));
+
+    return Status::NORMAL_WORK;
+}
+
 static Status::Statuses asm_make_while_else_(BackData* data, FILE* file, TreeNode* parent_node) {
     assert(data);
     assert(file);
     assert(parent_node);
 
     size_t scope_num = 0;
-    ENTER_SCOPE(&scope_num);
+    ENTER_LOOP_SCOPE(&scope_num);
 
     STATUS_CHECK(asm_while_begin(file, scope_num));
 
