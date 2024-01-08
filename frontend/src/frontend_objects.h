@@ -10,6 +10,12 @@
 #include "config.h"
 #include TREE_INCLUDE
 
+const char CMD_SEPARATOR_CHAR = '\n';
+
+const char INLINE_COMMENT_BEG[] = "//";
+
+const char MULTILINE_COMMENT_BEG[] = "/*";
+const char MULTILINE_COMMENT_END[] = "*/";
 
 enum class TerminalNum {
 

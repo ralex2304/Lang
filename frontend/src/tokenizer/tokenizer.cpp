@@ -11,6 +11,15 @@ struct TextData {
 
 static Status::Statuses add_cmd_separator_(TextData* text, Vector* tokens, Vector* vars);
 
+static Status::Statuses tokenizer_parse_cmd_separator_(TextData* text, Vector* tokens, Vector* vars,
+                                                       bool* is_found);
+
+static Status::Statuses tokenizer_skip_spaces_(TextData* text, bool* is_found);
+
+static Status::Statuses tokenizer_skip_inline_comment_(TextData* text, bool* is_found);
+
+static Status::Statuses tokenizer_skip_multiline_comment_(TextData* text, bool* is_found);
+
 static Status::Statuses tokenizer_read_num_(TextData* text, Vector* tokens, bool* is_found);
 
 static Status::Statuses tokenizer_add_var_(TextData* text, Vector* tokens, Vector* vars,
@@ -35,20 +44,20 @@ Status::Statuses tokenizer_process(const char* text_str, Vector* tokens, Vector*
     TextData text = {.str = text_str, .filename = filename};
 
     while (text_str[text.pos]) {
-        if (text_str[text.pos] == '\n') {
-            STATUS_CHECK(add_cmd_separator_(&text, tokens, vars));
-            text.line++;
-            text.pos++;
-            text.line_pos = text.pos;
-            continue;
-        }
-
-        if (isspace(text_str[text.pos])) {
-            text.pos++;
-            continue;
-        }
 
         bool is_found = false;
+
+        STATUS_CHECK(tokenizer_parse_cmd_separator_(&text, tokens, vars, &is_found));
+        if (is_found) continue;
+
+        STATUS_CHECK(tokenizer_skip_spaces_(&text, &is_found));
+        if (is_found) continue;
+
+        STATUS_CHECK(tokenizer_skip_inline_comment_(&text, &is_found));
+        if (is_found) continue;
+
+        STATUS_CHECK(tokenizer_skip_multiline_comment_(&text, &is_found));
+        if (is_found) continue;
 
         STATUS_CHECK(tokenizer_read_terminal_(&text, tokens, &is_found));
         if (is_found) continue;
@@ -69,6 +78,97 @@ Status::Statuses tokenizer_process(const char* text_str, Vector* tokens, Vector*
     if (!tokens->push_back(&term_token))
         return Status::MEMORY_EXCEED;
 
+    return Status::NORMAL_WORK;
+}
+
+static Status::Statuses tokenizer_parse_cmd_separator_(TextData* text, Vector* tokens, Vector* vars,
+                                                       bool* is_found) {
+    assert(text);
+    assert(tokens);
+    assert(vars);
+    assert(is_found);
+    assert(!*is_found);
+
+    if (text->str[text->pos] != CMD_SEPARATOR_CHAR)
+        return Status::NORMAL_WORK;
+
+    STATUS_CHECK(add_cmd_separator_(text, tokens, vars));
+
+    text->line++;
+    text->pos++;
+    text->line_pos = text->pos;
+
+    *is_found = true;
+
+    return Status::NORMAL_WORK;
+}
+
+static Status::Statuses tokenizer_skip_spaces_(TextData* text, bool* is_found) {
+    assert(text);
+    assert(is_found);
+    assert(!*is_found);
+
+    if (isspace(text->str[text->pos])) {
+        text->pos++;
+        *is_found = true;
+    }
+
+    return Status::NORMAL_WORK;
+}
+
+static Status::Statuses tokenizer_skip_inline_comment_(TextData* text, bool* is_found) {
+    assert(text);
+    assert(is_found);
+    assert(!*is_found);
+
+    if (strncmp(text->str + text->pos, INLINE_COMMENT_BEG,
+                                sizeof(INLINE_COMMENT_BEG) - 1) != 0) {
+        return Status::NORMAL_WORK;
+    }
+
+    text->pos += sizeof(INLINE_COMMENT_BEG) - 1;
+
+    while (text->str[text->pos] && text->str[text->pos] != '\n')
+        text->pos++;
+
+    *is_found = true;
+    return Status::NORMAL_WORK;
+}
+
+static Status::Statuses tokenizer_skip_multiline_comment_(TextData* text, bool* is_found) {
+    assert(text);
+    assert(is_found);
+    assert(!*is_found);
+
+    if (strncmp(text->str + text->pos, MULTILINE_COMMENT_BEG,
+                                sizeof(MULTILINE_COMMENT_BEG) - 1) != 0) {
+        return Status::NORMAL_WORK;
+    }
+
+    DebugInfo debug_info = DEBUG_INFO(*text);
+
+    text->pos += sizeof(MULTILINE_COMMENT_BEG) - 1;
+
+    while (strncmp(text->str + text->pos, MULTILINE_COMMENT_END,
+                                   sizeof(MULTILINE_COMMENT_END) - 1) != 0) {
+
+        if (text->str[text->pos] == '\n') {
+            text->pos++;
+            text->line++;
+            text->line_pos = text->pos;
+            continue;
+        }
+
+        if (text->str[text->pos] == '\0') {
+            syntax_error(debug_info, "multiline comment must be closed");
+            return Status::SYNTAX_ERROR;
+        }
+
+        text->pos++;
+    }
+    text->pos += sizeof(MULTILINE_COMMENT_END) - 1;
+
+    *is_found = true;
     return Status::NORMAL_WORK;
 }
 
