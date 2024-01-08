@@ -124,7 +124,7 @@ DEF_OPER(53, IF,              BINARY, {
     }
 })
 
-DEF_OPER(54, DO_IF,           BINARY) // TODO DO_IF
+DEF_OPER(54, DO_IF,           BINARY, { ASM_MAKE_DO_IF(node); })
 
 DEF_OPER(56, ELSE,            BINARY, { DAMAGED_TREE("unexpected ELSE node"); })
 

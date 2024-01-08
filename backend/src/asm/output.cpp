@@ -563,6 +563,22 @@ Status::Statuses asm_if_else_middle(FILE* file, size_t cnt) {
     return Status::NORMAL_WORK;
 }
 
+Status::Statuses asm_do_if_check_clause(FILE* file, size_t cnt) {
+    assert(file);
+
+    PRINTF_( 0, "; do-if clause check\n");
+
+    PRINTF_( 0, "push 0\n");
+    PRINTF_(+1, "jne ___do_if_%zu_end\n", cnt);
+
+    PRINTF_( 0, "pop [-1] ; <= seg fault\n");
+    PRINTF_( 0, "hlt\n");
+
+    PRINTF_(-1, "___do_if_%zu_end:\n\n", cnt);
+
+    return Status::NORMAL_WORK;
+}
+
 Status::Statuses asm_while_begin(FILE* file, size_t cnt) {
     assert(file);
 

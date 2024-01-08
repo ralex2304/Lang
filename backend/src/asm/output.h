@@ -51,6 +51,8 @@ Status::Statuses asm_if_else_begin(FILE* file, size_t cnt);
 
 Status::Statuses asm_if_else_middle(FILE* file, size_t cnt);
 
+Status::Statuses asm_do_if_check_clause(FILE* file, size_t cnt);
+
 Status::Statuses asm_while_begin(FILE* file, size_t cnt);
 
 Status::Statuses asm_while_check_clause(FILE* file, size_t cnt);

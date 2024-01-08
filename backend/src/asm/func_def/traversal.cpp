@@ -21,11 +21,15 @@ static Status::Statuses asm_unary_math_(BackData* data, FILE* file, TreeNode* no
 
 static Status::Statuses asm_make_set_fps_(BackData* data, FILE* file, TreeNode* val_node);
 
-static Status::Statuses asm_make_if_else_(BackData* data, FILE* file, TreeNode* node);
-
 static Status::Statuses asm_make_if_(BackData* data, FILE* file, TreeNode* node);
 
+static Status::Statuses asm_make_do_if_(BackData* data, FILE* file, TreeNode* node);
+
+static Status::Statuses asm_make_if_else_(BackData* data, FILE* file, TreeNode* node);
+
 static Status::Statuses asm_make_while_(BackData* data, FILE* file, TreeNode* parent_node);
+
+static Status::Statuses asm_make_do_while_(BackData* data, FILE* file, TreeNode* node);
 
 static Status::Statuses asm_make_while_else_(BackData* data, FILE* file, TreeNode* parent_node);
 
@@ -250,9 +254,27 @@ static Status::Statuses asm_make_if_(BackData* data, FILE* file, TreeNode* node)
     return Status::NORMAL_WORK;
 }
 
+static Status::Statuses asm_make_do_if_(BackData* data, FILE* file, TreeNode* node) {
+    assert(data);
+    assert(file);
+    assert(node);
+
+    size_t scope_num = 0;
+    ENTER_SCOPE(&scope_num);
+
+    EVAL_SUBTREE_NO_VAL(*R(node));
+
+    EXIT_SCOPE();
+
+    STATUS_CHECK(asm_do_if_check_clause(file, scope_num));
+
+    return Status::NORMAL_WORK;
+}
+
 static Status::Statuses asm_make_if_else_(BackData* data, FILE* file, TreeNode* node) {
     assert(data);
     assert(file);
+    assert(node);
 
     size_t scope_num = 0;
     ENTER_SCOPE(&scope_num);
