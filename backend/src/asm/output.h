@@ -69,6 +69,9 @@ Status::Statuses asm_break(FILE* file, size_t cnt);
 
 inline Status::Statuses asm_if_else_end(FILE* file, size_t cnt) { return asm_if_end(file, cnt); }
 
+Status::Statuses asm_prepost_oper(FILE* file, const size_t addr_offset, const bool is_global,
+                                  const char* oper);
+
 size_t asm_count_addr_offset(Stack* scopes);
 
 ScopeData* asm_create_scope(Stack* scopes, size_t* scope_num = nullptr, bool is_loop = false);

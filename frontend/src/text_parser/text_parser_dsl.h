@@ -19,6 +19,11 @@
 #define L(node_) (&(node_)->left)
 #define R(node_) (&(node_)->right)
 
+#define ELEM(node_)  ((TreeElem*)((node_)->elem))
+
+#define NODE_DATA(node_) (ELEM(node_)->data)
+#define NODE_TYPE(node_) (ELEM(node_)->type)
+
 #define NUM_ELEM(val_, debug_)      {.type = TreeElemType::NUM,  .data = {.num  = val_},    \
                                      .debug_info = debug_}
 #define OPER_ELEM(oper_, debug_)    {.type = TreeElemType::OPER, .data = {.oper = oper_},   \

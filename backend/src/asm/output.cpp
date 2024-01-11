@@ -650,6 +650,23 @@ Status::Statuses asm_break(FILE* file, size_t cnt) {
     return Status::NORMAL_WORK;
 }
 
+Status::Statuses asm_prepost_oper(FILE* file, const size_t addr_offset, const bool is_global,
+                                  const char* oper) {
+    assert(file);
+    assert(oper);
+
+    PRINTF_( 0, "; prepost oper\n");
+
+    STATUS_CHECK(asm_push_var_val(file, addr_offset, is_global));
+
+    PRINTF_( 0, "push 1\n");
+    PRINTF_( 0, "%s\n", oper);
+
+    STATUS_CHECK(asm_pop_var_value(file, addr_offset, is_global));
+
+    return Status::NORMAL_WORK;
+}
+
 ScopeData* asm_create_scope(Stack* scopes, size_t* scope_num, bool is_loop) {
     assert(scopes);
 

@@ -4,7 +4,7 @@
 
 static Status::Statuses asm_add_var_(BackData* data, TreeNode* node, bool is_const);
 
-static Status::Statuses asm_check_var_for_assign_(BackData* data, TreeNode* node);
+static Status::Statuses asm_check_var_for_assign_(BackData* data, TreeNode* node, Var* var = nullptr);
 
 static Status::Statuses asm_provide_func_call_(BackData* data, FILE* file, TreeNode* node,
                                                bool is_val_needed);
@@ -36,6 +36,12 @@ static Status::Statuses asm_make_while_else_(BackData* data, FILE* file, TreeNod
 static Status::Statuses asm_make_continue_(BackData* data, FILE* file, TreeNode* node);
 
 static Status::Statuses asm_make_break_(BackData* data, FILE* file, TreeNode* node);
+
+static Status::Statuses asm_make_prefix_oper_(BackData* data, FILE* file, TreeNode* node,
+                                              const char* oper, bool is_val_needed);
+
+static Status::Statuses asm_make_postfix_oper_(BackData* data, FILE* file, TreeNode* node,
+                                               const char* oper, bool is_val_needed);
 
 
 Status::Statuses asm_command_traversal(BackData* data, FILE* file, TreeNode* node,
@@ -118,7 +124,7 @@ static Status::Statuses asm_add_var_(BackData* data, TreeNode* node, bool is_con
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses asm_check_var_for_assign_(BackData* data, TreeNode* node) {
+static Status::Statuses asm_check_var_for_assign_(BackData* data, TreeNode* node, Var* var) {
     assert(data);
 
     if (node == nullptr || NODE_TYPE(node) != TreeElemType::VAR) {
@@ -126,7 +132,8 @@ static Status::Statuses asm_check_var_for_assign_(BackData* data, TreeNode* node
         return Status::TREE_ERROR;
     }
 
-    Var* var = asm_search_var(&data->scopes, NODE_DATA(node).var, nullptr);
+    if (var == nullptr)
+        var = asm_search_var(&data->scopes, NODE_DATA(node).var, nullptr);
 
     if (var == nullptr) {
         STATUS_CHECK(syntax_error(ELEM(node)->debug_info, "Var was not declared in this scope"));
@@ -417,4 +424,83 @@ static Status::Statuses asm_make_break_(BackData* data, FILE* file, TreeNode* no
     STATUS_CHECK(asm_break(file, scope_num));
 
     return Status::NORMAL_WORK;
+}
+
+static Status::Statuses asm_make_prefix_oper_(BackData* data, FILE* file, TreeNode* node,
+                                              const char* oper, bool is_val_needed) {
+    assert(data);
+    assert(file);
+    assert(node);
+    assert(oper);
+
+    if (*L(node) == nullptr || NODE_TYPE(*L(node)) != TreeElemType::VAR) {
+        DAMAGED_TREE("prefix oper must have var as left child");
+        return Status::TREE_ERROR;
+    }
+
+    bool is_global = false;
+    Var* var = asm_search_var(&data->scopes, NODE_DATA(*L(node)).var, &is_global);
+
+    STATUS_CHECK(asm_check_var_for_assign_(data, *L(node), var));
+
+    STATUS_CHECK(asm_prepost_oper(file, var->addr_offset, is_global, oper));
+
+
+    if (*R(node) == nullptr || NODE_TYPE(*R(node)) == TreeElemType::VAR) { //< This is the last oper
+
+        if (is_val_needed)
+            STATUS_CHECK(asm_push_var_val(file, var->addr_offset, is_global));
+
+        return Status::NORMAL_WORK;
+    }
+
+    if (NODE_TYPE(*R(node)) == TreeElemType::OPER) { //< There are some opers left
+
+        EVAL_SUBTREE(*R(node), is_val_needed);
+
+        return Status::NORMAL_WORK;
+    }
+
+    DAMAGED_TREE("Right child of prefix oper must be null, var or other prepost-opers");
+    return Status::TREE_ERROR;
+}
+
+static Status::Statuses asm_make_postfix_oper_(BackData* data, FILE* file, TreeNode* node,
+                                               const char* oper, bool is_val_needed) {
+    assert(data);
+    assert(file);
+    assert(node);
+    assert(oper);
+
+    if (*L(node) == nullptr || NODE_TYPE(*L(node)) != TreeElemType::VAR) {
+        DAMAGED_TREE("prefix oper must have var as left child");
+        return Status::TREE_ERROR;
+    }
+
+    bool is_global = false;
+    Var* var = asm_search_var(&data->scopes, NODE_DATA(*L(node)).var, &is_global);
+
+    STATUS_CHECK(asm_check_var_for_assign_(data, *L(node), var));
+
+    if (is_val_needed) {
+        STATUS_CHECK(asm_push_var_val(file, var->addr_offset, is_global));
+
+        is_val_needed = false;
+    }
+
+    STATUS_CHECK(asm_prepost_oper(file, var->addr_offset, is_global, oper));
+
+
+    if (*R(node) == nullptr || NODE_TYPE(*R(node)) == TreeElemType::VAR) //< This is the last oper
+        return Status::NORMAL_WORK;
+
+    if (NODE_TYPE(*R(node)) == TreeElemType::OPER) { //< There are some opers left
+
+        EVAL_SUBTREE_NO_VAL(*R(node));
+
+        return Status::NORMAL_WORK;
+    }
+
+    DAMAGED_TREE("Right child of prefix oper must be null, var or other prepost-opers");
+    return Status::TREE_ERROR;
 }

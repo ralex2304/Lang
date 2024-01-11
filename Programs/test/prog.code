@@ -32,6 +32,22 @@ ___func_0:
         ; var assignment: тест
         pop [rbx + 1]
 
+        ; prepost oper
+        push [rbx + 1]
+        push 1
+        add
+        pop [rbx + 1]
+
+        push [rbx + 1]
+        ; prepost oper
+        push [rbx + 1]
+        push 1
+        sub
+        pop [rbx + 1]
+
+        ; var assignment: тест
+        pop [rbx + 1]
+
         jmp ___while_3_begin
 
     ___while_3_end:

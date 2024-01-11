@@ -1156,13 +1156,12 @@ Status::Statuses TextParser::Prefix(ParseData* data, size_t* const pos, TreeNode
     OperNum oper = OperNum::NONE;
 
     if (IS_TOKEN_TERM_EQ(CUR_TOKEN,  TerminalNum::MATH_ADD) &&
-        IS_TOKEN_TERM_EQ(NEXT_TOKEN, TerminalNum::MATH_ADD))
+        IS_TOKEN_TERM_EQ(NEXT_TOKEN, TerminalNum::MATH_ADD)) {
         oper = OperNum::PREFIX_ADD;
-    else if (IS_TOKEN_TERM_EQ(CUR_TOKEN,  TerminalNum::MATH_SUB) &&
-             IS_TOKEN_TERM_EQ(NEXT_TOKEN, TerminalNum::MATH_SUB))
+    } else if (IS_TOKEN_TERM_EQ(CUR_TOKEN,  TerminalNum::MATH_SUB) &&
+               IS_TOKEN_TERM_EQ(NEXT_TOKEN, TerminalNum::MATH_SUB)) {
         oper = OperNum::PREFIX_SUB;
-    else
-        oper = OperNum::NONE;
+    }
 
     if (oper == OperNum::NONE) {
         STATUS_CHECK(Postfix(data, pos, dest, size));
@@ -1174,7 +1173,22 @@ Status::Statuses TextParser::Prefix(ParseData* data, size_t* const pos, TreeNode
     STATUS_CHECK(Prefix(data, pos, &prefix_node, size),     tree_dtor_untied_subtree(&prefix_node));
     assert(prefix_node);
 
-    STATUS_CHECK(new_oper_node(dest, oper, debug_info, nullptr, prefix_node),
+    TreeNode* var_node_src = nullptr;
+    if (NODE_TYPE(prefix_node) == TreeElemType::VAR) {
+        var_node_src = prefix_node;
+    } else {
+        assert(*L(prefix_node));
+        assert(NODE_TYPE(*L(prefix_node)) == TreeElemType::VAR);
+
+        var_node_src = *L(prefix_node);
+    }
+
+    TreeNode* var_node_new = nullptr;
+    STATUS_CHECK(new_var_node(&var_node_new, NODE_DATA(var_node_src).var,
+                                                  ELEM(var_node_src)->debug_info));
+    (*size)++;
+
+    STATUS_CHECK(new_oper_node(dest, oper, debug_info, var_node_new, prefix_node),
                                                             tree_dtor_untied_subtree(&prefix_node));
     (*size)++;
 
@@ -1207,20 +1221,23 @@ Status::Statuses TextParser::Postfix(ParseData* data, size_t* const pos, TreeNod
             oper = OperNum::POSTFIX_ADD;
         else if (IS_TOKEN_TERM_EQ(CUR_TOKEN,  TerminalNum::MATH_SUB) &&
                  IS_TOKEN_TERM_EQ(NEXT_TOKEN, TerminalNum::MATH_SUB))
-            oper = OperNum::POSTFIX_ADD;
+            oper = OperNum::POSTFIX_SUB;
         else
             oper = OperNum::NONE;
 
+        TreeNode* var_node = nullptr;
+        STATUS_CHECK(new_var_node(&var_node, var_num, var_debug_info));
+        (*size)++;
+
         if (oper == OperNum::NONE) {
-            STATUS_CHECK(new_var_node(dest, var_num, var_debug_info));
-            (*size)++;
+            *dest = var_node;
             if (parent)
                 (*dest)->parent = parent;
             break;
         }
         *pos += 2;
 
-        STATUS_CHECK(new_oper_node(dest, oper, debug_info, nullptr, nullptr));
+        STATUS_CHECK(new_oper_node(dest, oper, debug_info, var_node, nullptr));
         (*size)++;
 
         if (parent)

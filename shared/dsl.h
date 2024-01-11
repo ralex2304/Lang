@@ -128,4 +128,10 @@ inline bool dsl_is_double_equal(const double a, const double b) {
 #define ASM_MAKE_DO_IF(node_)   \
             STATUS_CHECK(asm_make_do_if_(data, file, node_))
 
+#define PREFIX_OPER(oper_)  \
+            STATUS_CHECK(asm_make_prefix_oper_(data, file, node, oper_, is_val_needed))
+
+#define POSTFIX_OPER(oper_) \
+            STATUS_CHECK(asm_make_postfix_oper_(data, file, node, oper_, is_val_needed))
+
 #endif //< #ifndef LANG_DSL_H_
