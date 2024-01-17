@@ -2,7 +2,7 @@
 DOCS_DIR = docs
 
 
-.PHONY: main frontend middleend backend build_front build_middle build_back
+.PHONY: main frontend middleend backend build_front build_middle build_back clean_front clean_middle clean_back
 
 main: build frontend backend
 
@@ -29,6 +29,15 @@ build_middle:
 build_back:
 	@cd ./backend && make
 
+clean_front:
+	@cd ./frontend && make clean
+
+clean_middle:
+	@cd ./middleend && make clean
+
+clean_back:
+	@cd ./backend && make clean
+
 .PHONY: doxygen dox
 
 DOCS_TARGET = $(DOCS_DIR)/docs_generated
@@ -39,5 +48,6 @@ doxygen dox: | $(DOCS_DIR)
 $(DOCS_DIR):
 	@mkdir ./$@
 
-clean:
+clean: clean_front clean_back # clean_middle
 	@rm -rf ./$(DOCS_TARGET)
+

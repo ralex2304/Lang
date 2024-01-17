@@ -16,3 +16,25 @@ size_t strncat_len(char* dest, const char* src, const ssize_t max_len) {
 
     return dest_i;
 }
+
+bool convert_to_utf8(const char* filename) {
+    assert(filename);
+
+    static const size_t MAX_CMD_LEN = 1024;
+    char buf[MAX_CMD_LEN] = {};
+
+    snprintf(buf, MAX_CMD_LEN, "mv %s %s.icv", filename, filename);
+    if (system(buf) != 0)
+        return false;
+
+    snprintf(buf, MAX_CMD_LEN, "iconv -f WINDOWS-1251 -t UTF-8 %s.icv > %s",
+                                filename, filename);
+    if (system(buf) != 0)
+        return false;
+
+    snprintf(buf, MAX_CMD_LEN, "rm -f %s.icv", filename);
+    if (system(buf) != 0)
+        return false;
+
+    return true;
+}
