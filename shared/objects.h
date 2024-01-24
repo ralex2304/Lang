@@ -5,6 +5,8 @@
 #include <assert.h>
 #include <stdio.h>
 
+#include "utils/vector.h"
+
 const char* const MAIN_FUNC_NAME = "остров_в_океане";
 
 struct String {
@@ -97,5 +99,16 @@ inline char* tree_elem_str_val(const void* elem) {
     return str;
 }
 
+inline ssize_t find_var_num_by_name(Vector* vars, const char* name) {
+    assert(vars);
+    assert(name);
+
+    for (ssize_t i = 0; i < vars->size(); i++) {
+        if (strcmp(*(const char**)((*vars)[i]), name) == 0)
+            return i;
+    }
+
+    return -1;
+}
 
 #endif //< #ifndef OBJECTS_H_

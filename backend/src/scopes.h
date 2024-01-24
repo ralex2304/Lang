@@ -17,9 +17,9 @@ struct Var {
 
 enum class ScopeType {
     NONE    = -1,
-    GLOBAL  = 1,
-    NEUTRAL = 2,
-    LOOP    = 3,
+    GLOBAL  =  1,
+    NEUTRAL =  2,
+    LOOP    =  3,
 };
 
 struct ScopeData {

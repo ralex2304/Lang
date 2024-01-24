@@ -3,7 +3,7 @@
 #include "dsl.h"
 
 static Status::Statuses declare_global_var_(BackData* data, FILE* file, ScopeData* var_table,
-                                               TreeNode* def);
+                                            TreeNode* def);
 
 static Status::Statuses asm_eval_global_expr_(BackData* data, FILE* file, TreeNode* expr);
 
@@ -14,87 +14,6 @@ static Status::Statuses asm_initialise_global_var_(BackData* data, FILE* file, T
 static Status::Statuses asm_var_assignment_header_(FILE* file, const char* var_name);
 
 static size_t asm_count_args_(TreeNode* arg);
-
-static int asm_printf_(const ssize_t lvl_change, FILE* file, va_list* args, const char* format);
-
-static int asm_printf_with_tab_(const size_t tab, FILE* file, va_list* args, const char* format);
-
-inline static int asm_printf_with_tab_(const size_t tab, FILE* file, const char* format, ...) {
-    assert(format);
-
-    va_list args = {};
-    va_start(args, format);
-
-    int res = asm_printf_with_tab_(tab, file, &args, format);
-
-    va_end(args);
-
-    return res;
-}
-
-inline static int asm_printf_(const ssize_t lvl_change, FILE* file, const char* format, ...) {
-    assert(format);
-
-    va_list args = {};
-    va_start(args, format);
-
-    int res = asm_printf_(lvl_change, file, &args, format);
-
-    va_end(args);
-
-    return res;
-}
-
-static int asm_printf_(const ssize_t lvl_change, FILE* file, va_list* args, const char* format) {
-    static const size_t TAB_SIZE = 4;
-    static ssize_t level = 0;
-
-    if (lvl_change < 0) {
-        level += lvl_change;
-        if (level < 0) {
-            assert(0 && "level mustn't be negative");
-            return EOF;
-        }
-    }
-
-    if (*format == '\0')
-        return 1;
-
-    int res = asm_printf_with_tab_(level * TAB_SIZE, file, args, format);
-
-    if (lvl_change > 0)
-        level += lvl_change;
-
-    return res;
-}
-
-static int asm_printf_with_tab_(const size_t tab, FILE* file, va_list* args, const char* format) {
-    assert(file);
-    assert(args);
-    assert(format);
-
-    int res = fprintf(file, "%*s", (int)tab, "");
-    if (res == EOF) {
-        perror("File write error");
-        return res;
-    }
-
-    res = vfprintf(file, format, *args);
-
-    if (res == EOF)
-        perror("File write error");
-
-    return res;
-}
-
-
-#define PRINTF_(lvl_change_, ...)                                   \
-            if (asm_printf_(lvl_change_, file, __VA_ARGS__) < 0)    \
-                return Status::OUTPUT_ERROR
-
-#define PRINTF_NO_TAB_(...)                                     \
-            if (asm_printf_with_tab_(0, file, __VA_ARGS__) < 0) \
-                return Status::OUTPUT_ERROR
 
 Var* asm_search_var(Stack* scopes, size_t var_num, bool* is_global) {
     assert(scopes);
@@ -438,34 +357,6 @@ size_t asm_count_addr_offset(Stack* scopes) {
         ans += (size_t)scopes->data[i].vars.size();
 
     return ans;
-}
-
-Status::Statuses asm_print_command(const size_t lvl_change, FILE* file, const char* format, ...) {
-    assert(format);
-
-    va_list args = {};
-    va_start(args, format);
-
-    if (asm_printf_(lvl_change, file, &args, format) < 0)
-        return Status::OUTPUT_ERROR;
-
-    va_end(args);
-
-    return Status::NORMAL_WORK;
-}
-
-Status::Statuses asm_print_command_no_tab(FILE* file, const char* format, ...) {
-    assert(format);
-
-    va_list args = {};
-    va_start(args, format);
-
-    if (asm_printf_with_tab_(0, file, &args, format) < 0)
-        return Status::OUTPUT_ERROR;
-
-    va_end(args);
-
-    return Status::NORMAL_WORK;
 }
 
 static Status::Statuses asm_var_assignment_header_(FILE* file, const char* var_name) {

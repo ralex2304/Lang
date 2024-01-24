@@ -7,13 +7,14 @@
 
 #include "utils/statuses.h"
 #include "objects.h"
-#include "../backend_objects.h"
-#include "../Stack/stack.h"
+#include "../../backend_objects.h"
+#include "../../Stack/stack.h"
 #include "config.h"
 #include TREE_INCLUDE
 #include "TreeAddon/TreeAddon.h"
 #include "file/file.h"
 #include "syntax_error/syntax_error.h"
+#include "asm_print.h"
 
 Var* asm_search_var(Stack* scopes, size_t var_num, bool* is_global);
 

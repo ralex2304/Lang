@@ -64,11 +64,17 @@ inline bool dsl_is_double_equal(const double a, const double b) {
 #define CHECK_VAR_FOR_ASSIGNMENT(node_) \
             STATUS_CHECK(asm_check_var_for_assign_(data, node_))
 
-#define ASM_PRINT_COMMAND(lvl_change_, ...)     \
-            STATUS_CHECK(asm_print_command(lvl_change_, file, __VA_ARGS__))
+#define ASM_PRINT_COMMAND(lvl_change_, ...)                                     \
+            do {                                                                \
+                if (AsmPrint::asm_printf(lvl_change_, file, __VA_ARGS__) < 0)   \
+                    return Status::OUTPUT_ERROR;                                \
+            } while (0)
 
-#define ASM_PRINT_COMMAND_NO_TAB(...)  \
-            STATUS_CHECK(asm_print_command_no_tab(file, __VA_ARGS__))
+#define ASM_PRINT_COMMAND_NO_TAB(...)                                           \
+            do {                                                                \
+                if (AsmPrint::asm_printf_with_tab(0, file, __VA_ARGS__) < 0)    \
+                    return Status::OUTPUT_ERROR;                                \
+            } while (0)
 
 #define BINARY_MATH(cmd_)                   \
             STATUS_CHECK(asm_binary_math_(data, file, node, cmd_, is_val_needed))
