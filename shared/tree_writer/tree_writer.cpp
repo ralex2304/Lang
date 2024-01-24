@@ -1,4 +1,4 @@
-#include "tree_output.h"
+#include "tree_writer.h"
 
 static Status::Statuses write_tree_(Tree* tree, FILE* file);
 
@@ -15,7 +15,7 @@ static Status::Statuses write_vars_(Vector* vars, FILE* file);
                                 return Status::OUTPUT_ERROR;        \
                         } while (0)
 
-Status::Statuses tree_output_write(Tree* tree, Vector* vars, const char* filename) {
+Status::Statuses tree_write(Tree* tree, Vector* vars, const char* filename) {
     assert(tree);
     assert(vars);
     assert(filename);

@@ -10,7 +10,6 @@
 #include "backend_objects.h"
 #include "config.h"
 #include TREE_INCLUDE
-#include "tree_output/tree_output.h"
 #include "asm/asm.h"
 #include "TreeAddon/TreeAddonDump.h"
 
