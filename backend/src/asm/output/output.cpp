@@ -59,9 +59,9 @@ Status::Statuses asm_initialise_global_scope(BackData* data, FILE* file) {
             return Status::TREE_ERROR;
         }
 
-        STATUS_CHECK(declare_global_var_(data, file, var_table, cur_cmd->left), var_table->dtor());
+        STATUS_CHECK(declare_global_var_(data, file, var_table, *L(cur_cmd)), var_table->dtor());
 
-        cur_cmd = cur_cmd->right;
+        cur_cmd = *R(cur_cmd);
     }
 
     return Status::NORMAL_WORK;
@@ -79,7 +79,7 @@ static Status::Statuses declare_global_var_(BackData* data, FILE* file, ScopeDat
     if (NODE_IS_OPER(def, OperNum::CONST_VAR_DEF)) {
         new_var.is_const = true;
 
-        def = def->right;
+        def = *R(def);
 
         if (!NODE_IS_OPER(def, OperNum::VAR_DEFINITION)) {
             STATUS_CHECK(syntax_error(ELEM(def)->debug_info, "Only var can be const"));
@@ -89,34 +89,34 @@ static Status::Statuses declare_global_var_(BackData* data, FILE* file, ScopeDat
 
     if (NODE_IS_OPER(def, OperNum::VAR_DEFINITION)) {
 
-        if (NODE_TYPE(def->left) != TreeElemType::VAR) {
+        if (TYPE_IS_VAR(*L(def))) {
             tree_is_damaged(&data->tree, "incorrect var definition hierarchy");
             return Status::TREE_ERROR;
         }
 
-        new_var.var_num = ELEM(def->left)->data.var;
+        new_var.var_num = ELEM(*L(def))->data.var;
 
         if (var_table->find_var(new_var.var_num) != nullptr) {
             STATUS_CHECK(syntax_error(ELEM(def)->debug_info, "Variable has been already declared"));
             return Status::SYNTAX_ERROR;
         }
 
-        STATUS_CHECK(asm_initialise_global_var_(data, file, def->right, &new_var));
+        STATUS_CHECK(asm_initialise_global_var_(data, file, *R(def), &new_var));
 
         return Status::NORMAL_WORK;
     }
 
     if (NODE_IS_OPER(def, OperNum::FUNC_DEFINITION)) {
 
-        if (!NODE_IS_OPER(def->left, OperNum::VAR_SEPARATOR) ||
-            (NODE_TYPE(def->left->left) != TreeElemType::VAR)) {
+        if (!NODE_IS_OPER(*L(def), OperNum::VAR_SEPARATOR) ||
+            !TYPE_IS_VAR(*L(*L(def)))) {
 
             tree_is_damaged(&data->tree, "incorrect func definition hierarchy");
             return Status::TREE_ERROR;
         }
 
-        Func new_func = {.func_num = ELEM(def->left->left)->data.var,
-                         .arg_num = asm_count_args_(def->left->right)};
+        Func new_func = {.func_num = ELEM(*L(*L(def)))->data.var,
+                         .arg_num = asm_count_args_(*R(*L(def)))};
 
         if (data->func_table.find_func(new_func.func_num) != nullptr) {
             STATUS_CHECK(syntax_error(ELEM(def)->debug_info, "Function has been already declared"));
@@ -138,7 +138,7 @@ static size_t asm_count_args_(TreeNode* arg) {
 
     while (arg && NODE_IS_OPER(arg, OperNum::VAR_SEPARATOR)) {
         ans++;
-        arg = arg->right;
+        arg = *R(arg);
     }
 
     return ans;
@@ -209,19 +209,19 @@ static Status::Statuses asm_eval_global_expr_(BackData* data, FILE* file, TreeNo
         return Status::SYNTAX_ERROR;
     }
 
-    if (expr->left != nullptr)
-        STATUS_CHECK(asm_eval_global_expr_(data, file, expr->left));
+    if (*L(expr) != nullptr)
+        STATUS_CHECK(asm_eval_global_expr_(data, file, *L(expr)));
 
-    if (expr->right != nullptr)
-        STATUS_CHECK(asm_eval_global_expr_(data, file, expr->right));
+    if (*R(expr) != nullptr)
+        STATUS_CHECK(asm_eval_global_expr_(data, file, *R(expr)));
 
-    if (NODE_TYPE(expr) == TreeElemType::NUM) {
+    if (TYPE_IS_NUM(expr)) {
         STATUS_CHECK(asm_push_const(file, ELEM(expr)->data.num));
 
         return Status::NORMAL_WORK;
     }
 
-    if (NODE_TYPE(expr) == TreeElemType::VAR) {
+    if (TYPE_IS_VAR(expr)) {
 
         Var* var = data->scopes.data[0].find_var(ELEM(expr)->data.var);
 
@@ -235,7 +235,7 @@ static Status::Statuses asm_eval_global_expr_(BackData* data, FILE* file, TreeNo
         return Status::NORMAL_WORK;
     }
 
-    if (NODE_TYPE(expr) == TreeElemType::OPER) {
+    if (TYPE_IS_OPER(expr)) {
         STATUS_CHECK(asm_write_global_oper_(file, ELEM(expr)->data.oper, &ELEM(expr)->debug_info));
 
         return Status::NORMAL_WORK;
@@ -396,7 +396,7 @@ Status::Statuses asm_assign_var(BackData* data, FILE* file, TreeNode* var_node) 
     assert(var_node);
 
     bool is_global_ = false;
-    size_t var_num = NODE_DATA(var_node).var;
+    size_t var_num = NODE_DATA(var_node)->var;
 
 
     Var* var_ = (asm_search_var(&data->scopes, var_num, &is_global_));

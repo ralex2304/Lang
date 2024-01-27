@@ -81,30 +81,32 @@ DEF_OPER(20, MATH_ADD,        BINARY, { BINARY_MATH("add"); })
 DEF_OPER(21, MATH_SUB,        BINARY, { BINARY_MATH("sub"); })
 DEF_OPER(22, MATH_MUL,        BINARY, { BINARY_MATH("mul"); })
 DEF_OPER(23, MATH_DIV,        BINARY, { BINARY_MATH("div"); })
-DEF_OPER(24, MATH_SQRT,       UNARY,  { UNARY_MATH("sqrt"); })
-DEF_OPER(25, MATH_SIN,        UNARY,  { UNARY_MATH("sin");  })
-DEF_OPER(26, MATH_COS,        UNARY,  { UNARY_MATH("cos");  })
+DEF_OPER(24, MATH_POW,        BINARY, { BINARY_MATH("pow"); })
+DEF_OPER(25, MATH_SQRT,       UNARY,  { UNARY_MATH("sqrt"); })
+DEF_OPER(26, MATH_SIN,        UNARY,  { UNARY_MATH("sin");  })
+DEF_OPER(27, MATH_COS,        UNARY,  { UNARY_MATH("cos");  })
+DEF_OPER(28, MATH_LN,         UNARY,  { UNARY_MATH("ln");   })
 
-DEF_OPER(27, MATH_NEGATIVE,   UNARY,  {
+DEF_OPER(29, MATH_NEGATIVE,   UNARY,  {
     ASM_PRINT_COMMAND(0, "push -1\n");
     UNARY_MATH(          "mul");
 })
 
-DEF_OPER(28, MATH_DIFF,       BINARY, { DAMAGED_TREE("unexpected MATH_DIFF"); })
+DEF_OPER(30, MATH_DIFF,       BINARY, { DAMAGED_TREE("unexpected MATH_DIFF"); })
 
-DEF_OPER(30, LOGIC_GREAT,     BINARY, { LOGIC("ja");  })
-DEF_OPER(31, LOGIC_LOWER,     BINARY, { LOGIC("jb");  })
-DEF_OPER(32, LOGIC_NOT_EQUAL, BINARY, { LOGIC("jne"); })
-DEF_OPER(33, LOGIC_EQUAL,     BINARY, { LOGIC("je");  })
-DEF_OPER(34, LOGIC_GREAT_EQ,  BINARY, { LOGIC("jae"); })
-DEF_OPER(35, LOGIC_LOWER_EQ,  BINARY, { LOGIC("jbe"); })
+DEF_OPER(40, LOGIC_GREAT,     BINARY, { LOGIC("ja");  })
+DEF_OPER(41, LOGIC_LOWER,     BINARY, { LOGIC("jb");  })
+DEF_OPER(42, LOGIC_NOT_EQUAL, BINARY, { LOGIC("jne"); })
+DEF_OPER(43, LOGIC_EQUAL,     BINARY, { LOGIC("je");  })
+DEF_OPER(44, LOGIC_GREAT_EQ,  BINARY, { LOGIC("jae"); })
+DEF_OPER(45, LOGIC_LOWER_EQ,  BINARY, { LOGIC("jbe"); })
 
-DEF_OPER(40, PREFIX_ADD,      BINARY, { PREFIX_OPER ("add"); })
-DEF_OPER(41, PREFIX_SUB,      BINARY, { PREFIX_OPER ("sub"); })
-DEF_OPER(42, POSTFIX_ADD,     BINARY, { POSTFIX_OPER("add"); })
-DEF_OPER(43, POSTFIX_SUB,     BINARY, { POSTFIX_OPER("sub"); })
+DEF_OPER(50, PREFIX_ADD,      BINARY, { PREFIX_OPER ("add"); })
+DEF_OPER(51, PREFIX_SUB,      BINARY, { PREFIX_OPER ("sub"); })
+DEF_OPER(52, POSTFIX_ADD,     BINARY, { POSTFIX_OPER("add"); })
+DEF_OPER(53, POSTFIX_SUB,     BINARY, { POSTFIX_OPER("sub"); })
 
-DEF_OPER(50, WHILE,           BINARY, {
+DEF_OPER(60, WHILE,           BINARY, {
     if (NODE_IS_OPER(*R(node), OperNum::ELSE)) {
         ASM_MAKE_WHILE_ELSE(node);
     } else {
@@ -112,9 +114,9 @@ DEF_OPER(50, WHILE,           BINARY, {
     }
 })
 
-DEF_OPER(51, DO_WHILE,        BINARY, { ASM_MAKE_DO_WHILE(node); })
+DEF_OPER(61, DO_WHILE,        BINARY, { ASM_MAKE_DO_WHILE(node); })
 
-DEF_OPER(53, IF,              BINARY, {
+DEF_OPER(63, IF,              BINARY, {
     EVAL_SUBTREE_GET_VAL(*L(node));
 
     if (NODE_IS_OPER(*R(node), OperNum::ELSE)) {
@@ -124,12 +126,12 @@ DEF_OPER(53, IF,              BINARY, {
     }
 })
 
-DEF_OPER(54, DO_IF,           BINARY, { ASM_MAKE_DO_IF(node); })
+DEF_OPER(64, DO_IF,           BINARY, { ASM_MAKE_DO_IF(node); })
 
-DEF_OPER(56, ELSE,            BINARY, { DAMAGED_TREE("unexpected ELSE node"); })
+DEF_OPER(66, ELSE,            BINARY, { DAMAGED_TREE("unexpected ELSE node"); })
 
-DEF_OPER(57, BREAK,           LEAF,   { ASM_MAKE_BREAK(node); })
-DEF_OPER(58, CONTINUE,        LEAF,   { ASM_MAKE_CONTINUE(node); })
+DEF_OPER(67, BREAK,           LEAF,   { ASM_MAKE_BREAK(node); })
+DEF_OPER(68, CONTINUE,        LEAF,   { ASM_MAKE_CONTINUE(node); })
 
 DEF_OPER(70, IN,              LEAF,   { ASM_PRINT_COMMAND(0, "in\n"); })
 

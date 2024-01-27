@@ -62,6 +62,8 @@ namespace TextParser {
 
     Status::Statuses MathLvl4(ParseData* data, size_t* const pos, TreeNode** dest, size_t* const size);
 
+    Status::Statuses MathLvl5(ParseData* data, size_t* const pos, TreeNode** dest, size_t* const size);
+
     Status::Statuses CH_Binary(ParseData* data, size_t* const pos, TreeNode** dest, size_t* const size);
 
     Status::Statuses CH_Unary(ParseData* data, size_t* const pos, TreeNode** dest, size_t* const size);

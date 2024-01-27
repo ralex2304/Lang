@@ -4,6 +4,11 @@
 
 extern LogFileData log_file;
 
+static Status::Statuses tree_copy_subtree_traversal_(Tree* tree, TreeNode* src,
+                                                     TreeNode** dest, TreeNode* parent,
+                                                     bool* is_simple);
+
+
 Status::Statuses tree_dtor_untied_subtree(TreeNode** node) {
     assert(node);
 
@@ -34,3 +39,74 @@ void tree_is_damaged(Tree* tree, const char* err_msg) {
 
     TREE_DUMP(tree);
 }
+
+static Status::Statuses tree_copy_subtree_traversal_(Tree* tree, TreeNode* src,
+                                                     TreeNode** dest, TreeNode* parent,
+                                                     bool* is_simple) {
+    assert(tree);
+    assert(src);
+    assert(dest);
+    assert(*dest == nullptr);
+    assert(is_simple);
+
+    // Not macros, because inserting not in diff_data.tree
+    if (tree_insert(tree, dest, parent, ELEM(src)) != Tree::OK)
+        return Status::TREE_ERROR;
+
+    if (TYPE_IS_NUM(src)) {
+        *is_simple = true;
+        return Status::NORMAL_WORK;
+
+    } else if (TYPE_IS_VAR(src)) {
+        *is_simple = false;
+        return Status::NORMAL_WORK;
+    }
+    assert(TYPE_IS_OPER(src));
+
+    bool is_l_simple = false;
+    bool is_r_simple = false;
+
+    if (IS_L_EXIST(src))
+        STATUS_CHECK(tree_copy_subtree_traversal_(tree, src->left, L(*dest), *dest,
+                                                  &is_l_simple));
+    else
+        is_l_simple = true;
+
+    if (IS_R_EXIST(src))
+        STATUS_CHECK(tree_copy_subtree_traversal_(tree, src->right, R(*dest), *dest,
+                                                  &is_r_simple));
+    else
+        is_r_simple = true;
+
+    *is_simple = is_l_simple && is_r_simple;
+
+    return Status::NORMAL_WORK;
+}
+
+Status::Statuses tree_copy_subtree(TreeNode* src, TreeNode** dest, size_t* size,
+                                   bool* is_simple) {
+    assert(src);
+    assert(dest);
+    assert(*dest == nullptr);
+    assert(size);
+    // is_simple can be nullptr
+
+    Tree copy = {};
+    DSL_TREE_CTOR(&copy);
+
+    bool placeholder = false;
+    STATUS_CHECK(tree_copy_subtree_traversal_(&copy, src, &copy.root, nullptr,
+                                              is_simple != nullptr ? is_simple
+                                                                   : &placeholder));
+
+    *size = copy.size;
+    *dest = copy.root;
+
+    copy.size = 0;
+    copy.root = nullptr;
+
+    DSL_TREE_DTOR(&copy);
+
+    return Status::NORMAL_WORK;
+}
+

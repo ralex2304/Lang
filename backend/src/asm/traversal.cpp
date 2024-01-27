@@ -52,17 +52,17 @@ Status::Statuses asm_command_traversal(BackData* data, FILE* file, TreeNode* nod
     if (node == nullptr)
         return Status::NORMAL_WORK;
 
-    if (NODE_TYPE(node) == TreeElemType::NUM) {
+    if (TYPE_IS_NUM(node)) {
         if (is_val_needed)
-            STATUS_CHECK(asm_push_const(file, NODE_DATA(node).num));
+            STATUS_CHECK(asm_push_const(file, NODE_DATA(node)->num));
 
         return Status::NORMAL_WORK;
     }
 
-    if (NODE_TYPE(node) == TreeElemType::VAR) {
+    if (TYPE_IS_VAR(node)) {
 
         bool is_global = false;
-        Var* var = asm_search_var(&data->scopes, NODE_DATA(node).var, &is_global);
+        Var* var = asm_search_var(&data->scopes, NODE_DATA(node)->var, &is_global);
 
         if (var == nullptr) {
             STATUS_CHECK(syntax_error(ELEM(node)->debug_info, "Unknown var name"));
@@ -75,12 +75,12 @@ Status::Statuses asm_command_traversal(BackData* data, FILE* file, TreeNode* nod
         return Status::NORMAL_WORK;
     }
 
-    if (NODE_TYPE(node) != TreeElemType::OPER) {
+    if (!TYPE_IS_OPER(node)) {
         DAMAGED_TREE("unexpected node type");
         return Status::TREE_ERROR;
     }
 
-    switch (NODE_DATA(node).oper) {
+    switch (NODE_DATA(node)->oper) {
 
 #define DEF_OPER(num_, name_, type_, ...)   \
             case (OperNum)num_:             \
@@ -105,9 +105,9 @@ Status::Statuses asm_command_traversal(BackData* data, FILE* file, TreeNode* nod
 static Status::Statuses asm_add_var_(BackData* data, TreeNode* node, bool is_const) {
     assert(data);
     assert(node);
-    assert(NODE_TYPE(node) == TreeElemType::VAR);
+    assert(TYPE_IS_VAR(node));
 
-    size_t var_num = NODE_DATA(node).var;
+    size_t var_num = NODE_DATA(node)->var;
 
     if (LAST_VAR_TABLE.find_var(var_num)) {
         STATUS_CHECK(syntax_error(ELEM(node)->debug_info, "Var is already defined in this scope"));
@@ -127,13 +127,13 @@ static Status::Statuses asm_add_var_(BackData* data, TreeNode* node, bool is_con
 static Status::Statuses asm_check_var_for_assign_(BackData* data, TreeNode* node, Var* var) {
     assert(data);
 
-    if (node == nullptr || NODE_TYPE(node) != TreeElemType::VAR) {
+    if (node == nullptr || !TYPE_IS_VAR(node)) {
         DAMAGED_TREE("incorrect var assignment hierarchy");
         return Status::TREE_ERROR;
     }
 
     if (var == nullptr)
-        var = asm_search_var(&data->scopes, NODE_DATA(node).var, nullptr);
+        var = asm_search_var(&data->scopes, NODE_DATA(node)->var, nullptr);
 
     if (var == nullptr) {
         STATUS_CHECK(syntax_error(ELEM(node)->debug_info, "Var was not declared in this scope"));
@@ -179,7 +179,7 @@ static Status::Statuses asm_eval_func_args_(BackData* data, FILE* file, TreeNode
 
 static Status::Statuses asm_provide_func_call_(BackData* data, FILE* file, TreeNode* node,
                                                bool is_val_needed) {
-    size_t func_num = NODE_DATA(*L(node)).var;
+    size_t func_num = NODE_DATA(*L(node))->var;
     Func* func = FIND_FUNC(func_num);
 
     if (func == nullptr) {
@@ -192,7 +192,7 @@ static Status::Statuses asm_provide_func_call_(BackData* data, FILE* file, TreeN
 
     EVAL_FUNC_ARGS(*R(node), offset, func->arg_num);
 
-    if (NODE_TYPE(*L(node)) != TreeElemType::VAR) {
+    if (!TYPE_IS_VAR(*L(node))) {
         DAMAGED_TREE("incorrect var arguments list in function call");
     }
 
@@ -385,11 +385,11 @@ static Status::Statuses asm_make_set_fps_(BackData* data, FILE* file, TreeNode* 
     assert(file);
     assert(val_node);
 
-    if (NODE_TYPE(val_node) != TreeElemType::NUM) {
+    if (!TYPE_IS_NUM(val_node)) {
         DAMAGED_TREE("Set fps must have const argument");
     }
 
-    ASM_PRINT_COMMAND(0, "fps %d\n", NODE_DATA(val_node).num);
+    ASM_PRINT_COMMAND(0, "fps %d\n", NODE_DATA(val_node)->num);
 
     return Status::NORMAL_WORK;
 }
@@ -433,20 +433,20 @@ static Status::Statuses asm_make_prefix_oper_(BackData* data, FILE* file, TreeNo
     assert(node);
     assert(oper);
 
-    if (*L(node) == nullptr || NODE_TYPE(*L(node)) != TreeElemType::VAR) {
+    if (*L(node) == nullptr || !TYPE_IS_VAR(*L(node))) {
         DAMAGED_TREE("prefix oper must have var as left child");
         return Status::TREE_ERROR;
     }
 
     bool is_global = false;
-    Var* var = asm_search_var(&data->scopes, NODE_DATA(*L(node)).var, &is_global);
+    Var* var = asm_search_var(&data->scopes, NODE_DATA(*L(node))->var, &is_global);
 
     STATUS_CHECK(asm_check_var_for_assign_(data, *L(node), var));
 
     STATUS_CHECK(asm_prepost_oper(file, var->addr_offset, is_global, oper));
 
 
-    if (*R(node) == nullptr || NODE_TYPE(*R(node)) == TreeElemType::VAR) { //< This is the last oper
+    if (*R(node) == nullptr || TYPE_IS_VAR(*R(node))) { //< This is the last oper
 
         if (is_val_needed)
             STATUS_CHECK(asm_push_var_val(file, var->addr_offset, is_global));
@@ -454,7 +454,7 @@ static Status::Statuses asm_make_prefix_oper_(BackData* data, FILE* file, TreeNo
         return Status::NORMAL_WORK;
     }
 
-    if (NODE_TYPE(*R(node)) == TreeElemType::OPER) { //< There are some opers left
+    if (TYPE_IS_OPER(*R(node))) { //< There are some opers left
 
         EVAL_SUBTREE(*R(node), is_val_needed);
 
@@ -472,13 +472,13 @@ static Status::Statuses asm_make_postfix_oper_(BackData* data, FILE* file, TreeN
     assert(node);
     assert(oper);
 
-    if (*L(node) == nullptr || NODE_TYPE(*L(node)) != TreeElemType::VAR) {
+    if (*L(node) == nullptr || !TYPE_IS_VAR(*L(node))) {
         DAMAGED_TREE("prefix oper must have var as left child");
         return Status::TREE_ERROR;
     }
 
     bool is_global = false;
-    Var* var = asm_search_var(&data->scopes, NODE_DATA(*L(node)).var, &is_global);
+    Var* var = asm_search_var(&data->scopes, NODE_DATA(*L(node))->var, &is_global);
 
     STATUS_CHECK(asm_check_var_for_assign_(data, *L(node), var));
 
@@ -491,10 +491,10 @@ static Status::Statuses asm_make_postfix_oper_(BackData* data, FILE* file, TreeN
     STATUS_CHECK(asm_prepost_oper(file, var->addr_offset, is_global, oper));
 
 
-    if (*R(node) == nullptr || NODE_TYPE(*R(node)) == TreeElemType::VAR) //< This is the last oper
+    if (*R(node) == nullptr || TYPE_IS_VAR(*R(node))) //< This is the last oper
         return Status::NORMAL_WORK;
 
-    if (NODE_TYPE(*R(node)) == TreeElemType::OPER) { //< There are some opers left
+    if (TYPE_IS_OPER(*R(node))) { //< There are some opers left
 
         EVAL_SUBTREE_NO_VAL(*R(node));
 

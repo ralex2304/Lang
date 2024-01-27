@@ -947,6 +947,48 @@ Status::Statuses TextParser::MathLvl4(ParseData* data, size_t* const pos, TreeNo
 
     TreeNode* parent = nullptr;
 
+    do {
+        STATUS_CHECK(MathLvl5(data, pos, dest, size));
+        assert(*dest);
+
+        if (parent)
+            (*dest)->parent = parent;
+
+        DebugInfo oper_debug_info = CUR_TOKEN_DEBUG_INFO;
+
+        if (IS_TOKEN_TYPE(CUR_TOKEN, TokenType::TERM) &&
+            CUR_TOKEN.data.term != TerminalNum::MATH_POW)
+            break;
+
+        (*pos)++;
+
+        TreeNode* oper_node = nullptr;
+        STATUS_CHECK(new_oper_node(&oper_node, OperNum::MATH_POW, oper_debug_info, *dest, nullptr),
+                                                                tree_dtor_untied_subtree(&oper_node));
+        (*size)++;
+
+        if (parent)
+            oper_node->parent = parent;
+
+        *dest = oper_node;
+
+        parent = *dest;
+        dest = R(*dest);
+
+    } while (1);
+
+    return Status::NORMAL_WORK;
+}
+
+Status::Statuses TextParser::MathLvl5(ParseData* data, size_t* const pos, TreeNode** dest,
+                                      size_t* const size) {
+    assert(data);
+    assert(dest);
+    assert(*dest == nullptr);
+    assert(pos);
+
+    TreeNode* parent = nullptr;
+
     if (IS_TOKEN_TERM_EQ(CUR_TOKEN,  TerminalNum::MATH_SUB) &&
        !IS_TOKEN_TERM_EQ(NEXT_TOKEN, TerminalNum::MATH_SUB)) {
 
@@ -1080,6 +1122,9 @@ Status::Statuses TextParser::CH_Unary(ParseData* data, size_t* const pos, TreeNo
                 break;
             case TerminalNum::MATH_COS:
                 oper = OperNum::MATH_COS;
+                break;
+            case TerminalNum::MATH_LN:
+                oper = OperNum::MATH_LN;
                 break;
 
             default:

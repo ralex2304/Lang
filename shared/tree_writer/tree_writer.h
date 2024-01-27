@@ -12,6 +12,6 @@
 #include "file/file.h"
 #include "utils/vector.h"
 
-Status::Statuses tree_write(Tree* tree, Vector* data, const char* filename);
+Status::Statuses write_tree(Tree* tree, Vector* vars, const char* filename);
 
 #endif //< #ifndef TREE_OUTPUT_H_

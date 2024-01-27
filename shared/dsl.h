@@ -7,16 +7,26 @@
 
 #include <math.h>
 
-#define NODE_IS_OPER(node_, oper_)                                                          \
-            ((NODE_TYPE(node_) == TreeElemType::OPER) && NODE_DATA(node_).oper == oper_)
+#define NODE_IS_OPER(node_, oper_)  (TYPE_IS_OPER(node_) && NODE_DATA(node_)->oper == oper_)
 
 #define L(node_) (&(node_)->left)
 #define R(node_) (&(node_)->right)
 
+#define IS_L_EXIST(node_) (*L(node_) != nullptr)
+#define IS_R_EXIST(node_) (*R(node_) != nullptr)
+
 #define ELEM(node_)  ((TreeElem*)((node_)->elem))
 
-#define NODE_DATA(node_) (ELEM(node_)->data)
-#define NODE_TYPE(node_) (ELEM(node_)->type)
+#define NODE_DATA(node_) (&ELEM(node_)->data)
+#define NODE_TYPE(node_) (&ELEM(node_)->type)
+
+#define NUM_VAL(node_)      (&NODE_DATA(node_)->num)
+#define VAR_NUM(node_)      (&NODE_DATA(node_)->var)
+#define OPER_NUM(node_)     (&NODE_DATA(node_)->oper)
+
+#define TYPE_IS_NUM(node_)  (*NODE_TYPE(node_) == TreeElemType::NUM)
+#define TYPE_IS_VAR(node_)  (*NODE_TYPE(node_) == TreeElemType::VAR)
+#define TYPE_IS_OPER(node_) (*NODE_TYPE(node_) == TreeElemType::OPER)
 
 inline bool dsl_is_double_equal(const double a, const double b) {
     static const double EPSILON = 0.000001;
@@ -26,7 +36,21 @@ inline bool dsl_is_double_equal(const double a, const double b) {
 
 #define IS_DOUBLE_EQ(a_, b_) dsl_is_double_equal(a_, b_)
 
+#define NODE_VAL_EQUALS(node_, val_) (TYPE_IS_NUM(node_) && IS_DOUBLE_EQ(*NUM_VAL(node_), val_))
+
 #define LAST_VAR_TABLE (data->scopes.data[data->scopes.size - 1])
+
+#define TREE_CHECK(action_, ...)    do {                                \
+                                        if (action_ != Tree::OK) {      \
+                                            __VA_ARGS__;                \
+                                            return Status::TREE_ERROR;  \
+                                        }                               \
+                                    } while(0)
+
+#define DSL_TREE_CTOR(tree_, ...) TREE_CHECK(TREE_CTOR(tree_, sizeof(TreeElem), &tree_elem_dtor, \
+                                                  &tree_elem_verify, &tree_elem_str_val), __VA_ARGS__)
+
+#define DSL_TREE_DTOR(tree_, ...) TREE_CHECK(tree_dtor(tree_), __VA_ARGS__)
 
 //=====================================codegen dsl==================================================
 
