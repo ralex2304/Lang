@@ -41,11 +41,11 @@ static Status::Statuses read_vars_(Vector* vars, char* text, size_t* const pos) 
             break;
 
         *line_end = '\0';
-        char* var = text + *pos;
+        String var = {.s = text + *pos, .len = (size_t)(line_end - (text + *pos))};
         if (!vars->push_back(&var))
             return Status::MEMORY_EXCEED;
 
-        *pos += line_end - var + 1;
+        *pos += line_end - var.s + 1;
     }
 
     return Status::NORMAL_WORK;

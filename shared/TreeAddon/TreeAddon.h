@@ -18,7 +18,7 @@ void tree_is_damaged(Tree* tree, const char* err_msg);
 Status::Statuses tree_copy_subtree(TreeNode* src, TreeNode** dest, size_t* size,
                                    bool* is_simple = nullptr);
 
-Status::Statuses tree_reconnect_node(TreeNode** dest, TreeNode* src);
+Status::Statuses tree_reconnect_node(Tree* tree, TreeNode** dest, TreeNode* src);
 
 
 #endif //< #ifndef LANG_TREE_ADDON_H_

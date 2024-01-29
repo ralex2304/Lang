@@ -30,9 +30,9 @@ static Status::Statuses tokenizer_read_terminal_(TextData* text, Vector* tokens,
 static bool can_be_var_symbol_(char c);
 
 
-#define DEBUG_INFO(text_)  {.filename = (text_).filename, .line = (text_).line, \
-                           .symbol = (text_).pos - (text_).line_pos,            \
-                           .line_position = (text_).line_pos}
+#define DEBUG_INFO_(text_)  {.filename = (text_).filename, .line = (text_).line, \
+                            .symbol = (text_).pos - (text_).line_pos,            \
+                            .line_position = (text_).line_pos}
 
 Status::Statuses tokenizer_process(const char* text_str, Vector* tokens, Vector* vars,
                                    const char* filename) {
@@ -68,13 +68,13 @@ Status::Statuses tokenizer_process(const char* text_str, Vector* tokens, Vector*
         STATUS_CHECK(tokenizer_add_var_(&text, tokens, vars, &is_found));
         if (is_found) continue;
 
-        STATUS_CHECK(syntax_error(DEBUG_INFO(text), "unknown symbol"));
+        STATUS_CHECK(syntax_error(DEBUG_INFO_(text), "unknown symbol"));
 
         return Status::SYNTAX_ERROR;
     }
 
     Token term_token = {.type = TokenType::TERM, .data = {.term = TerminalNum::TERMINATOR},
-                                                 .debug_info = DEBUG_INFO(text)};
+                                                 .debug_info = DEBUG_INFO_(text)};
     if (!tokens->push_back(&term_token))
         return Status::MEMORY_EXCEED;
 
@@ -145,7 +145,7 @@ static Status::Statuses tokenizer_skip_multiline_comment_(TextData* text, bool* 
         return Status::NORMAL_WORK;
     }
 
-    DebugInfo debug_info = DEBUG_INFO(*text);
+    DebugInfo debug_info = DEBUG_INFO_(*text);
 
     text->pos += sizeof(MULTILINE_COMMENT_BEG) - 1;
 
@@ -181,7 +181,7 @@ static Status::Statuses add_cmd_separator_(TextData* text, Vector* tokens, Vecto
         ((Token*)((*tokens)[tokens->size() - 1]))->data.term == TerminalNum::CMD_SEPARATOR)) {
 
         Token new_token = {.type = TokenType::TERM, .data = {.term = TerminalNum::CMD_SEPARATOR},
-                            .debug_info = DEBUG_INFO(*text)};
+                           .debug_info = DEBUG_INFO_(*text)};
 
         if (!tokens->push_back(&new_token))
             return Status::MEMORY_EXCEED;
@@ -213,7 +213,7 @@ static Status::Statuses tokenizer_read_num_(TextData* text, Vector* tokens, bool
 
     if (isfinite(num)) {
         Token new_token = {.type = TokenType::NUM, .data = {.num = num},
-                           .debug_info = DEBUG_INFO(*text)};
+                           .debug_info = DEBUG_INFO_(*text)};
 
         PUSH_NEW_TOKEN_(*text);
         *is_found = true;
@@ -257,7 +257,7 @@ static Status::Statuses tokenizer_add_var_(TextData* text, Vector* tokens, Vecto
     }
 
     Token new_token = {.type = TokenType::VAR, .data = {.var = var_num},
-                       .debug_info = DEBUG_INFO(*text)};
+                       .debug_info = DEBUG_INFO_(*text)};
 
     PUSH_NEW_TOKEN_(*text);
     *is_found = true;
@@ -288,7 +288,7 @@ static Status::Statuses tokenizer_read_terminal_(TextData* text, Vector* tokens,
 
     if (term_num != TerminalNum::NONE) {
         Token new_token = {.type = TokenType::TERM, .data = {.term = term_num},
-                           .debug_info = DEBUG_INFO(*text)};
+                           .debug_info = DEBUG_INFO_(*text)};
 
         PUSH_NEW_TOKEN_(*text);
         *is_found = true;
@@ -301,3 +301,5 @@ static Status::Statuses tokenizer_read_terminal_(TextData* text, Vector* tokens,
 static bool can_be_var_symbol_(char c) {
     return c == '_' || isalnum(c) || isrusalpha(c);
 }
+
+#undef DEBUG_INFO_

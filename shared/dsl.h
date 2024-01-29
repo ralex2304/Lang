@@ -7,7 +7,8 @@
 
 #include <math.h>
 
-#define NODE_IS_OPER(node_, oper_)  (TYPE_IS_OPER(node_) && NODE_DATA(node_)->oper == oper_)
+#define NODE_IS_OPER(node_, oper_)  (node_ != nullptr && TYPE_IS_OPER(node_)    \
+                                     && NODE_DATA(node_)->oper == oper_)
 
 #define L(node_) (&(node_)->left)
 #define R(node_) (&(node_)->right)
@@ -28,11 +29,17 @@
 #define TYPE_IS_VAR(node_)  (*NODE_TYPE(node_) == TreeElemType::VAR)
 #define TYPE_IS_OPER(node_) (*NODE_TYPE(node_) == TreeElemType::OPER)
 
+#define DEBUG_INFO(node_) (&ELEM(node_)->debug_info)
+
 inline bool dsl_is_double_equal(const double a, const double b) {
     static const double EPSILON = 0.000001;
 
     return abs(a - b) < EPSILON;
 }
+
+#define NUM_ELEM(val_,     debug_)  {.type = TreeElemType::NUM,  .data = {.num  = val_},    .debug_info = debug_}
+#define OPER_ELEM(oper_,   debug_)  {.type = TreeElemType::OPER, .data = {.oper = oper_},   .debug_info = debug_}
+#define VAR_ELEM(var_num_, debug_)  {.type = TreeElemType::VAR,  .data = {.var = var_num_}, .debug_info = debug_}
 
 #define IS_DOUBLE_EQ(a_, b_) dsl_is_double_equal(a_, b_)
 
@@ -51,6 +58,25 @@ inline bool dsl_is_double_equal(const double a, const double b) {
                                                   &tree_elem_verify, &tree_elem_str_val), __VA_ARGS__)
 
 #define DSL_TREE_DTOR(tree_, ...) TREE_CHECK(tree_dtor(tree_), __VA_ARGS__)
+
+#define TREE_INSERT(dest_, parent_, elem_)                                              \
+            do {                                                                        \
+                TreeElem new_elem_ = elem_;                                             \
+                if (tree_insert(&data->tree, dest_, parent_, &new_elem_) != Tree::OK)   \
+                    return Status::TREE_ERROR;                                          \
+            } while(0)
+
+#define TREE_DELETE_NODE(node_)                                         \
+            do {                                                        \
+                if (tree_delete(&data->tree, node_, false) != Tree::OK) \
+                    return Status::TREE_ERROR;                          \
+            } while(0)
+
+#define TREE_DELETE_SUBTREE(node_)                                      \
+            do {                                                        \
+                if (tree_delete(&data->tree, node_, true) != Tree::OK)  \
+                    return Status::TREE_ERROR;                          \
+            } while(0)
 
 //=====================================codegen dsl==================================================
 
@@ -123,7 +149,7 @@ inline bool dsl_is_double_equal(const double a, const double b) {
 
 #define EVAL_FUNC_ARGS(node_, offset_, arg_count_)                                      \
             STATUS_CHECK(asm_eval_func_args_(data, file, node_, offset_, arg_count_,    \
-                                             &ELEM(node)->debug_info))
+                                             DEBUG_INFO(node_)))
 
 #define FIND_FUNC(num_) \
             (data->func_table.find_func(num_))

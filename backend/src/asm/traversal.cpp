@@ -65,7 +65,7 @@ Status::Statuses asm_command_traversal(BackData* data, FILE* file, TreeNode* nod
         Var* var = asm_search_var(&data->scopes, NODE_DATA(node)->var, &is_global);
 
         if (var == nullptr) {
-            STATUS_CHECK(syntax_error(ELEM(node)->debug_info, "Unknown var name"));
+            STATUS_CHECK(syntax_error(*DEBUG_INFO(node), "Unknown var name"));
             return Status::SYNTAX_ERROR;
         }
 
@@ -82,11 +82,11 @@ Status::Statuses asm_command_traversal(BackData* data, FILE* file, TreeNode* nod
 
     switch (NODE_DATA(node)->oper) {
 
-#define DEF_OPER(num_, name_, type_, ...)   \
-            case (OperNum)num_:             \
-                {                           \
-                    __VA_ARGS__;            \
-                    break;                  \
+#define DEF_OPER(num_, name_, type_, math_type_, ...)   \
+            case (OperNum)num_:                         \
+                {                                       \
+                    __VA_ARGS__;                        \
+                    break;                              \
                 }
 
 #include "operators.h"
@@ -110,7 +110,7 @@ static Status::Statuses asm_add_var_(BackData* data, TreeNode* node, bool is_con
     size_t var_num = NODE_DATA(node)->var;
 
     if (LAST_VAR_TABLE.find_var(var_num)) {
-        STATUS_CHECK(syntax_error(ELEM(node)->debug_info, "Var is already defined in this scope"));
+        STATUS_CHECK(syntax_error(*DEBUG_INFO(node), "Var is already defined in this scope"));
         return Status::SYNTAX_ERROR;
     }
 
@@ -136,12 +136,12 @@ static Status::Statuses asm_check_var_for_assign_(BackData* data, TreeNode* node
         var = asm_search_var(&data->scopes, NODE_DATA(node)->var, nullptr);
 
     if (var == nullptr) {
-        STATUS_CHECK(syntax_error(ELEM(node)->debug_info, "Var was not declared in this scope"));
+        STATUS_CHECK(syntax_error(*DEBUG_INFO(node), "Var was not declared in this scope"));
         return Status::SYNTAX_ERROR;
     }
 
     if (var->is_const) {
-        STATUS_CHECK(syntax_error(ELEM(node)->debug_info, "Can't assign to a const var"));
+        STATUS_CHECK(syntax_error(*DEBUG_INFO(node), "Can't assign to a const var"));
         return Status::SYNTAX_ERROR;
     }
 
@@ -183,7 +183,7 @@ static Status::Statuses asm_provide_func_call_(BackData* data, FILE* file, TreeN
     Func* func = FIND_FUNC(func_num);
 
     if (func == nullptr) {
-        STATUS_CHECK(syntax_error(ELEM(*L(node))->debug_info,
+        STATUS_CHECK(syntax_error(*DEBUG_INFO(node),
                                   "Function name was not declared in this scope"));
         return Status::SYNTAX_ERROR;
     }
@@ -401,7 +401,7 @@ static Status::Statuses asm_make_continue_(BackData* data, FILE* file, TreeNode*
     ssize_t scope_num = find_loop_scope_num(data);
 
     if (scope_num < 0) {
-        syntax_error(ELEM(node)->debug_info, "\"continue\" must be inside loop");
+        syntax_error(*DEBUG_INFO(node), "\"continue\" must be inside loop");
         return Status::SYNTAX_ERROR;
     }
 
@@ -417,7 +417,7 @@ static Status::Statuses asm_make_break_(BackData* data, FILE* file, TreeNode* no
     ssize_t scope_num = find_loop_scope_num(data);
 
     if (scope_num < 0) {
-        syntax_error(ELEM(node)->debug_info, "\"break\" must be inside loop");
+        syntax_error(*DEBUG_INFO(node), "\"break\" must be inside loop");
         return Status::SYNTAX_ERROR;
     }
 

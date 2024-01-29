@@ -4,7 +4,7 @@ DOCS_DIR = docs
 
 .PHONY: main frontend middleend backend build_front build_middle build_back clean_front clean_middle clean_back
 
-main: build frontend backend
+main: build frontend middleend backend
 
 PROG_PATH = Programs/$(prog)
 
@@ -12,13 +12,13 @@ frontend:
 	@LANG=ru_RU.CP1251 luit ./frontend/./main -i $(PROG_PATH)/prog.snb -o $(PROG_PATH)/prog.tre
 
 middleend:
-	@LANG=ru_RU.CP1251 luit ./middleend/./main
+	@LANG=ru_RU.CP1251 luit ./middleend/./main -i $(PROG_PATH)/prog.tre -o $(PROG_PATH)/prog.treopt
 
 backend:
-	@LANG=ru_RU.CP1251 luit ./backend/./main -i $(PROG_PATH)/prog.tre -o $(PROG_PATH)/prog.code
+	@LANG=ru_RU.CP1251 luit ./backend/./main -i $(PROG_PATH)/prog.treopt -o $(PROG_PATH)/prog.code
 
 
-build: build_front build_back
+build: build_front build_middle build_back
 
 build_front:
 	@cd ./frontend && make
@@ -48,6 +48,6 @@ doxygen dox: | $(DOCS_DIR)
 $(DOCS_DIR):
 	@mkdir ./$@
 
-clean: clean_front clean_back # clean_middle
+clean: clean_front clean_back clean_middle
 	@rm -rf ./$(DOCS_TARGET)
 

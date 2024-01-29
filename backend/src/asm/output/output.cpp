@@ -82,7 +82,7 @@ static Status::Statuses declare_global_var_(BackData* data, FILE* file, ScopeDat
         def = *R(def);
 
         if (!NODE_IS_OPER(def, OperNum::VAR_DEFINITION)) {
-            STATUS_CHECK(syntax_error(ELEM(def)->debug_info, "Only var can be const"));
+            STATUS_CHECK(syntax_error(*DEBUG_INFO(def), "Only var can be const"));
             return Status::SYNTAX_ERROR;
         }
     }
@@ -97,7 +97,7 @@ static Status::Statuses declare_global_var_(BackData* data, FILE* file, ScopeDat
         new_var.var_num = ELEM(*L(def))->data.var;
 
         if (var_table->find_var(new_var.var_num) != nullptr) {
-            STATUS_CHECK(syntax_error(ELEM(def)->debug_info, "Variable has been already declared"));
+            STATUS_CHECK(syntax_error(*DEBUG_INFO(def), "Variable has been already declared"));
             return Status::SYNTAX_ERROR;
         }
 
@@ -119,7 +119,7 @@ static Status::Statuses declare_global_var_(BackData* data, FILE* file, ScopeDat
                          .arg_num = asm_count_args_(*R(*L(def)))};
 
         if (data->func_table.find_func(new_func.func_num) != nullptr) {
-            STATUS_CHECK(syntax_error(ELEM(def)->debug_info, "Function has been already declared"));
+            STATUS_CHECK(syntax_error(*DEBUG_INFO(def), "Function has been already declared"));
             return Status::SYNTAX_ERROR;
         }
 
@@ -205,7 +205,7 @@ static Status::Statuses asm_eval_global_expr_(BackData* data, FILE* file, TreeNo
     assert(expr);
 
     if (NODE_IS_OPER(expr, OperNum::FUNC_CALL)) {
-        STATUS_CHECK(syntax_error(ELEM(expr)->debug_info, "Function call is forbidden here"));
+        STATUS_CHECK(syntax_error(*DEBUG_INFO(expr), "Function call is forbidden here"));
         return Status::SYNTAX_ERROR;
     }
 
@@ -226,7 +226,7 @@ static Status::Statuses asm_eval_global_expr_(BackData* data, FILE* file, TreeNo
         Var* var = data->scopes.data[0].find_var(ELEM(expr)->data.var);
 
         if (var == nullptr) {
-            STATUS_CHECK(syntax_error(ELEM(expr)->debug_info, "Unknown variable"));
+            STATUS_CHECK(syntax_error(*DEBUG_INFO(expr), "Unknown variable"));
             return Status::SYNTAX_ERROR;
         }
 
@@ -236,7 +236,7 @@ static Status::Statuses asm_eval_global_expr_(BackData* data, FILE* file, TreeNo
     }
 
     if (TYPE_IS_OPER(expr)) {
-        STATUS_CHECK(asm_write_global_oper_(file, ELEM(expr)->data.oper, &ELEM(expr)->debug_info));
+        STATUS_CHECK(asm_write_global_oper_(file, ELEM(expr)->data.oper, DEBUG_INFO(expr)));
 
         return Status::NORMAL_WORK;
     }
@@ -293,7 +293,7 @@ Status::Statuses asm_call_function(BackData* data, FILE* file, size_t func_num, 
     assert(data);
     assert(file);
 
-    PRINTF_(+1, "; func call: %s\n", *(const char**)data->vars[func_num]);
+    PRINTF_(+1, "; func call: %.*s\n", PRINTF_STRING_(*(String*)data->vars[func_num]));
 
     PRINTF_( 0, "push rbx\n");
     PRINTF_( 0, "push rbx + %zu\n", offset);
@@ -373,7 +373,7 @@ Status::Statuses asm_begin_func_defenition(BackData* data, FILE* file, const siz
 
     PRINTF_( 0, "; =========================== Function definition =========================\n");
 
-    PRINTF_( 0, "; func name: %s\n", *(const char**)(data->vars[func_num]));
+    PRINTF_( 0, "; func name: %.*s\n", PRINTF_STRING_(*(String*)(data->vars[func_num])));
 
     PRINTF_(+1, "___func_%zu:\n", func_num);
 

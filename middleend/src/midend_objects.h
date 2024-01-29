@@ -1,23 +1,20 @@
-#ifndef BACKEND_OBKECTS_H_
-#define BACKEND_OBKECTS_H_
+#ifndef MIDEND_OBJECTS_H_
+#define MIDEND_OBJECTS_H_
 
 #include <assert.h>
-#include <stdlib.h>
 
 #include "objects.h"
 #include "utils/vector.h"
 #include "utils/statuses.h"
 #include "config.h"
 #include TREE_INCLUDE
-#include "Stack/stack.h"
 
-struct BackData {
+
+struct MidData {
     Tree tree = {};
     Vector vars = {};
 
-    Stack scopes = {};
-
-    FuncTable func_table = {};
+    ssize_t argument_var_num = -1;
 
     inline bool ctor() {
         if (TREE_CTOR(&tree, sizeof(TreeElem), &tree_elem_dtor, &tree_elem_verify,
@@ -27,14 +24,7 @@ struct BackData {
         if (!vars.ctor(sizeof(String)))
             return false;
 
-        for (ssize_t i = 0; i < scopes.size; i++)
-            scopes.data[i].dtor();
-
-        if (STK_CTOR(&scopes) != Stack::OK)
-            return false;
-
-        if (!func_table.ctor())
-            return false;
+        argument_var_num = -1;
 
         return true;
     };
@@ -45,13 +35,10 @@ struct BackData {
 
         vars.dtor();
 
-        if (stk_dtor(&scopes))
-            return false;
-
-        func_table.dtor();
+        argument_var_num = -1;
 
         return true;
     };
 };
 
-#endif //< #ifndef BACKEND_OBKECTS_H_
+#endif //< #ifndef MIDEND_OBJECTS_H_

@@ -14,6 +14,8 @@ struct String {
     size_t len = 0;
 };
 
+#define PRINTF_STRING_(string_)     (string_).len, (string_).s
+
 struct DebugInfo {
     const char* filename = nullptr;
     size_t line = 0;
@@ -36,10 +38,19 @@ enum OperType {
     LIST   =  3, //< must have left child. Right is optional, but if defined, must be the same
 };
 
+enum OperMathType {
+    MATH_NONE = -1,
+    NO_MATH   =  0,
+    MATH      =  1,
+    MATH_L    =  2,
+    MATH_R    =  3,
+    MATH_L_R  =  4,
+};
+
 enum class OperNum {
     NONE = -1,
 
-    #define DEF_OPER(num_, name_, type_, ...) name_ = num_,
+    #define DEF_OPER(num_, name_, type_, math_type_, ...) name_ = num_,
     #include "operators.h"
     #undef DEF_OPER
 };
@@ -103,8 +114,13 @@ inline ssize_t find_var_num_by_name(Vector* vars, const char* name) {
     assert(vars);
     assert(name);
 
+    size_t name_len = strlen(name);
+
     for (ssize_t i = 0; i < vars->size(); i++) {
-        if (strcmp(*(const char**)((*vars)[i]), name) == 0)
+        const char* var = ((String*)((*vars)[i]))->s;
+        size_t var_len  = ((String*)((*vars)[i]))->len;
+
+        if (var_len == name_len && strncmp(var, name, var_len) == 0)
             return i;
     }
 

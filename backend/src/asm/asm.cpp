@@ -33,7 +33,7 @@ static Status::Statuses make_asm_process_(BackData* data, FILE* file) {
 
     ssize_t main_func = find_var_num_by_name(&data->vars, MAIN_FUNC_NAME);
     if (main_func == -1) {
-        STATUS_CHECK(syntax_error(ELEM(data->tree.root)->debug_info, "main function not found"));
+        STATUS_CHECK(syntax_error(*DEBUG_INFO(data->tree.root), "main function not found"));
         return Status::SYNTAX_ERROR;
     }
 
@@ -138,7 +138,7 @@ static Status::Statuses asm_add_func_args_var_table_(BackData* data, TreeNode* c
         }
 
         if (scope->find_var(new_var.var_num)) {
-            STATUS_CHECK(syntax_error(ELEM(*R(def))->debug_info, "This name is already used"));
+            STATUS_CHECK(syntax_error(*DEBUG_INFO(*R(def)), "This name is already used"));
             return Status::SYNTAX_ERROR;
         }
 

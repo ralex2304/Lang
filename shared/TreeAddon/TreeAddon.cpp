@@ -110,3 +110,27 @@ Status::Statuses tree_copy_subtree(TreeNode* src, TreeNode** dest, size_t* size,
     return Status::NORMAL_WORK;
 }
 
+Status::Statuses tree_reconnect_node(Tree* tree, TreeNode** dest, TreeNode* src) {
+    assert(tree);
+    assert(dest);
+    assert(*dest);
+    assert(src);
+
+    TreeNode* node_tmp = *dest;
+
+    if (*L(node_tmp) != nullptr && *L(node_tmp) != src) TREE_CHECK(tree_delete(tree, L(node_tmp), false));
+    if (*R(node_tmp) != nullptr && *R(node_tmp) != src) TREE_CHECK(tree_delete(tree, R(node_tmp), false));
+
+    src->parent = (*dest)->parent;
+    *dest = src;
+
+    *L(node_tmp) = nullptr;
+    *R(node_tmp) = nullptr;
+
+    if (tree_node_dtor(tree, &node_tmp) != Tree::OK)
+        return Status::TREE_ERROR;
+
+    tree->size -= 1;
+
+    return Status::NORMAL_WORK;
+}

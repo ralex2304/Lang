@@ -21,37 +21,9 @@ ___func_0:
     ; var assignment: тест
     pop [rbx + 0]
 
-    ; while begin
-    ___while_3_begin:
-        push 123
-        ; while clause check
-        push 0
-        je ___while_3_end
-
-        push 123
-        ; var assignment: тест
-        pop [rbx + 1]
-
-        ; prepost oper
-        push [rbx + 1]
-        push 1
-        add
-        pop [rbx + 1]
-
-        push [rbx + 1]
-        ; prepost oper
-        push [rbx + 1]
-        push 1
-        sub
-        pop [rbx + 1]
-
-        ; var assignment: тест
-        pop [rbx + 1]
-
-        jmp ___while_3_begin
-
-    ___while_3_end:
-    ; while end
+    push [rbx + 0]
+    ; var assignment: тест
+    pop [rbx + 0]
 
 ret
 ; ------------------------- Function definition end -----------------------
