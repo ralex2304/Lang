@@ -5,7 +5,7 @@
     pop rbx
 ; Regs initialisation end
 
-; func call
+; func call: остров_в_океане
     push rbx
     push rbx + 0
     pop rbx
@@ -15,14 +15,18 @@
 hlt
 
 ; =========================== Function definition =========================
+; func name: остров_в_океане
 ___func_0:
     in
+    ; var assignment: А
     pop [rbx + 0]
 
     in
+    ; var assignment: Б
     pop [rbx + 1]
 
     in
+    ; var assignment: В
     pop [rbx + 2]
 
     push [rbx + 0]
@@ -34,7 +38,7 @@ ___func_0:
     push [rbx + 2]
     pop [rbx + 5]
 
-    ; func call
+    ; func call: квадратка
         push rbx
         push rbx + 3
         pop rbx
@@ -52,6 +56,7 @@ ret
 
 
 ; =========================== Function definition =========================
+; func name: квадратка
 ___func_4:
     push [rbx + 0]
     push 0
@@ -71,7 +76,7 @@ ___func_4:
         push [rbx + 2]
         pop [rbx + 4]
 
-        ; func call
+        ; func call: не_квадратка
             push rbx
             push rbx + 3
             pop rbx
@@ -100,6 +105,7 @@ ___func_4:
 
     sub
 
+    ; var assignment: дискр
     pop [rbx + 3]
 
     push [rbx + 3]
@@ -163,6 +169,7 @@ ___func_4:
     push [rbx + 3]
     sqrt
 
+    ; var assignment: дискр
     pop [rbx + 3]
 
     push 2
@@ -208,6 +215,7 @@ ret
 
 
 ; =========================== Function definition =========================
+; func name: не_квадратка
 ___func_5:
     push [rbx + 0]
     push 0
@@ -234,9 +242,6 @@ ___func_5:
         push 0
         je ___if_11_end
             push -1
-            push 1
-            mul
-
             out
 
             push 0

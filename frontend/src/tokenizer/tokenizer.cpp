@@ -29,6 +29,8 @@ static Status::Statuses tokenizer_read_terminal_(TextData* text, Vector* tokens,
 
 static bool can_be_var_symbol_(char c);
 
+static bool terminal_compare_(const char* text, const char* term, size_t* len);
+
 
 #define DEBUG_INFO_(text_)  {.filename = (text_).filename, .line = (text_).line, \
                             .symbol = (text_).pos - (text_).line_pos,            \
@@ -272,16 +274,20 @@ static Status::Statuses tokenizer_read_terminal_(TextData* text, Vector* tokens,
     assert(!*is_found);
 
     TerminalNum term_num = TerminalNum::NONE;
+    size_t token_len_with_single_spaces = 0;
     size_t token_len = 0;
 
     for (size_t i = 0; i < TERMINALS_SIZE; i++) {
-        if (strncmp(text->str + text->pos, TERMINALS[i].name, TERMINALS[i].name_len) == 0 &&
-            !(TERMINALS[i].is_text_name &&
-              can_be_var_symbol_(text->str[text->pos + TERMINALS[i].name_len]))) {
+        size_t cur_token_len = 0;
 
-            if (TERMINALS[i].name_len > token_len) {
-                term_num = TERMINALS[i].num;
-                token_len = TERMINALS[i].name_len;
+        if (terminal_compare_(text->str + text->pos, TERMINALS[i].name, &cur_token_len) &&
+            !(TERMINALS[i].is_text_name &&
+              can_be_var_symbol_(text->str[text->pos + cur_token_len]))) {
+
+            if (TERMINALS[i].name_len > token_len_with_single_spaces) {
+                term_num  = TERMINALS[i].num;
+                token_len = cur_token_len;
+                token_len_with_single_spaces = TERMINALS[i].name_len;
             }
         }
     }
@@ -300,6 +306,33 @@ static Status::Statuses tokenizer_read_terminal_(TextData* text, Vector* tokens,
 
 static bool can_be_var_symbol_(char c) {
     return c == '_' || isalnum(c) || isrusalpha(c);
+}
+
+static bool terminal_compare_(const char* text, const char* term, size_t* len) {
+    assert(text);
+    assert(term);
+    assert(len);
+
+    size_t pos = 0, term_pos = 0;
+    for (pos = 0, term_pos = 0; term[term_pos] != '\0'; pos++, term_pos++) {
+
+        if (text[pos] == '\0')
+            return false;
+
+        if (isspace(term[term_pos]) && isspace(text[pos])) {
+            while (text[pos + 1] && isspace(text[pos + 1]))
+                pos++;
+
+            continue;
+        }
+
+        if (term[term_pos] != text[pos])
+            return false;
+    }
+
+    *len = pos;
+
+    return true;
 }
 
 #undef DEBUG_INFO_
