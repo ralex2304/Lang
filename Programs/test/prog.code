@@ -17,11 +17,11 @@ hlt
 ; =========================== Function definition =========================
 ; func name: остров_в_океане
 ___func_0:
-    push 123
+    push 246
     ; var assignment: тест
     pop [rbx + 0]
 
-    push [rbx + 0]
+    push 0
     ; var assignment: тест
     pop [rbx + 0]
 

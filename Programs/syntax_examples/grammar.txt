@@ -42,7 +42,7 @@ MathLvl3 := MathLvl4 {{'MATH_MUL' | 'MATH_DIV'} MathLvl4}*
 
 MathLvl4 := MathLvl5 {'MATH_POW' MathLvl5}*
 
-MathLvl5 := {'MATH_SUB'}? {{'OPEN_BRACE' Expr 'CLOSE_BRACE'} | CH_Binary | CH_Unary | Primary }
+MathLvl5 := {{'MATH_SUB' MathLvl5} | {{'OPEN_BRACE' Expr 'CLOSE_BRACE'} | CH_Binary | CH_Unary | Primary}}
 
 CH_Binary := {'MATH_DIFF'} 'OPEN_BRACE' Expr 'VAR_SEPARATOR' VarName 'CLOSE_BRACE'
 
@@ -50,6 +50,6 @@ CH_Unary := {'MATH_SQRT' | 'MATH_SIN' | 'MATH_COS' | 'MATH_LN'} 'OPEN_BRACE' Exp
 
 Primary := {'IN' | Double | CH_FuncCall | Prefix}
 
-Prefix := {{'MATH_ADD''MATH_ADD' | 'MATH_SUB''MATH_SUB'} Prefix} | Postfix
+Prefix := {{'MATH_DOUBLE_ADD' | 'MATH_DOUBLE_SUB'} Prefix} | Postfix
 
-Postfix := VarName {'MATH_ADD''MATH_ADD' | 'MATH_SUB''MATH_SUB'}*
+Postfix := VarName {'MATH_DOUBLE_ADD' | 'MATH_DOUBLE_SUB'}*
