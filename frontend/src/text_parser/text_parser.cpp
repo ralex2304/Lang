@@ -77,8 +77,8 @@ Status::Statuses TextParser::CH_Def(ParseData* data, size_t* const pos, TreeNode
 
     TreeNode* parent = nullptr;
 
-    if (IS_TOKEN_TERM_EQ(NEXT_TOKEN, TerminalNum::VAR) &&
-        IS_TOKEN_TERM_EQ(CUR_TOKEN,  TerminalNum::CONST)) {
+    if (IS_TOKEN_TERM_EQ(CUR_TOKEN,  TerminalNum::VAR) &&
+        IS_TOKEN_TERM_EQ(NEXT_TOKEN, TerminalNum::CONST)) {
 
         STATUS_CHECK(new_oper_node(dest, OperNum::CONST_VAR_DEF, CUR_TOKEN_DEBUG_INFO,
                                    nullptr, nullptr));
