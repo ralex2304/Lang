@@ -2,7 +2,7 @@
 
 Main := {'CMD_SEPARATOR'? CH_Def 'CMD_SEPARATOR'?}* 'TERMINATOR'
 
-CH_Def := 'CONST'? 'VAR' VarName {'ASSIGNMENT' Expr | 'OPEN_BRACE' FuncArgsDef 'CLOSE_BRACE' 'CMD_SEPARATOR'? CH_Commands}
+CH_Def := 'VAR' 'CONST'? VarName {'ASSIGNMENT' Expr | 'OPEN_BRACE' FuncArgsDef 'CLOSE_BRACE' 'CMD_SEPARATOR'? CH_Commands}
 
 FuncArgsDef := {'VAR' VarName {'VAR_SEPARATOR' 'VAR' VarName}*}?
 

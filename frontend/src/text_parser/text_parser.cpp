@@ -77,21 +77,20 @@ Status::Statuses TextParser::CH_Def(ParseData* data, size_t* const pos, TreeNode
 
     TreeNode* parent = nullptr;
 
-    if (IS_TOKEN_TERM_EQ(CUR_TOKEN,  TerminalNum::CONST) &&
-        IS_TOKEN_TERM_EQ(NEXT_TOKEN, TerminalNum::VAR)) {
+    if (IS_TOKEN_TERM_EQ(NEXT_TOKEN, TerminalNum::VAR) &&
+        IS_TOKEN_TERM_EQ(CUR_TOKEN,  TerminalNum::CONST)) {
 
         STATUS_CHECK(new_oper_node(dest, OperNum::CONST_VAR_DEF, CUR_TOKEN_DEBUG_INFO,
                                    nullptr, nullptr));
         (*size)++;
-        (*pos)++;
+        *pos += 2;
 
         parent = *dest;
         dest = R(*dest);
-    }
-
-    if (!IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::VAR))
+    } else if (IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::VAR))
+        (*pos)++;
+    else
         return Status::NORMAL_WORK;
-    (*pos)++;
 
     if (!IS_TOKEN_TYPE(CUR_TOKEN, TokenType::VAR)) {
         STATUS_CHECK(syntax_error(CUR_TOKEN_DEBUG_INFO, "Expected var or function name"));
