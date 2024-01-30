@@ -89,7 +89,7 @@ static Status::Statuses declare_global_var_(BackData* data, FILE* file, ScopeDat
 
     if (NODE_IS_OPER(def, OperNum::VAR_DEFINITION)) {
 
-        if (TYPE_IS_VAR(*L(def))) {
+        if (!TYPE_IS_VAR(*L(def))) {
             tree_is_damaged(&data->tree, "incorrect var definition hierarchy");
             return Status::TREE_ERROR;
         }
