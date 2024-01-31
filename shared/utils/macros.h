@@ -69,8 +69,12 @@ inline char* strndup(const char* src, const size_t n) {
 
 #endif //< #ifndef unix
 
-inline bool isrusalpha(char c) {
+constexpr inline bool isrusalpha(const char c) {
     return ('à' <= c && c <= 'ÿ') || ('À' <= c && c <= 'ß') || c == '¸' || c == '¨';
+}
+
+constexpr inline bool constisalpha(const char c) {
+    return ('a' <= c && c <= 'Z') || ('A' <= c && c <= 'Z');
 }
 
 #endif // #ifndef MACROS_H_

@@ -2,6 +2,7 @@
 #define FRONTEND_OBJECTS_H_
 
 #include <stdlib.h>
+#include <ctype.h>
 
 #include "utils/macros.h"
 #include "objects.h"
@@ -10,7 +11,7 @@
 #include "config.h"
 #include TREE_INCLUDE
 
-const char CMD_SEPARATOR_CHAR = '\n';
+constexpr size_t MAX_SYNONYMS_NUM = 3;
 
 const char INLINE_COMMENT_BEG[] = "//";
 
@@ -22,7 +23,7 @@ enum class TerminalNum {
     NONE = -1,
     TERMINATOR = 0,
 
-#define DEF_TERMINAL(num_, name_, is_text_name_, str_, ...) name_ = num_,
+#define DEF_TERMINAL(num_, name_, ...) name_ = num_,
 #include "terminals.h"
 #undef DEF_TERMINAL
 
@@ -31,17 +32,36 @@ enum class TerminalNum {
 struct Terminal {
     TerminalNum num = TerminalNum::NONE;
 
-    const char* name = "not defined";
-    const size_t name_len = 0;
+    const char* const* names = nullptr;
+    size_t  names_len[MAX_SYNONYMS_NUM] = {};
+    bool is_text_name[MAX_SYNONYMS_NUM] = {};
 
-    bool is_text_name = false;
+    constexpr Terminal(TerminalNum num_, const char* const* names_): num(num_), names(names_) {
+
+        for (size_t i = 0; i < MAX_SYNONYMS_NUM; i++) {
+            is_text_name[i] = false;
+
+            if (names[i] == nullptr)
+                continue;
+
+            size_t j = 0;
+            for (j = 0; names[i][j] != '\0'; j++)
+                if (constisalpha(names[i][j]) || isrusalpha(names[i][j]))
+                    is_text_name[i] = true;
+
+            names_len[i] = j;
+        }
+    };
 };
 
-const Terminal TERMINALS[] = {
+#define DEF_TERMINAL(num_, name_, ...)  \
+            constexpr char const* TERMINAL_NAME_##name_[MAX_SYNONYMS_NUM] = __VA_ARGS__;
+#include "terminals.h"
+#undef DEF_TERMINAL
 
-#define DEF_TERMINAL(num_, name_, is_text_name_, str_, ...) {.num = TerminalNum::name_, .name = str_,   \
-                                                             .name_len = sizeof(str_) - 1,              \
-                                                             .is_text_name = is_text_name_},
+constexpr Terminal TERMINALS[] = {
+
+#define DEF_TERMINAL(num_, name_, ...) Terminal(TerminalNum::name_, TERMINAL_NAME_##name_),
 #include "terminals.h"
 #undef DEF_TERMINAL
 

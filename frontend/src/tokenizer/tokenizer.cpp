@@ -9,6 +9,8 @@ struct TextData {
     const char* filename = nullptr;
 };
 
+static const Terminal* find_terminal_by_text_(TextData* text, size_t* token_len);
+
 static Status::Statuses add_cmd_separator_(TextData* text, Vector* tokens, Vector* vars);
 
 static Status::Statuses tokenizer_parse_cmd_separator_(TextData* text, Vector* tokens, Vector* vars,
@@ -91,13 +93,16 @@ static Status::Statuses tokenizer_parse_cmd_separator_(TextData* text, Vector* t
     assert(is_found);
     assert(!*is_found);
 
-    if (text->str[text->pos] != CMD_SEPARATOR_CHAR)
+    size_t token_len = 0;
+    const Terminal* terminal = find_terminal_by_text_(text, &token_len);
+
+    if (terminal == nullptr || terminal->num != TerminalNum::CMD_SEPARATOR)
         return Status::NORMAL_WORK;
 
     STATUS_CHECK(add_cmd_separator_(text, tokens, vars));
 
     text->line++;
-    text->pos++;
+    text->pos += token_len;
     text->line_pos = text->pos;
 
     *is_found = true;
@@ -273,32 +278,17 @@ static Status::Statuses tokenizer_read_terminal_(TextData* text, Vector* tokens,
     assert(is_found);
     assert(!*is_found);
 
-    TerminalNum term_num = TerminalNum::NONE;
-    size_t token_len_with_single_spaces = 0;
     size_t token_len = 0;
+    const Terminal* terminal = find_terminal_by_text_(text, &token_len);
 
-    for (size_t i = 0; i < TERMINALS_SIZE; i++) {
-        size_t cur_token_len = 0;
+    if (terminal == nullptr)
+        return Status::NORMAL_WORK;
 
-        if (terminal_compare_(text->str + text->pos, TERMINALS[i].name, &cur_token_len) &&
-            !(TERMINALS[i].is_text_name &&
-              can_be_var_symbol_(text->str[text->pos + cur_token_len]))) {
+    Token new_token = {.type = TokenType::TERM, .data = {.term = terminal->num},
+                        .debug_info = DEBUG_INFO_(*text)};
 
-            if (TERMINALS[i].name_len > token_len_with_single_spaces) {
-                term_num  = TERMINALS[i].num;
-                token_len = cur_token_len;
-                token_len_with_single_spaces = TERMINALS[i].name_len;
-            }
-        }
-    }
-
-    if (term_num != TerminalNum::NONE) {
-        Token new_token = {.type = TokenType::TERM, .data = {.term = term_num},
-                           .debug_info = DEBUG_INFO_(*text)};
-
-        PUSH_NEW_TOKEN_(*text);
-        *is_found = true;
-    }
+    PUSH_NEW_TOKEN_(*text);
+    *is_found = true;
 
     return Status::NORMAL_WORK;
 }
@@ -319,7 +309,7 @@ static bool terminal_compare_(const char* text, const char* term, size_t* len) {
         if (text[pos] == '\0')
             return false;
 
-        if (isspace(term[term_pos]) && isspace(text[pos])) {
+        if (term[term_pos] == ' ' && text[pos] == ' ') {
             while (text[pos + 1] && isspace(text[pos + 1]))
                 pos++;
 
@@ -336,3 +326,32 @@ static bool terminal_compare_(const char* text, const char* term, size_t* len) {
 }
 
 #undef DEBUG_INFO_
+
+static const Terminal* find_terminal_by_text_(TextData* text, size_t* token_len) {
+
+    const Terminal* terminal = nullptr;
+    size_t token_len_with_single_spaces = 0;
+
+    for (size_t i = 0; i < TERMINALS_SIZE; i++) {
+        for (size_t j = 0; j < MAX_SYNONYMS_NUM; j++) {
+
+            if (TERMINALS[i].names[j] == nullptr)
+                continue;
+
+            size_t cur_token_len = 0;
+
+            if (terminal_compare_(text->str + text->pos, TERMINALS[i].names[j], &cur_token_len) &&
+                !(TERMINALS[i].is_text_name[j] &&
+                can_be_var_symbol_(text->str[text->pos + cur_token_len]))) {
+
+                if (TERMINALS[i].names_len[j] > token_len_with_single_spaces) {
+                    *token_len = cur_token_len;
+                    token_len_with_single_spaces = TERMINALS[i].names_len[j];
+                    terminal = TERMINALS + i;
+                }
+            }
+        }
+    }
+
+    return terminal;
+}
