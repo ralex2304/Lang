@@ -13,7 +13,7 @@
 #include TREE_INCLUDE
 #include "TreeAddon/TreeAddon.h"
 #include "file/file.h"
-#include "syntax_error/syntax_error.h"
+#include "error_printer/error_printer.h"
 #include "asm_print.h"
 
 Var* asm_search_var(Stack* scopes, size_t var_num, bool* is_global);

@@ -11,7 +11,7 @@
 #include "TreeAddon/TreeAddon.h"
 #include "../frontend_objects.h"
 #include "utils/vector.h"
-#include "syntax_error/syntax_error.h"
+#include "error_printer/error_printer.h"
 
 Status::Statuses parse_text(ParseData* data);
 

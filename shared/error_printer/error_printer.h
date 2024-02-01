@@ -1,5 +1,5 @@
-#ifndef SYNTAX_ERROR_H_
-#define SYNTAX_ERROR_H_
+#ifndef ERROR_PRINTER_H_
+#define ERROR_PRINTER_H_
 
 #include <assert.h>
 #include <stdlib.h>
@@ -16,4 +16,6 @@
 
 Status::Statuses syntax_error(DebugInfo info, const char* format, ...);
 
-#endif //< #ifndef SYNTAX_ERROR_H_
+Status::Statuses warning(DebugInfo info, const char* format, ...);
+
+#endif //< #ifndef ERROR_PRINTER_H_

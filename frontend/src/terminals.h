@@ -3,9 +3,9 @@ static_assert(0 && "DEF_TERMINAL is not defined");
 #endif //< #ifndef DEF_TERMINAL
 
 
-//          NUM | ENUM NAME | NAME_IS_TEXT | NAMES
+//          NUM | ENUM NAME | NAMES
 
-DEF_TERMINAL(1,  CMD_SEPARATOR,   {";",        "\n"})
+DEF_TERMINAL(1,  CMD_SEPARATOR,   {"\n"})
 DEF_TERMINAL(2,  VAR,             {"var",      "мой",            "контора"})
 DEF_TERMINAL(3,  CONST,           {"const",    "грубый",         "пидорасов"})
 DEF_TERMINAL(4,  ASSIGNMENT,      {"=",        nullptr,          "ано"})

@@ -6,7 +6,7 @@
 #include "config.h"
 #include TREE_INCLUDE
 #include "file/file.h"
-#include "syntax_error/syntax_error.h"
+#include "error_printer/error_printer.h"
 
 #include "../backend_objects.h"
 #include "../Stack/stack.h"

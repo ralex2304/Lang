@@ -12,7 +12,7 @@
 #include "utils/statuses.h"
 #include "file/file.h"
 #include "../frontend_objects.h"
-#include "syntax_error/syntax_error.h"
+#include "error_printer/error_printer.h"
 
 Status::Statuses tokenizer_process(const char* text, Vector* tokens, Vector* vars,
                                    const char* filename);
