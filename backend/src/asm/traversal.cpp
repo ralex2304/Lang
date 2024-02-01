@@ -82,11 +82,11 @@ Status::Statuses asm_command_traversal(BackData* data, FILE* file, TreeNode* nod
 
     switch (NODE_DATA(node)->oper) {
 
-#define DEF_OPER(num_, name_, type_, math_type_, ...)   \
-            case (OperNum)num_:                         \
-                {                                       \
-                    __VA_ARGS__;                        \
-                    break;                              \
+#define DEF_OPER(num_, name_, type_, math_type_, l_child_type_, r_child_type_, ...)  \
+            case (OperNum)num_:     \
+                {                   \
+                    __VA_ARGS__;    \
+                    break;          \
                 }
 
 #include "operators.h"

@@ -41,7 +41,15 @@ static Status::Statuses diff_simplify_traversal_(MidData* data, TreeNode** node,
             break;
 
         case TreeElemType::OPER:
-            STATUS_CHECK(diff_simplify_oper_(data, node, is_countable));
+
+            if (NODE_IS_OPER(*node, OperNum::FUNC_CALL) || NODE_IS_OPER(*node, OperNum::IN)) {
+                *is_countable = false;
+
+                bool is_countable_subtree = false;
+                STATUS_CHECK(diff_simplify_oper_(data, node, &is_countable_subtree));
+            } else
+                STATUS_CHECK(diff_simplify_oper_(data, node, is_countable));
+
             break;
 
         case TreeElemType::NONE:

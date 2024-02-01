@@ -47,6 +47,13 @@ enum OperMathType {
     MATH_L_R  =  4,
 };
 
+enum OperChildType {
+    STOP      = 0,
+    INHERIT   = 1,
+    VAL       = 2,
+    NO_VAL    = 3,
+};
+
 enum class OperNum {
     NONE = -1,
 
