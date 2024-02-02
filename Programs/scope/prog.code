@@ -21,31 +21,24 @@ ___func_0:
     ; var assignment: переменная
     pop [rbx + 0]
 
-    push 1
-    ; if begin
-    push 0
-    je ___if_3_end
-        push [rbx + 0]
-        out
+    push [rbx + 0]
+    out
 
-        push 10
-        ; var assignment: переменная
-        pop [rbx + 1]
+    push 10
+    ; var assignment: переменная
+    pop [rbx + 1]
 
-        push [rbx + 1]
-        out
+    push [rbx + 1]
+    out
 
-        push [rbx + 1]
-        push 10
-        add
-        ; var assignment: переменная
-        pop [rbx + 1]
+    push [rbx + 1]
+    push 10
+    add
+    ; var assignment: переменная
+    pop [rbx + 1]
 
-        push [rbx + 1]
-        out
-
-    ___if_3_end:
-    ; if end
+    push [rbx + 1]
+    out
 
     push [rbx + 0]
     out

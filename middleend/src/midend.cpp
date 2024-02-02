@@ -24,6 +24,8 @@ Status::Statuses mid_process(const char* input_filename, const char* output_file
 
     STATUS_CHECK(detect_no_effect(&data), LOCAL_DTOR_());
 
+    STATUS_CHECK(detect_dead_code(&data), LOCAL_DTOR_());
+
     STATUS_CHECK(tree_addon_dump_dot(&data.vars, &data.tree));
 
     STATUS_CHECK(write_tree(&data.tree, &data.vars, output_filename), LOCAL_DTOR_());
