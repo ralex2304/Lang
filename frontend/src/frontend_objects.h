@@ -11,8 +11,6 @@
 #include "config.h"
 #include TREE_INCLUDE
 
-constexpr size_t MAX_SYNONYMS_NUM = 3;
-
 const char INLINE_COMMENT_BEG[] = "//";
 
 const char MULTILINE_COMMENT_BEG[] = "/*";

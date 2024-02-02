@@ -31,7 +31,11 @@ static Status::Statuses make_asm_process_(BackData* data, FILE* file) {
     assert(data);
     assert(file);
 
-    ssize_t main_func = find_var_num_by_name(&data->vars, MAIN_FUNC_NAME);
+    ssize_t main_func = -1;
+    for (size_t i = 0; i < MAX_SYNONYMS_NUM; i++)
+        if (MAIN_FUNC_NAMES[i] != nullptr)
+            main_func = find_var_num_by_name(&data->vars, MAIN_FUNC_NAMES[i]);
+
     if (main_func == -1) {
         STATUS_CHECK(syntax_error(*DEBUG_INFO(data->tree.root), "main function not found"));
         return Status::SYNTAX_ERROR;

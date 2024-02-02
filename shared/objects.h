@@ -7,7 +7,9 @@
 
 #include "utils/vector.h"
 
-const char* const MAIN_FUNC_NAME = "остров_в_океане";
+constexpr size_t MAX_SYNONYMS_NUM = 3;
+
+const char* const MAIN_FUNC_NAMES[MAX_SYNONYMS_NUM] = {"main", "министерство", "остров_в_океане"};
 
 struct String {
     const char* s = nullptr;

@@ -6,11 +6,13 @@
 
 #define IS_TOKEN_TERM_EQ(token_, term_) (IS_TOKEN_TYPE(token_, TokenType::TERM) && (token_).data.term == term_)
 
-#define CUR_TOKEN (*(Token*)(data->tokens[*pos]))
+#define ND_TOKEN(num_) (*(Token*)(data->tokens[*pos + num_]))
 
-#define NEXT_TOKEN (*(Token*)(data->tokens[*pos + 1]))
+#define CUR_TOKEN ND_TOKEN(0)
 
-#define CUR_TOKEN_DEBUG_INFO CUR_TOKEN.debug_info
+#define NEXT_TOKEN ND_TOKEN(1)
+
+#define DEBUG_INFO(token_) (token_).debug_info
 
 #define TREE_INSERT(node_, parent_, elem_)                                      \
             if (tree_insert(&data->tree, node_, parent_, elem_) != Tree::OK)    \
