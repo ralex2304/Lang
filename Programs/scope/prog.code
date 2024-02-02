@@ -21,24 +21,25 @@ ___func_0:
     ; var assignment: переменная
     pop [rbx + 0]
 
-    push [rbx + 0]
-    out
+    ; new scope
+        push [rbx + 0]
+        out
 
-    push 10
-    ; var assignment: переменная
-    pop [rbx + 1]
+        push 10
+        ; var assignment: переменная
+        pop [rbx + 1]
 
-    push [rbx + 1]
-    out
+        push [rbx + 1]
+        out
 
-    push [rbx + 1]
-    push 10
-    add
-    ; var assignment: переменная
-    pop [rbx + 1]
+        push [rbx + 1]
+        push 10
+        add
+        ; var assignment: переменная
+        pop [rbx + 1]
 
-    push [rbx + 1]
-    out
+        push [rbx + 1]
+        out
 
     push [rbx + 0]
     out

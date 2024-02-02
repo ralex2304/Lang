@@ -27,6 +27,10 @@ int AsmPrint::asm_printf(const ssize_t lvl_change, FILE* file, const char* forma
 }
 
 int AsmPrint::asm_printf(const ssize_t lvl_change, FILE* file, va_list* args, const char* format) {
+    assert(format);
+    assert(file);
+    assert(args);
+
     static const size_t TAB_SIZE = 4;
     static ssize_t level = 0;
 
@@ -38,10 +42,10 @@ int AsmPrint::asm_printf(const ssize_t lvl_change, FILE* file, va_list* args, co
         }
     }
 
-    if (*format == '\0')
-        return 1;
+    int res = 1;
 
-    int res = asm_printf_with_tab(level * TAB_SIZE, file, args, format);
+    if (*format != '\0')
+        res = asm_printf_with_tab(level * TAB_SIZE, file, args, format);
 
     if (lvl_change > 0)
         level += lvl_change;
