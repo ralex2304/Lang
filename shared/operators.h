@@ -135,6 +135,14 @@ DEF_OPER(66, ELSE,            BINARY, MATH_L_R, NO_VAL, NO_VAL,   { DAMAGED_TREE
 DEF_OPER(67, BREAK,           LEAF,   NO_MATH,  STOP, STOP,       { ASM_MAKE_BREAK(node); })
 DEF_OPER(68, CONTINUE,        LEAF,   NO_MATH,  STOP, STOP,       { ASM_MAKE_CONTINUE(node); })
 
+DEF_OPER(69, NEW_SCOPE,       UNARY,  MATH_R,   STOP, NO_VAL,     {
+    ENTER_SCOPE(nullptr);
+
+    EVAL_SUBTREE_NO_VAL(*R(node));
+
+    EXIT_SCOPE();
+})
+
 DEF_OPER(70, IN,              LEAF,   NO_MATH,  STOP, STOP,       { ASM_PRINT_COMMAND(0, "in\n"); })
 
 DEF_OPER(71, OUT,             UNARY,  MATH_R,   STOP, VAL,        {
