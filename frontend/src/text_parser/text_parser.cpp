@@ -94,7 +94,8 @@ Status::Statuses TextParser::CH_Def(ParseData* data, size_t* const pos, TreeNode
 
         parent = *dest;
         dest = R(*dest);
-    } else if (IS_TOKEN_TERM_EQ(ND_TOKEN(1), TerminalNum::VAR))
+    } else if (IS_TOKEN_TERM_EQ(ND_TOKEN(1), TerminalNum::VAR) ||
+               IS_TOKEN_TERM_EQ(ND_TOKEN(1), TerminalNum::CONST))
         *pos += 2;
     else
         return Status::NORMAL_WORK;
