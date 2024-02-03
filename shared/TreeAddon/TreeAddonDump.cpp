@@ -81,6 +81,9 @@ static Status::Statuses tree_addon_dot_dump_traversal_next_(Vector* vars, Tree* 
 
     FPRINTF_(NODE_PREFIX "%p->" NODE_PREFIX "%p[color=green]\n", parent, node);
 
+    if (node->parent != nullptr)
+        FPRINTF_(NODE_PREFIX "%p->" NODE_PREFIX "%p[color=yellow]\n", node, node->parent);
+
     return Status::NORMAL_WORK;
 }
 
