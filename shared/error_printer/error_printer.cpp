@@ -90,6 +90,8 @@ static Status::Statuses print_message_(DebugInfo info, const char* color, const 
         PRINTF_("~");
     fprintf(stderr, STYLE_RESET "\n");
 
+    FREE(src_text);
+
     return Status::NORMAL_WORK;
 }
 #undef PRINTF_

@@ -1,3 +1,4 @@
+sanitizer = 1
 
 DOCS_DIR = docs
 
@@ -21,13 +22,13 @@ backend:
 build: build_front build_middle build_back
 
 build_front:
-	@cd ./frontend && make
+	@cd ./frontend && make $(if $(sanitizer), sanitizer=1)
 
 build_middle:
-	@cd ./middleend && make
+	@cd ./middleend && make $(if $(sanitizer), sanitizer=1)
 
 build_back:
-	@cd ./backend && make
+	@cd ./backend && make $(if $(sanitizer), sanitizer=1)
 
 clean_front:
 	@cd ./frontend && make clean

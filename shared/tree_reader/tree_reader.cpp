@@ -9,18 +9,18 @@ static Status::Statuses read_vars_(Vector* vars, char* text, size_t* const pos);
 
 
 
-Status::Statuses read_tree(Tree* tree, Vector* vars, char* text, const char* filename) {
+Status::Statuses read_tree(Tree* tree, Vector* vars, char** text, const char* filename) {
     assert(tree);
     assert(vars);
     assert(filename);
 
-    STATUS_CHECK(file_open_read_close(filename, &text));
+    STATUS_CHECK(file_open_read_close(filename, text));
     assert(text);
 
     size_t pos = 0;
-    STATUS_CHECK(read_tree_(tree, text, &pos));
+    STATUS_CHECK(read_tree_(tree, *text, &pos));
 
-    STATUS_CHECK(read_vars_(vars, text, &pos));
+    STATUS_CHECK(read_vars_(vars, *text, &pos));
 
     return Status::NORMAL_WORK;
 }

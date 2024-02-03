@@ -13,7 +13,7 @@ Status::Statuses back_process(const char* input_filename, const char* output_fil
         return Status::MEMORY_EXCEED;
 
     char* text = nullptr;
-    STATUS_CHECK(read_tree(&data.tree, &data.vars, text, input_filename), LOCAL_DTOR_());
+    STATUS_CHECK(read_tree(&data.tree, &data.vars, &text, input_filename), LOCAL_DTOR_());
 
     STATUS_CHECK(make_asm(&data, output_filename), LOCAL_DTOR_());
 

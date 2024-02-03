@@ -12,7 +12,7 @@ Status::Statuses mid_process(const char* input_filename, const char* output_file
         return Status::MEMORY_EXCEED;
 
     char* text = nullptr;
-    STATUS_CHECK(read_tree(&data.tree, &data.vars, text, input_filename), LOCAL_DTOR_());
+    STATUS_CHECK(read_tree(&data.tree, &data.vars, &text, input_filename), LOCAL_DTOR_());
 
     STATUS_CHECK(tree_addon_dump_dot(&data.vars, &data.tree));
 

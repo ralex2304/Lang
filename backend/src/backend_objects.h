@@ -27,9 +27,6 @@ struct BackData {
         if (!vars.ctor(sizeof(String)))
             return false;
 
-        for (ssize_t i = 0; i < scopes.size; i++)
-            scopes.data[i].dtor();
-
         if (STK_CTOR(&scopes) != Stack::OK)
             return false;
 
@@ -40,17 +37,26 @@ struct BackData {
     };
 
     inline bool dtor() {
+        bool no_error = true;
+
         if (tree_dtor(&tree) != Tree::OK)
-            return false;
+            no_error = false;
 
         vars.dtor();
 
+        Elem_t tmp = {};
+        while (scopes.size > 0) {
+            no_error = no_error && (stk_pop(&scopes, &tmp) == Stack::OK);
+
+            tmp.dtor();
+        }
+
         if (stk_dtor(&scopes))
-            return false;
+            no_error = false;
 
         func_table.dtor();
 
-        return true;
+        return no_error;
     };
 };
 

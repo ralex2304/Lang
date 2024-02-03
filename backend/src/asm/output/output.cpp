@@ -580,10 +580,11 @@ Status::Statuses asm_pop_var_table(Stack* scopes) {
 
     ScopeData res = {};
 
-    if (stk_pop(scopes, &res) != Stack::OK)
-        return Status::STACK_ERROR;
-
+    int stk_res = stk_pop(scopes, &res);
     res.dtor();
+
+    if (stk_res != Stack::OK)
+        return Status::STACK_ERROR;
 
     return Status::NORMAL_WORK;
 }
