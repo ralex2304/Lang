@@ -32,7 +32,7 @@ static Status::Statuses make_asm_process_(BackData* data, FILE* file) {
     assert(file);
 
     ssize_t main_func = -1;
-    for (size_t i = 0; i < MAX_SYNONYMS_NUM; i++)
+    for (size_t i = 0; i < MAX_SYNONYMS_NUM && main_func == -1; i++)
         if (MAIN_FUNC_NAMES[i] != nullptr)
             main_func = find_var_num_by_name(&data->vars, MAIN_FUNC_NAMES[i]);
 
