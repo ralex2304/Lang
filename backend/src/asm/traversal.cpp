@@ -2,12 +2,22 @@
 
 #include "dsl.h"
 
-static Status::Statuses asm_add_var_(BackData* data, TreeNode* node, bool is_const);
+static Status::Statuses asm_command_traversal_var_(BackData* data, FILE* file, TreeNode* node,
+                                                   bool is_val_needed);
+
+static Status::Statuses asm_add_num_var_(BackData* data, TreeNode* node, bool is_const);
 
 static Status::Statuses asm_check_var_for_assign_(BackData* data, TreeNode* node, Var* var = nullptr);
 
 static Status::Statuses asm_provide_func_call_(BackData* data, FILE* file, TreeNode* node,
                                                bool is_val_needed);
+
+static Status::Statuses asm_get_arr_elem_val_(BackData* data, FILE* file, TreeNode* node,
+                                              bool is_val_needed);
+
+static Status::Statuses asm_array_definition_assignment_(BackData* data, FILE* file, TreeNode* node);
+
+static Status::Statuses asm_add_array_(BackData* data, TreeNode* node, bool is_const);
 
 static Status::Statuses asm_eval_func_args_(BackData* data, FILE* file, TreeNode* cur_sep,
                                             size_t addr_offset,
@@ -43,6 +53,20 @@ static Status::Statuses asm_make_prefix_oper_(BackData* data, FILE* file, TreeNo
 static Status::Statuses asm_make_postfix_oper_(BackData* data, FILE* file, TreeNode* node,
                                                const char* oper, bool is_val_needed);
 
+static Status::Statuses asm_make_prepost_init_var_(BackData* data, TreeNode* node,
+                                                   bool* is_array_elem, TreeNode** var_node,
+                                                   Var** var, bool* is_global);
+
+static Status::Statuses asm_make_prefix_oper_eval_(BackData* data, FILE* file, TreeNode* node,
+                                                   const bool is_array_elem, const Var* var,
+                                                   const bool is_global, TreeNode* var_node,
+                                                   const char* oper);
+
+static Status::Statuses asm_make_postfix_oper_eval_(BackData* data, FILE* file, TreeNode* node,
+                                                    const bool is_array_elem, const Var* var,
+                                                    const bool is_global, TreeNode* var_node,
+                                                    const char* oper, bool is_val_needed);
+
 
 Status::Statuses asm_command_traversal(BackData* data, FILE* file, TreeNode* node,
                                        bool is_val_needed) {
@@ -60,17 +84,7 @@ Status::Statuses asm_command_traversal(BackData* data, FILE* file, TreeNode* nod
     }
 
     if (TYPE_IS_VAR(node)) {
-
-        bool is_global = false;
-        Var* var = asm_search_var(&data->scopes, NODE_DATA(node)->var, &is_global);
-
-        if (var == nullptr) {
-            STATUS_CHECK(syntax_error(*DEBUG_INFO(node), "Unknown var name"));
-            return Status::SYNTAX_ERROR;
-        }
-
-        if (is_val_needed)
-            STATUS_CHECK(asm_push_var_val(file, var->addr_offset, is_global));
+        STATUS_CHECK(asm_command_traversal_var_(data, file, node, is_val_needed));
 
         return Status::NORMAL_WORK;
     }
@@ -102,7 +116,33 @@ Status::Statuses asm_command_traversal(BackData* data, FILE* file, TreeNode* nod
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses asm_add_var_(BackData* data, TreeNode* node, bool is_const) {
+static Status::Statuses asm_command_traversal_var_(BackData* data, FILE* file, TreeNode* node,
+                                                   bool is_val_needed) {
+    assert(data);
+    assert(file);
+    assert(node);
+    assert(TYPE_IS_NUM(node));
+
+    bool is_global = false;
+    Var* var = asm_search_var(&data->scopes, NODE_DATA(node)->var, &is_global);
+
+    if (var == nullptr) {
+        STATUS_CHECK(syntax_error(*DEBUG_INFO(node), "Unknown var name"));
+        return Status::SYNTAX_ERROR;
+    }
+
+    if (var->type != VarType::NUM) {
+        STATUS_CHECK(syntax_error(*DEBUG_INFO(node), "Expected numeric var"));
+        return Status::SYNTAX_ERROR;
+    }
+
+    if (is_val_needed)
+        STATUS_CHECK(asm_push_var_val(file, var->addr_offset, is_global));
+
+    return Status::NORMAL_WORK;
+}
+
+static Status::Statuses asm_add_num_var_(BackData* data, TreeNode* node, bool is_const) {
     assert(data);
     assert(node);
     assert(TYPE_IS_VAR(node));
@@ -115,11 +155,54 @@ static Status::Statuses asm_add_var_(BackData* data, TreeNode* node, bool is_con
     }
 
     Var new_var = {.var_num = var_num,
+                   .type = VarType::NUM,
+                   .size = 1,
                    .is_const = is_const,
                    .addr_offset = asm_count_addr_offset(&data->scopes)};
 
     if (!LAST_VAR_TABLE.vars.push_back(&new_var))
         return Status::MEMORY_EXCEED;
+
+    LAST_VAR_TABLE.size += new_var.size;
+
+    return Status::NORMAL_WORK;
+}
+
+static Status::Statuses asm_add_array_(BackData* data, TreeNode* node, bool is_const) {
+    assert(data);
+    assert(node);
+    assert(NODE_IS_OPER(node, OperNum::VAR_SEPARATOR));
+    assert(*L(node) && TYPE_IS_VAR(*L(node)));
+
+    size_t var_num = NODE_DATA(*L(node))->var;
+
+    if (LAST_VAR_TABLE.find_var(var_num)) {
+        STATUS_CHECK(syntax_error(*DEBUG_INFO(node), "var is already defined in this scope"));
+        return Status::SYNTAX_ERROR;
+    }
+
+    if (*R(node) != nullptr && !TYPE_IS_NUM(*R(node))) {
+        STATUS_CHECK(syntax_error(*DEBUG_INFO(*R(node)), "array size must be const expression"));
+        return Status::SYNTAX_ERROR;
+    }
+
+    ssize_t array_size = (ssize_t)*NUM_VAL(*R(node));
+    if (array_size < 1) {
+        STATUS_CHECK(syntax_error(*DEBUG_INFO(*R(node)), "array size must be at least 1 instead of "
+                                                         "%zd", array_size));
+        return Status::SYNTAX_ERROR;
+    }
+
+    Var new_var = {.var_num = var_num,
+                   .type = VarType::ARRAY,
+                   .size = (size_t)array_size,
+                   .is_const = is_const,
+                   .addr_offset = asm_count_addr_offset(&data->scopes)};
+
+    if (!LAST_VAR_TABLE.vars.push_back(&new_var))
+        return Status::MEMORY_EXCEED;
+
+    LAST_VAR_TABLE.size = new_var.size;
 
     return Status::NORMAL_WORK;
 }
@@ -127,21 +210,25 @@ static Status::Statuses asm_add_var_(BackData* data, TreeNode* node, bool is_con
 static Status::Statuses asm_check_var_for_assign_(BackData* data, TreeNode* node, Var* var) {
     assert(data);
 
-    if (node == nullptr || !TYPE_IS_VAR(node)) {
+    if (node == nullptr || !(TYPE_IS_VAR(node) || NODE_IS_OPER(node, OperNum::ARRAY_ELEM))) {
         DAMAGED_TREE("incorrect var assignment hierarchy");
         return Status::TREE_ERROR;
     }
 
-    if (var == nullptr)
-        var = asm_search_var(&data->scopes, NODE_DATA(node)->var, nullptr);
+    if (var == nullptr) {
+        if (TYPE_IS_VAR(node))
+            var = asm_search_var(&data->scopes, NODE_DATA(node)->var, nullptr);
+        else
+            var = asm_search_var(&data->scopes, NODE_DATA(*L(node))->var, nullptr);
+    }
 
     if (var == nullptr) {
-        STATUS_CHECK(syntax_error(*DEBUG_INFO(node), "Var was not declared in this scope"));
+        STATUS_CHECK(syntax_error(*DEBUG_INFO(node), "var was not declared in this scope"));
         return Status::SYNTAX_ERROR;
     }
 
     if (var->is_const) {
-        STATUS_CHECK(syntax_error(*DEBUG_INFO(node), "Can't assign to a const var"));
+        STATUS_CHECK(syntax_error(*DEBUG_INFO(node), "can't assign to a const var"));
         return Status::SYNTAX_ERROR;
     }
 
@@ -167,10 +254,10 @@ static Status::Statuses asm_eval_func_args_(BackData* data, FILE* file, TreeNode
     }
 
     if (arg_cnt < 0) {
-        STATUS_CHECK(syntax_error(*debug_info, "Too many arguments"));
+        STATUS_CHECK(syntax_error(*debug_info, "too many arguments"));
         return Status::SYNTAX_ERROR;
     } else if (arg_cnt > 0) {
-        STATUS_CHECK(syntax_error(*debug_info, "Too few arguments"));
+        STATUS_CHECK(syntax_error(*debug_info, "too few arguments"));
         return Status::SYNTAX_ERROR;
     }
 
@@ -179,6 +266,10 @@ static Status::Statuses asm_eval_func_args_(BackData* data, FILE* file, TreeNode
 
 static Status::Statuses asm_provide_func_call_(BackData* data, FILE* file, TreeNode* node,
                                                bool is_val_needed) {
+    assert(data);
+    assert(file);
+    assert(node);
+
     size_t func_num = NODE_DATA(*L(node))->var;
     Func* func = FIND_FUNC(func_num);
 
@@ -202,6 +293,67 @@ static Status::Statuses asm_provide_func_call_(BackData* data, FILE* file, TreeN
         ASM_PRINT_COMMAND(0, "push rax\n");
 
     ASM_PRINT_COMMAND_NO_TAB("\n");
+
+    return Status::NORMAL_WORK;
+}
+
+static Status::Statuses asm_get_arr_elem_val_(BackData* data, FILE* file, TreeNode* node,
+                                              bool is_val_needed) {
+    assert(data);
+    assert(file);
+    assert(node);
+
+    bool is_global = false;
+    Var* var = asm_search_var(&data->scopes, NODE_DATA(*L(node))->var, &is_global);
+
+    if (var == nullptr) {
+        STATUS_CHECK(syntax_error(*DEBUG_INFO(node), "unknown var name"));
+        return Status::SYNTAX_ERROR;
+    }
+
+    if (var->type != VarType::ARRAY) {
+        STATUS_CHECK(syntax_error(*DEBUG_INFO(node), "expected array var"));
+        return Status::SYNTAX_ERROR;
+    }
+
+    if (is_val_needed) {
+        EVAL_SUBTREE_GET_VAL(*R(node));
+
+        STATUS_CHECK(asm_push_arr_elem_val(file, var->addr_offset, is_global));
+    }
+
+    return Status::NORMAL_WORK;
+}
+
+
+static Status::Statuses asm_array_definition_assignment_(BackData* data, FILE* file, TreeNode* node) {
+    assert(data);
+    assert(file);
+    assert(node);
+    assert(NODE_IS_OPER(node, OperNum::ARRAY_DEFINITION));
+
+    bool is_global = false;
+    const Var* var = asm_search_var(&data->scopes, (size_t)*VAR_NUM(*L(*L(node))), &is_global);
+    assert(var);
+    assert(var->type == VarType::ARRAY);
+
+    size_t array_size = var->size;
+
+    TreeNode* cur_separator = *R(node);
+
+    size_t i = 0;
+    while (cur_separator && *L(cur_separator)) {
+        if (i >= array_size) {
+            STATUS_CHECK(syntax_error(*DEBUG_INFO(*L(cur_separator)), "too many initialiser values"));
+            return Status::SYNTAX_ERROR;
+        }
+
+        EVAL_SUBTREE_GET_VAL(*L(cur_separator));
+
+        STATUS_CHECK(asm_pop_arr_elem_value_with_const_index(file, var->addr_offset, i++, is_global));
+
+        cur_separator = *R(cur_separator);
+    }
 
     return Status::NORMAL_WORK;
 }
@@ -433,23 +585,28 @@ static Status::Statuses asm_make_prefix_oper_(BackData* data, FILE* file, TreeNo
     assert(node);
     assert(oper);
 
-    if (*L(node) == nullptr || !TYPE_IS_VAR(*L(node))) {
+    if (*L(node) == nullptr || !(TYPE_IS_VAR(*L(node)) || NODE_IS_OPER(*L(node), OperNum::ARRAY_ELEM))) {
         DAMAGED_TREE("prefix oper must have var as left child");
         return Status::TREE_ERROR;
     }
 
+    TreeNode* var_node = *L(node);
+    bool is_array_elem = false;
+    Var* var = nullptr;
     bool is_global = false;
-    Var* var = asm_search_var(&data->scopes, NODE_DATA(*L(node))->var, &is_global);
+    STATUS_CHECK(asm_make_prepost_init_var_(data, node, &is_array_elem, &var_node, &var, &is_global));
 
-    STATUS_CHECK(asm_check_var_for_assign_(data, *L(node), var));
-
-    STATUS_CHECK(asm_prepost_oper(file, var->addr_offset, is_global, oper));
-
+    STATUS_CHECK(asm_make_prefix_oper_eval_(data, file, node, is_array_elem, var, is_global,
+                                            var_node, oper));
 
     if (*R(node) == nullptr || TYPE_IS_VAR(*R(node))) { //< This is the last oper
 
-        if (is_val_needed)
-            STATUS_CHECK(asm_push_var_val(file, var->addr_offset, is_global));
+        if (is_val_needed) {
+            if (is_array_elem || var->type == VarType::ARRAY)
+                STATUS_CHECK(asm_push_arr_elem_val_the_same(file));
+            else
+                STATUS_CHECK(asm_push_var_val(file, var->addr_offset, is_global));
+        }
 
         return Status::NORMAL_WORK;
     }
@@ -465,6 +622,33 @@ static Status::Statuses asm_make_prefix_oper_(BackData* data, FILE* file, TreeNo
     return Status::TREE_ERROR;
 }
 
+static Status::Statuses asm_make_prefix_oper_eval_(BackData* data, FILE* file, TreeNode* node,
+                                                   const bool is_array_elem, const Var* var,
+                                                   const bool is_global, TreeNode* var_node,
+                                                   const char* oper) {
+    assert(data);
+    assert(file);
+    assert(node);
+    assert(var);
+    assert(var_node);
+    assert(oper);
+
+    if (is_array_elem && var->type != VarType::ARRAY) {
+        STATUS_CHECK(syntax_error(*DEBUG_INFO(var_node), "array var expected"));
+        return Status::SYNTAX_ERROR;
+    }
+
+    if (is_array_elem) {
+        EVAL_SUBTREE_GET_VAL(*R(*L(node)));
+        STATUS_CHECK(asm_prepost_oper_arr_elem(file, var->addr_offset, is_global, oper));
+    } else if (var->type == VarType::ARRAY)
+        STATUS_CHECK(asm_prepost_oper_arr_elem_the_same(file, oper));
+    else
+        STATUS_CHECK(asm_prepost_oper_var(file, var->addr_offset, is_global, oper));
+
+    return Status::NORMAL_WORK;
+}
+
 static Status::Statuses asm_make_postfix_oper_(BackData* data, FILE* file, TreeNode* node,
                                                const char* oper, bool is_val_needed) {
     assert(data);
@@ -472,24 +656,21 @@ static Status::Statuses asm_make_postfix_oper_(BackData* data, FILE* file, TreeN
     assert(node);
     assert(oper);
 
-    if (*L(node) == nullptr || !TYPE_IS_VAR(*L(node))) {
-        DAMAGED_TREE("prefix oper must have var as left child");
+    if (*L(node) == nullptr || !(TYPE_IS_VAR(*L(node)) || NODE_IS_OPER(*L(node), OperNum::ARRAY_ELEM))) {
+        DAMAGED_TREE("postfix oper must have var as left child");
         return Status::TREE_ERROR;
     }
 
+    TreeNode* var_node = *L(node);
+    bool is_array_elem = false;
+    Var* var = nullptr;
     bool is_global = false;
-    Var* var = asm_search_var(&data->scopes, NODE_DATA(*L(node))->var, &is_global);
+    STATUS_CHECK(asm_make_prepost_init_var_(data, node, &is_array_elem, &var_node, &var, &is_global));
 
     STATUS_CHECK(asm_check_var_for_assign_(data, *L(node), var));
 
-    if (is_val_needed) {
-        STATUS_CHECK(asm_push_var_val(file, var->addr_offset, is_global));
-
-        is_val_needed = false;
-    }
-
-    STATUS_CHECK(asm_prepost_oper(file, var->addr_offset, is_global, oper));
-
+    STATUS_CHECK(asm_make_postfix_oper_eval_(data, file, node, is_array_elem, var, is_global,
+                                             var_node, oper, is_val_needed));
 
     if (*R(node) == nullptr || TYPE_IS_VAR(*R(node))) //< This is the last oper
         return Status::NORMAL_WORK;
@@ -503,4 +684,66 @@ static Status::Statuses asm_make_postfix_oper_(BackData* data, FILE* file, TreeN
 
     DAMAGED_TREE("Right child of prefix oper must be null, var or other prepost-opers");
     return Status::TREE_ERROR;
+}
+
+static Status::Statuses asm_make_prepost_init_var_(BackData* data, TreeNode* node,
+                                                   bool* is_array_elem, TreeNode** var_node,
+                                                   Var** var, bool* is_global) {
+    assert(data);
+    assert(node);
+    assert(is_array_elem);
+    assert(var_node);
+    assert(var);
+    assert(*var == nullptr);
+    assert(is_global);
+
+
+    if (NODE_IS_OPER(*L(node), OperNum::ARRAY_ELEM)) {
+        *is_array_elem = true;
+        *var_node = *L(*L(node));
+    }
+
+    *var = asm_search_var(&data->scopes, NODE_DATA(*var_node)->var, is_global);
+
+    STATUS_CHECK(asm_check_var_for_assign_(data, *L(node), *var));
+
+    return Status::NORMAL_WORK;
+}
+
+static Status::Statuses asm_make_postfix_oper_eval_(BackData* data, FILE* file, TreeNode* node,
+                                                    const bool is_array_elem, const Var* var,
+                                                    const bool is_global, TreeNode* var_node,
+                                                    const char* oper, bool is_val_needed) {
+    assert(data);
+    assert(file);
+    assert(node);
+    assert(var);
+    assert(var_node);
+    assert(oper);
+
+    if (is_array_elem) {
+        if (var->type != VarType::ARRAY) {
+            STATUS_CHECK(syntax_error(*DEBUG_INFO(var_node), "array var expected"));
+            return Status::SYNTAX_ERROR;
+        }
+
+        EVAL_SUBTREE_GET_VAL(*R(*L(node)));
+        STATUS_CHECK(asm_save_arr_elem_addr(file, var->addr_offset, is_global));
+    }
+
+    if (is_val_needed) {
+        if (is_array_elem || var->type == VarType::ARRAY)
+            STATUS_CHECK(asm_push_arr_elem_val_the_same(file));
+        else
+            STATUS_CHECK(asm_push_var_val(file, var->addr_offset, is_global));
+
+        is_val_needed = false;
+    }
+
+    if (is_array_elem || var->type == VarType::ARRAY)
+        STATUS_CHECK(asm_prepost_oper_arr_elem_the_same(file, oper));
+    else
+        STATUS_CHECK(asm_prepost_oper_var(file, var->addr_offset, is_global, oper));
+
+    return Status::NORMAL_WORK;
 }

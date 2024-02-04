@@ -6,6 +6,8 @@
 
 #define IS_TOKEN_TERM_EQ(token_, term_) (IS_TOKEN_TYPE(token_, TokenType::TERM) && (token_).data.term == term_)
 
+#define ND_TOKEN_EXISTS(num_) (data->tokens.size() > (ssize_t)(num_ + *pos))
+
 #define ND_TOKEN(num_) (*(Token*)(data->tokens[*pos + num_]))
 
 #define CUR_TOKEN ND_TOKEN(0)

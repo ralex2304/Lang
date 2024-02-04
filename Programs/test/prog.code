@@ -5,25 +5,29 @@
     pop rbx
 ; Regs initialisation end
 
-; func call: остров_в_океане
+; Global array initialisation
+; Global array initialisation end
+
+; func call: main
     push rbx
     push rbx + 0
     pop rbx
-    call ___func_0
+    call ___func_1
     pop rbx
 ; func call end
 hlt
 
 ; =========================== Function definition =========================
-; func name: остров_в_океане
-___func_0:
-    push 246
-    ; var assignment: тест
-    pop [rbx + 0]
-
+; func name: main
+___func_1:
+    push 1
+    ; arr elem index:
+    push 1
+    ; arr elem assignment: test
     push 0
-    ; var assignment: тест
-    pop [rbx + 0]
+    add
+    pop rcx
+    pop [rcx]
 
 ret
 ; ------------------------- Function definition end -----------------------

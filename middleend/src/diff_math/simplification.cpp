@@ -42,7 +42,8 @@ static Status::Statuses diff_simplify_traversal_(MidData* data, TreeNode** node,
 
         case TreeElemType::OPER:
 
-            if (NODE_IS_OPER(*node, OperNum::FUNC_CALL) || NODE_IS_OPER(*node, OperNum::IN)) {
+            if (NODE_IS_OPER(*node, OperNum::FUNC_CALL) || NODE_IS_OPER(*node, OperNum::IN) ||
+                NODE_IS_OPER(*node, OperNum::ARRAY_ELEM)) {
                 *is_countable = false;
 
                 bool is_countable_subtree = false;

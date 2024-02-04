@@ -8,8 +8,17 @@
 #include "utils/vector.h"
 #include "utils/statuses.h"
 
+enum class VarType {
+    NONE  = 0,
+    NUM   = 1,
+    ARRAY = 2,
+};
+
 struct Var {
     size_t var_num = 0;
+
+    VarType type = {};
+    size_t size = 1;
 
     bool is_const = true;
     size_t addr_offset = 0;
@@ -29,6 +38,8 @@ struct ScopeData {
     size_t scope_num = 0;
 
     Vector vars = {};
+
+    size_t size = 0;
 
     inline bool ctor(ScopeType type_) {
         static size_t counter = 0;

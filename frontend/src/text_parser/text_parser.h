@@ -18,7 +18,9 @@ Status::Statuses parse_text(ParseData* data);
 namespace TextParser {
     Status::Statuses Main(ParseData* data, size_t* const pos, TreeNode** dest, size_t* const size);
 
-    Status::Statuses CH_Def(ParseData* data, size_t* const pos, TreeNode** dest, size_t* const size);
+    Status::Statuses CH_DefFunc(ParseData* data, size_t* const pos, TreeNode** dest, size_t* const size);
+
+    Status::Statuses CH_DefVar(ParseData* data, size_t* const pos, TreeNode** dest, size_t* const size);
 
     Status::Statuses FuncArgsDef(ParseData* data, size_t* const pos, TreeNode** dest, size_t* const size);
 

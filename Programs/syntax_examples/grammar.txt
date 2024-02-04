@@ -1,18 +1,20 @@
 // 'CH_' - means that function exits without error (gives choice)
 
-Main := {'CMD_SEPARATOR'? CH_Def 'CMD_SEPARATOR'?}* 'TERMINATOR'
+Main := {'CMD_SEPARATOR'? {CH_DefFunc | CH_DefVar} 'CMD_SEPARATOR'?}* 'TERMINATOR'
 
-CH_Def := VarName 'VAR' 'CONST'? {'ASSIGNMENT' Expr | 'OPEN_BRACE' FuncArgsDef 'CLOSE_BRACE' 'CMD_SEPARATOR'? CH_Commands}
+CH_DefFunc := VarName {'VAR' | 'CONST'} 'OPEN_BRACE' FuncArgsDef 'CLOSE_BRACE' 'CMD_SEPARATOR'? CH_Commands
+
+CH_DefVar := VarName {'OPEN_INDEX_BRACE' Expr 'CLOSE_INDEX_BRACE'}? 'VAR' 'CONST'? {'ASSIGNMENT' Expr {'VAR_SEPARATOR' Expr}* }?
 
 FuncArgsDef := {VarName 'VAR' 'CONST'? {'VAR_SEPARATOR' VarName 'VAR' 'CONST'?}*}?
 
-CH_Commands := 'OPEN_SCOPE' 'CMD_SEPARATOR'? {Command {'CMD_SEPARATOR' Command}*}? 'CMD_SEPARATOR'? 'CLOSE_SCOPE'
+CH_Commands := 'OPEN_SCOPE' 'CMD_SEPARATOR'? {Command {'CMD_SEPARATOR' Command}*} 'CMD_SEPARATOR'? 'CLOSE_SCOPE'
 
 CH_FuncCall := VarName 'OPEN_BRACE' {FuncArgs}? 'CLOSE_BRACE'
 
 FuncArgs := Expr {'VAR_SEPARATOR' Expr}*
 
-Command := {CH_Commands | CH_Def | CH_CommandWithArg | CH_ComplexCommand | CH_CommandWithConstArg | SimpleCommand}
+Command := {CH_Commands | CH_DefVar | CH_CommandWithArg | CH_ComplexCommand | CH_CommandWithConstArg | SimpleCommand}
 
 SimpleCommand := {'BREAK' | 'CONTINUE' | 'SHOW' | Expr}
 
@@ -32,7 +34,7 @@ CH_CommandWithConstArg := 'SET_FPS' Double
 
 // ---------------------------------------------MATHS------------------------------------------------
 
-Expr := {{VarName {'ASSIGNMENT' !'ASSIGNMENT' | {'MATH_ADD' | 'MATH_SUB' | 'MATH_MUL' | 'MATH_DIV'} 'ASSIGNMENT'} Expr} | {MathLvl1}}
+Expr := {VarName {'OPEN_INDEX_BRACE' Expr 'CLOSE_INDEX_BRACE'}? {{'ASSIGNMENT' !'ASSIGNMENT'} | {{'MATH_ADD' | 'MATH_SUB' | 'MATH_MUL' | 'MATH_DIV'} 'ASSIGNMENT'}} Expr} | MathLvl1
 
 MathLvl1 := MathLvl2 {{{{'ASSIGNMENT' | 'LOGIC_NOT' | 'LOGIC_LOWER' | 'LOGIC_GREATER'} 'ASSIGNMENT'} | {'LOGIC_LOWER' | 'LOGIC_GREATER'}} MathLvl2}*
 
@@ -52,4 +54,4 @@ Primary := {'IN' | Double | CH_FuncCall | Prefix}
 
 Prefix := {{'MATH_DOUBLE_ADD' | 'MATH_DOUBLE_SUB'} Prefix} | Postfix
 
-Postfix := VarName {'MATH_DOUBLE_ADD' | 'MATH_DOUBLE_SUB'}*
+Postfix := VarName {'OPEN_INDEX_BRACE' Expr 'CLOSE_INDEX_BRACE'}? {'MATH_DOUBLE_ADD' | 'MATH_DOUBLE_SUB'}*

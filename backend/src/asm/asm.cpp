@@ -45,7 +45,7 @@ static Status::Statuses make_asm_process_(BackData* data, FILE* file) {
 
     STATUS_CHECK(asm_initialise_global_scope(data, file));
 
-    STATUS_CHECK(asm_call_function(data, file, main_func, data->scopes.data[0].vars.size()));
+    STATUS_CHECK(asm_call_function(data, file, main_func, asm_count_addr_offset(&data->scopes)));
 
     STATUS_CHECK(asm_halt(file));
 
@@ -64,8 +64,7 @@ static Status::Statuses asm_func_def_(BackData* data, FILE* file) {
 
         TreeNode* def = *L(cur_cmd);
 
-        if (NODE_IS_OPER(def, OperNum::CONST_VAR_DEF) ||
-            NODE_IS_OPER(def, OperNum::VAR_DEFINITION)) {
+        if (!NODE_IS_OPER(def, OperNum::FUNC_DEFINITION)) {
 
             cur_cmd = *R(cur_cmd);
             continue;
@@ -148,6 +147,8 @@ static Status::Statuses asm_add_func_args_var_table_(BackData* data, TreeNode* c
 
         if (!scope->vars.push_back(&new_var))
             return Status::MEMORY_EXCEED;
+
+        scope->size += new_var.size;
 
         cur_arg = *R(cur_arg);
     }

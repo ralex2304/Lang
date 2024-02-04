@@ -85,6 +85,20 @@ inline bool dsl_is_double_equal(const double a, const double b) {
             EVAL_SUBTREE_GET_VAL(*R(node));                     \
             ASM_PRINT_COMMAND(0, cmd_ "\n")
 
+#define VAR_DEFINITION_ASSIGNMENT(node_)            \
+            do {                                    \
+                if (*R(node_) == nullptr)           \
+                    break;                          \
+                                                    \
+                EVAL_SUBTREE_GET_VAL(*R(node_));    \
+                                                    \
+                ASSIGN_VAR_VAL(*L(node_));          \
+            } while (0)
+
+#define ARRAY_DEFINITION_ASSIGNMENT(node_)          \
+            if (*R(node_) != nullptr)               \
+                STATUS_CHECK(asm_array_definition_assignment_(data, file, node_))
+
 #define LOGIC(jump_)                \
             EVAL_SUBTREE_GET_VAL(*L(node)); \
             EVAL_SUBTREE_GET_VAL(*R(node)); \
@@ -102,14 +116,27 @@ inline bool dsl_is_double_equal(const double a, const double b) {
 #define EVAL_SUBTREE(node_, is_val_needed_) \
             STATUS_CHECK(asm_command_traversal(data, file, node_, is_val_needed_))
 
-#define ADD_VAR(node_)              \
-            STATUS_CHECK(asm_add_var_(data, node_, false))
+#define ADD_NUM_VAR(node_)          \
+            STATUS_CHECK(asm_add_num_var_(data, node_, false))
 
-#define ADD_CONST_VAR(node_)         \
-            STATUS_CHECK(asm_add_var_(data, node_, true))
+#define ADD_NUM_CONST_VAR(node_)    \
+            STATUS_CHECK(asm_add_num_var_(data, node_, true))
 
-#define ASSIGN_VAR_VAL(node_)       \
-            STATUS_CHECK(asm_assign_var(data, file, node_))
+#define ADD_ARRAY(node_)            \
+            STATUS_CHECK(asm_add_array_(data, node_, false))
+
+#define ADD_CONST_ARRAY(node_)      \
+            STATUS_CHECK(asm_add_array_(data, node_, true))
+
+#define ASSIGN_VAR_VAL(node_)                                               \
+            do {                                                            \
+                if (NODE_IS_OPER(node_, OperNum::ARRAY_ELEM)) {             \
+                    ASM_PRINT_COMMAND(0, "; arr elem index:\n");            \
+                    EVAL_SUBTREE_GET_VAL(*R(node_));                        \
+                    STATUS_CHECK(asm_assign_arr_elem(data, file, node_));   \
+                } else                                                      \
+                    STATUS_CHECK(asm_assign_var(data, file, node_));        \
+            } while (0)
 
 #define CHECK_VAR_FOR_ASSIGNMENT(node_) \
             STATUS_CHECK(asm_check_var_for_assign_(data, node_))
@@ -132,9 +159,11 @@ inline bool dsl_is_double_equal(const double a, const double b) {
 #define UNARY_MATH(cmd_)                    \
             STATUS_CHECK(asm_unary_math_(data, file, node, cmd_, is_val_needed))
 
-#define DAMAGED_TREE(err_msg_)                      \
-            tree_is_damaged(&data->tree, err_msg_); \
-            return Status::TREE_ERROR
+#define DAMAGED_TREE(err_msg_)                          \
+            do {                                        \
+                tree_is_damaged(&data->tree, err_msg_); \
+                return Status::TREE_ERROR;              \
+            } while (0)
 
 #define ENTER_SCOPE(num_)                                   \
             if (!asm_create_scope(&data->scopes, num_)) \
@@ -156,6 +185,9 @@ inline bool dsl_is_double_equal(const double a, const double b) {
 
 #define PROVIDE_FUNC_CALL()    \
             STATUS_CHECK(asm_provide_func_call_(data, file, node, is_val_needed))
+
+#define GET_ARR_ELEM_VAL()      \
+            STATUS_CHECK(asm_get_arr_elem_val_(data, file, node, is_val_needed))
 
 #define ASM_SET_FPS(value_node_)    \
             STATUS_CHECK(asm_make_set_fps_(data, file, value_node_))

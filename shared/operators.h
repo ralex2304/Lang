@@ -2,6 +2,13 @@
 static_assert(0 && "DEF_OPER is not defined");
 #endif //< #ifndef DEF_OPER
 
+/*
+register usage:
+    rax - func return val
+    rbx - local var addr frame
+    rcx - array elem index
+*/
+
 //   | NUM |      NAME      | TYPE | MATH_TYPE | IS_CHILD_VAL_NEEDED | ASM_COMMAND
 
 DEF_OPER(1,  CMD_SEPARATOR,   LIST,   MATH_L_R, NO_VAL, NO_VAL,   {
@@ -12,55 +19,64 @@ DEF_OPER(1,  CMD_SEPARATOR,   LIST,   MATH_L_R, NO_VAL, NO_VAL,   {
     }
 })
 
-
 DEF_OPER(2,  VAR_DEFINITION,  BINARY, MATH_R,   VAL, VAL,         {
-    ADD_VAR(*L(node));
+    ADD_NUM_VAR(*L(node));
 
-    EVAL_SUBTREE_GET_VAL(*R(node));
-
-    ASSIGN_VAR_VAL(*L(node));
+    VAR_DEFINITION_ASSIGNMENT(node);
 })
 DEF_OPER(3,  CONST_VAR_DEF,   UNARY,  MATH_R,   STOP, VAL,        {
-    ADD_CONST_VAR(*L(*R(node)));
+    if (NODE_IS_OPER(*R(node), OperNum::VAR_DEFINITION)) {
+        ADD_NUM_CONST_VAR(*L(*R(node)));
 
-    EVAL_SUBTREE_GET_VAL(*R(*R(node)));
+        VAR_DEFINITION_ASSIGNMENT(*R(node));
 
-    ASSIGN_VAR_VAL(*L(*R(node)));
+    } else if (NODE_IS_OPER(*R(node), OperNum::ARRAY_DEFINITION)) {
+        ADD_CONST_ARRAY(*L(*R(node)));
+
+        ARRAY_DEFINITION_ASSIGNMENT(*R(node));
+
+    } else
+        DAMAGED_TREE("Wrong const var definition hierarchy");
+})
+DEF_OPER(4, ARRAY_DEFINITION, UNARY,  MATH_R,   STOP, VAL,        {
+    ADD_ARRAY(*L(node));
+
+    ARRAY_DEFINITION_ASSIGNMENT(node);
 })
 
-DEF_OPER(4,  FUNC_DEFINITION, BINARY, MATH_R,   STOP, NO_VAL,     {
+DEF_OPER(5,  FUNC_DEFINITION, BINARY, MATH_R,   STOP, NO_VAL,     {
     DAMAGED_TREE("Unexpected FUNC_DEFINITION (not in global scope)");
 })
 
-DEF_OPER(5,  ASSIGNMENT,      BINARY, MATH_R,   STOP, VAL,        {
+DEF_OPER(6,  ASSIGNMENT,      BINARY, MATH_R,   STOP, VAL,        {
     CHECK_VAR_FOR_ASSIGNMENT(*L(node));
 
     EVAL_SUBTREE_GET_VAL(*R(node));
 
     ASSIGN_VAR_VAL(*L(node));
 })
-DEF_OPER(6,  ASSIGNMENT_ADD,  BINARY, MATH_R,   STOP, VAL,        {
+DEF_OPER(7,  ASSIGNMENT_ADD,  BINARY, MATH_R,   STOP, VAL,        {
     CHECK_VAR_FOR_ASSIGNMENT(*L(node));
 
     ASSIGNMENT_WITH_ACTION("add");
 
     ASSIGN_VAR_VAL(*L(node));
 })
-DEF_OPER(7,  ASSIGNMENT_SUB,  BINARY, MATH_R,   STOP, VAL,        {
+DEF_OPER(8,  ASSIGNMENT_SUB,  BINARY, MATH_R,   STOP, VAL,        {
     CHECK_VAR_FOR_ASSIGNMENT(*L(node));
 
     ASSIGNMENT_WITH_ACTION("sub");
 
     ASSIGN_VAR_VAL(*L(node));
 })
-DEF_OPER(8,  ASSIGNMENT_MUL,  BINARY, MATH_R,   STOP, VAL,        {
+DEF_OPER(9,  ASSIGNMENT_MUL,  BINARY, MATH_R,   STOP, VAL,        {
     CHECK_VAR_FOR_ASSIGNMENT(*L(node));
 
     ASSIGNMENT_WITH_ACTION("mul");
 
     ASSIGN_VAR_VAL(*L(node));
 })
-DEF_OPER(9,  ASSIGNMENT_DIV,  BINARY, MATH_R,   STOP, VAL,        {
+DEF_OPER(10, ASSIGNMENT_DIV,  BINARY, MATH_R,   STOP, VAL,        {
     CHECK_VAR_FOR_ASSIGNMENT(*L(node));
 
     ASSIGNMENT_WITH_ACTION("div");
@@ -68,16 +84,18 @@ DEF_OPER(9,  ASSIGNMENT_DIV,  BINARY, MATH_R,   STOP, VAL,        {
     ASSIGN_VAR_VAL(*L(node));
 })
 
-DEF_OPER(10, RETURN,          UNARY,  MATH_R,   STOP, VAL,        {
+DEF_OPER(11, ARRAY_ELEM,      BINARY, MATH_R,   STOP, VAL,        { GET_ARR_ELEM_VAL(); })
+
+DEF_OPER(15, VAR_SEPARATOR,   LIST,   MATH_L_R, INHERIT, INHERIT, { DAMAGED_TREE("unexpected VAR_SEPARATOR"); })
+
+DEF_OPER(16, FUNC_CALL,       BINARY, MATH_R,   STOP, VAL,        { PROVIDE_FUNC_CALL(); })
+
+DEF_OPER(17, RETURN,          UNARY,  MATH_R,   STOP, VAL,        {
     EVAL_SUBTREE_GET_VAL(*R(node));
 
     ASM_PRINT_COMMAND(0, "pop rax\n\n");
     ASM_PRINT_COMMAND(0, "ret\n\n");
 })
-
-DEF_OPER(15, VAR_SEPARATOR,   LIST,   MATH_L_R, INHERIT, INHERIT, { DAMAGED_TREE("unexpected VAR_SEPARATOR"); })
-
-DEF_OPER(16, FUNC_CALL,       BINARY, MATH_R,   STOP, VAL,        { PROVIDE_FUNC_CALL(); })
 
 DEF_OPER(20, MATH_ADD,        BINARY, MATH,     INHERIT, INHERIT, { BINARY_MATH("add"); })
 DEF_OPER(21, MATH_SUB,        BINARY, MATH,     INHERIT, INHERIT, { BINARY_MATH("sub"); })
