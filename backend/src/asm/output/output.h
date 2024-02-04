@@ -18,9 +18,13 @@
 
 Var* asm_search_var(Stack* scopes, size_t var_num, bool* is_global);
 
+Status::Statuses asm_swap_last_stk_vals(FILE* file);
+
 Status::Statuses asm_assign_var(BackData* data, FILE* file, TreeNode* var_node);
 
 Status::Statuses asm_assign_arr_elem(BackData* data, FILE* file, TreeNode* var_node);
+
+Status::Statuses asm_assign_arr_elem_same(FILE* file);
 
 Status::Statuses asm_initialise_global_scope(BackData* data, FILE* file);
 

@@ -7,6 +7,8 @@ register usage:
     rax - func return val
     rbx - local var addr frame
     rcx - array elem index
+    rdx - calculations
+    rex - calculations
 */
 
 //   | NUM |      NAME      | TYPE | MATH_TYPE | IS_CHILD_VAL_NEEDED | ASM_COMMAND
@@ -60,28 +62,28 @@ DEF_OPER(7,  ASSIGNMENT_ADD,  BINARY, MATH_R,   STOP, VAL,        {
 
     ASSIGNMENT_WITH_ACTION("add");
 
-    ASSIGN_VAR_VAL(*L(node));
+    ASSIGN_VAR_VAL_SAME(*L(node));
 })
 DEF_OPER(8,  ASSIGNMENT_SUB,  BINARY, MATH_R,   STOP, VAL,        {
     CHECK_VAR_FOR_ASSIGNMENT(*L(node));
 
     ASSIGNMENT_WITH_ACTION("sub");
 
-    ASSIGN_VAR_VAL(*L(node));
+    ASSIGN_VAR_VAL_SAME(*L(node));
 })
 DEF_OPER(9,  ASSIGNMENT_MUL,  BINARY, MATH_R,   STOP, VAL,        {
     CHECK_VAR_FOR_ASSIGNMENT(*L(node));
 
     ASSIGNMENT_WITH_ACTION("mul");
 
-    ASSIGN_VAR_VAL(*L(node));
+    ASSIGN_VAR_VAL_SAME(*L(node));
 })
 DEF_OPER(10, ASSIGNMENT_DIV,  BINARY, MATH_R,   STOP, VAL,        {
     CHECK_VAR_FOR_ASSIGNMENT(*L(node));
 
     ASSIGNMENT_WITH_ACTION("div");
 
-    ASSIGN_VAR_VAL(*L(node));
+    ASSIGN_VAR_VAL_SAME(*L(node));
 })
 
 DEF_OPER(11, ARRAY_ELEM,      BINARY, MATH_R,   STOP, VAL,        { GET_ARR_ELEM_VAL(); })

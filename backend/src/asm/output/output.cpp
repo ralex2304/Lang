@@ -641,7 +641,7 @@ Status::Statuses asm_assign_arr_elem(BackData* data, FILE* file, TreeNode* var_n
     bool is_global_ = false;
     size_t var_num = NODE_DATA(*L(var_node))->var;
 
-    Var* var = (asm_search_var(&data->scopes, var_num, &is_global_));
+    Var* var = asm_search_var(&data->scopes, var_num, &is_global_);
     assert(var);
 
     if (var->type != VarType::ARRAY) {
@@ -656,6 +656,27 @@ Status::Statuses asm_assign_arr_elem(BackData* data, FILE* file, TreeNode* var_n
     return Status::NORMAL_WORK;
 }
 
+Status::Statuses asm_assign_arr_elem_same(FILE* file) {
+    assert(file);
+
+    STATUS_CHECK(asm_arr_elem_assignment_header_(file, "*the same*"));
+
+    STATUS_CHECK(asm_pop_arr_elem_value_the_same(file));
+
+    return Status::NORMAL_WORK;
+}
+
+Status::Statuses asm_swap_last_stk_vals(FILE* file) {
+    assert(file);
+
+    PRINTF_(0, "; swap last stk files\n");
+    PRINTF_(0, "pop rdx\n");
+    PRINTF_(0, "pop rex\n");
+    PRINTF_(0, "push rdx\n");
+    PRINTF_(0, "push rex\n\n");
+
+    return Status::NORMAL_WORK;
+}
 
 Status::Statuses asm_if_begin(FILE* file, size_t cnt) {
     assert(file);

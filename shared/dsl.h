@@ -81,9 +81,13 @@ inline bool dsl_is_double_equal(const double a, const double b) {
 //=====================================codegen dsl==================================================
 
 #define ASSIGNMENT_WITH_ACTION(cmd_)                            \
-            EVAL_SUBTREE_GET_VAL(*L(node)); /* get var value*/  \
             EVAL_SUBTREE_GET_VAL(*R(node));                     \
+            EVAL_SUBTREE_GET_VAL(*L(node)); /* get var value*/  \
+            ASM_SWAP_LAST_STK_VALS();                           \
             ASM_PRINT_COMMAND(0, cmd_ "\n")
+
+#define ASM_SWAP_LAST_STK_VALS()    \
+            STATUS_CHECK(asm_swap_last_stk_vals(file))
 
 #define VAR_DEFINITION_ASSIGNMENT(node_)            \
             do {                                    \
@@ -134,6 +138,14 @@ inline bool dsl_is_double_equal(const double a, const double b) {
                     ASM_PRINT_COMMAND(0, "; arr elem index:\n");            \
                     EVAL_SUBTREE_GET_VAL(*R(node_));                        \
                     STATUS_CHECK(asm_assign_arr_elem(data, file, node_));   \
+                } else                                                      \
+                    STATUS_CHECK(asm_assign_var(data, file, node_));        \
+            } while (0)
+
+#define ASSIGN_VAR_VAL_SAME(node_)                                          \
+            do {                                                            \
+                if (NODE_IS_OPER(node_, OperNum::ARRAY_ELEM)) {             \
+                    STATUS_CHECK(asm_assign_arr_elem_same(file));           \
                 } else                                                      \
                     STATUS_CHECK(asm_assign_var(data, file, node_));        \
             } while (0)

@@ -20,13 +20,20 @@ hlt
 ; =========================== Function definition =========================
 ; func name: main
 ___func_1:
+    push 123
     push 1
-    ; arr elem index:
-    push 1
-    ; arr elem assignment: test
-    push 0
+    push rbx
     add
     pop rcx
+    push [rcx]
+    ; swap last stk files
+    pop rdx
+    pop rex
+    push rdx
+    push rex
+
+    div
+    ; arr elem assignment: *the same*
     pop [rcx]
 
 ret
