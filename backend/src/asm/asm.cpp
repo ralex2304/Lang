@@ -113,6 +113,7 @@ static Status::Statuses asm_func_def_make_body_(BackData* data, FILE* file, Tree
 
 static Status::Statuses asm_add_func_args_var_table_(BackData* data, TreeNode* cur_arg) {
     assert(data);
+    // cur_arg can be nullptr
 
     size_t addr_offset = asm_count_addr_offset(&data->scopes);
 
@@ -121,7 +122,6 @@ static Status::Statuses asm_add_func_args_var_table_(BackData* data, TreeNode* c
         return Status::STACK_ERROR;
 
     while (cur_arg) {
-
         Var new_var = {.is_const = false, .addr_offset = addr_offset++};
 
         TreeNode* def = *L(cur_arg);

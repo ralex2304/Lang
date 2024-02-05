@@ -178,11 +178,11 @@ inline bool dsl_is_double_equal(const double a, const double b) {
             } while (0)
 
 #define ENTER_SCOPE(num_)                                   \
-            if (!asm_create_scope(&data->scopes, num_)) \
+            if (!asm_create_scope(&data->scopes, num_))     \
                 return Status::STACK_ERROR
 
 #define ENTER_LOOP_SCOPE(num_)                                      \
-            if (!asm_create_scope(&data->scopes, num_, true))   \
+            if (!asm_create_scope(&data->scopes, num_, true))       \
                 return Status::STACK_ERROR
 
 #define EXIT_SCOPE()    \
