@@ -795,7 +795,8 @@ Status::Statuses TextParser::Expr(ParseData* data, size_t* const pos, TreeNode**
     while (IS_TOKEN_TYPE(CUR_TOKEN, TokenType::VAR)) { //< while is used here for break. Mustn't iterate
         size_t var_num = CUR_TOKEN.data.var;
         DebugInfo var_debug_info = DEBUG_INFO(CUR_TOKEN);
-        size_t begin_pos = (*pos)++;
+        const size_t begin_pos = (*pos)++;
+        const size_t begin_size = *size;
 
         TreeNode* arr_index_expr = nullptr;
         if (IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::OPEN_INDEX_BRACE)) {
@@ -807,6 +808,7 @@ Status::Statuses TextParser::Expr(ParseData* data, size_t* const pos, TreeNode**
                 STATUS_CHECK(syntax_error(DEBUG_INFO(CUR_TOKEN), "Expected index brace closing"),
                                                             tree_dtor_untied_subtree(&arr_index_expr));
                 tree_dtor_untied_subtree(&arr_index_expr);
+                *size = begin_size;
                 return Status::SYNTAX_ERROR;
             }
             (*pos)++;
@@ -847,7 +849,7 @@ Status::Statuses TextParser::Expr(ParseData* data, size_t* const pos, TreeNode**
 
             if (oper == OperNum::NONE) {
                 *pos = begin_pos;
-                if (arr_index_expr) (*size)--;
+                *size = begin_size;
                 tree_dtor_untied_subtree(&arr_index_expr);
                 break;
             }
@@ -855,7 +857,7 @@ Status::Statuses TextParser::Expr(ParseData* data, size_t* const pos, TreeNode**
             (*pos) += 2;
         } else {
             *pos = begin_pos;
-            if (arr_index_expr) (*size)--;
+            *size = begin_size;
             tree_dtor_untied_subtree(&arr_index_expr);
             break;
         }
