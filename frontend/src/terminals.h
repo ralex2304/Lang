@@ -17,7 +17,7 @@ DEF_TERMINAL(12, CLOSE_SCOPE,       {"}"})
 DEF_TERMINAL(13, OPEN_BRACE,        {"("})
 DEF_TERMINAL(14, CLOSE_BRACE,       {")"})
 DEF_TERMINAL(15, OPEN_INDEX_BRACE,  {"["})
-DEF_TERMINAL(15, CLOSE_INDEX_BRACE, {"]"})
+DEF_TERMINAL(16, CLOSE_INDEX_BRACE, {"]"})
 DEF_TERMINAL(17, VAR_SEPARATOR,     {",",        nullptr,          "ещё"})
 
 DEF_TERMINAL(20, MATH_ADD,          {"+",        nullptr,          "курва"})
