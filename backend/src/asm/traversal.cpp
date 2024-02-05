@@ -121,7 +121,7 @@ static Status::Statuses asm_command_traversal_var_(BackData* data, FILE* file, T
     assert(data);
     assert(file);
     assert(node);
-    assert(TYPE_IS_NUM(node));
+    assert(TYPE_IS_VAR(node));
 
     bool is_global = false;
     Var* var = asm_search_var(&data->scopes, NODE_DATA(node)->var, &is_global);
