@@ -21,7 +21,8 @@ EXTERNAL_DIR = ../shared
 IFLAGS = -I$(EXTERNAL_DIR)/
 
 SRC_DIR = src
-BUILD_DIR = build/own
+BUILD_DIR = build
+OWN_BUILD_DIR = $(BUILD_DIR)/own
 DOCS_DIR = docs
 NON_CODE_DIRS =
 TARGET = main
@@ -39,8 +40,8 @@ FILES_FULL = $(shell find ./$(SRC_DIR) -name "*.cpp")\
 FILES = $(FILES_FULL:.%=%)
 
 
-MAKE_DIRS = $(NESTED_CODE_DIRS:%=$(BUILD_DIR)%)
-OBJ = $(FILES:%=$(BUILD_DIR)%)
+MAKE_DIRS = $(NESTED_CODE_DIRS:%=$(OWN_BUILD_DIR)%)
+OBJ = $(FILES:%=$(OWN_BUILD_DIR)%)
 DEPENDS = $(OBJ:%.cpp=%.d)
 OBJECTS = $(OBJ:%.cpp=%.o)
 
@@ -51,15 +52,15 @@ all: $(TARGET)
 $(TARGET): $(OBJECTS)
 	@$(CC) $(CFLAGS) $(IFLAGS) -I$(LIB_DIR) $(if $(sanitizer), $(CFLAGS_SANITIZER)) $^ -o $@ $(LIBS)
 
-$(BUILD_DIR):
+$(OWN_BUILD_DIR):
 	@mkdir ./$@
 
-$(MAKE_DIRS): | $(BUILD_DIR)
+$(MAKE_DIRS): | $(OWN_BUILD_DIR)
 	@mkdir ./$@
 
 -include $(DEPENDS)
 
-$(BUILD_DIR)/%.o: %.cpp | $(BUILD_DIR) $(MAKE_DIRS)
+$(OWN_BUILD_DIR)/%.o: %.cpp | $(OWN_BUILD_DIR) $(MAKE_DIRS)
 	@$(CC) $(CFLAGS) $(IFLAGS) -I$(LIB_DIR) $(if $(sanitizer), $(CFLAGS_SANITIZER)) -MMD -MP -c $< -o $@
 
 .PHONY: doxygen dox
