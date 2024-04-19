@@ -78,13 +78,15 @@ inline bool dsl_is_double_equal(const double a, const double b) {
                     return Status::TREE_ERROR;                          \
             } while(0)
 
+#define SYNTAX_ERROR(...) syntax_error(*DEBUG_INFO(node), __VA_ARGS__)
+
 //=====================================codegen dsl==================================================
 
 #define ASSIGNMENT_WITH_ACTION(cmd_)                            \
             EVAL_SUBTREE_GET_VAL(*R(node));                     \
             EVAL_SUBTREE_GET_VAL(*L(node)); /* get var value*/  \
             ASM_SWAP_LAST_STK_VALS();                           \
-            ASM_PRINT_COMMAND(0, cmd_ "\n")
+            ASM_MATH_OPERATOR(cmd_)
 
 #define ASM_SWAP_LAST_STK_VALS()    \
             STATUS_CHECK(asm_swap_last_stk_vals(file))
@@ -106,7 +108,7 @@ inline bool dsl_is_double_equal(const double a, const double b) {
 #define LOGIC(jump_)                \
             EVAL_SUBTREE_GET_VAL(*L(node)); \
             EVAL_SUBTREE_GET_VAL(*R(node)); \
-            LOGIC_COMPARE_(jump_)
+            LOGIC_COMPARE_(NODE_DATA(node)->oper)
 
 #define LOGIC_COMPARE_(jump_)       \
             STATUS_CHECK(asm_logic_compare(file, jump_))
@@ -135,7 +137,7 @@ inline bool dsl_is_double_equal(const double a, const double b) {
 #define ASSIGN_VAR_VAL(node_)                                               \
             do {                                                            \
                 if (NODE_IS_OPER(node_, OperNum::ARRAY_ELEM)) {             \
-                    ASM_PRINT_COMMAND(0, "; arr elem index:\n");            \
+                    ASM_COMMENT("arr elem index:");                         \
                     EVAL_SUBTREE_GET_VAL(*R(node_));                        \
                     STATUS_CHECK(asm_assign_arr_elem(data, file, node_));   \
                 } else                                                      \
@@ -165,17 +167,47 @@ inline bool dsl_is_double_equal(const double a, const double b) {
                     return Status::OUTPUT_ERROR;                                \
             } while (0)
 
-#define BINARY_MATH(cmd_)                   \
-            STATUS_CHECK(asm_binary_math_(data, file, node, cmd_, is_val_needed))
+#define BINARY_MATH()   \
+            STATUS_CHECK(asm_binary_math_(data, file, node, NODE_DATA(node)->oper, is_val_needed))
 
-#define UNARY_MATH(cmd_)                    \
-            STATUS_CHECK(asm_unary_math_(data, file, node, cmd_, is_val_needed))
+#define UNARY_MATH()    \
+            STATUS_CHECK(asm_unary_math_(data, file, node, NODE_DATA(node)->oper, is_val_needed))
 
-#define DAMAGED_TREE(err_msg_)                          \
-            do {                                        \
-                tree_is_damaged(&data->tree, err_msg_); \
-                return Status::TREE_ERROR;              \
-            } while (0)
+#define UNARY_MATH_SPEC(oper_)  \
+            STATUS_CHECK(asm_unary_math_(data, file, node, oper_, is_val_needed))
+
+#define ASM_MATH_OPERATOR(oper_)    \
+            STATUS_CHECK(asm_math_operator(file, oper_));
+
+#define ASM_PUSH_IMMED_OPERAND(imm_)    \
+            STATUS_CHECK(asm_push_immed_operand(file, imm_))
+
+#define ASM_COMMENT(comment_)   \
+            STATUS_CHECK(asm_comment(file, comment_))
+
+#define ASM_TAB()   \
+            STATUS_CHECK(asm_tab(file))
+
+#define ASM_UNTAB() \
+            STATUS_CHECK(asm_untab(file))
+
+#define ASM_READ_DOUBLE()   \
+            STATUS_CHECK(asm_read_double(file))
+
+#define ASM_PRINT_DOUBLE()  \
+            STATUS_CHECK(asm_print_double(file))
+
+#define ASM_RET()   \
+            STATUS_CHECK(asm_ret(file))
+
+#define ASM_WRITE_RETURNED_VALUE()  \
+            STATUS_CHECK(asm_write_returned_value(file))
+
+#define ASM_NEGATIVE()  \
+            STATUS_CHECK(asm_negative(file))
+
+#define DAMAGED_TREE(err_msg_)  \
+            tree_is_damaged(&data->tree, err_msg_);
 
 #define ENTER_SCOPE(num_)                                   \
             if (!asm_create_scope(&data->scopes, num_))     \
@@ -203,6 +235,9 @@ inline bool dsl_is_double_equal(const double a, const double b) {
 
 #define ASM_SET_FPS(value_node_)    \
             STATUS_CHECK(asm_make_set_fps_(data, file, value_node_))
+
+#define ASM_VIDEO_SHOW_FRAME()  \
+            STATUS_CHECK(asm_video_show_frame(file));
 
 #define ASM_MAKE_IF(node_)  \
             STATUS_CHECK(asm_make_if_(data, file, node_))

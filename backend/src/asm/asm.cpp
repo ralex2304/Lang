@@ -36,10 +36,8 @@ static Status::Statuses make_asm_process_(BackData* data, FILE* file) {
         if (MAIN_FUNC_NAMES[i] != nullptr)
             main_func = find_var_num_by_name(&data->vars, MAIN_FUNC_NAMES[i]);
 
-    if (main_func == -1) {
-        STATUS_CHECK(syntax_error(*DEBUG_INFO(data->tree.root), "main function not found"));
-        return Status::SYNTAX_ERROR;
-    }
+    if (main_func == -1)
+        return syntax_error(*DEBUG_INFO(data->tree.root), "main function not found");
 
     STATUS_CHECK(asm_init_regs(file));
 
@@ -70,12 +68,8 @@ static Status::Statuses asm_func_def_(BackData* data, FILE* file) {
             continue;
         }
 
-        if (!NODE_IS_OPER(*L(def), OperNum::VAR_SEPARATOR) ||
-            !TYPE_IS_VAR(*L(*L(def)))) {
-
-            DAMAGED_TREE("incorrect function defenition args hierarchy");
-            return Status::TREE_ERROR;
-        }
+        if (!NODE_IS_OPER(*L(def), OperNum::VAR_SEPARATOR) || !TYPE_IS_VAR(*L(*L(def))))
+            return DAMAGED_TREE("incorrect function defenition args hierarchy");
 
         size_t func_num = ELEM(*L(*L(def)))->data.var;
 
@@ -122,7 +116,7 @@ static Status::Statuses asm_add_func_args_var_table_(BackData* data, TreeNode* c
         return Status::STACK_ERROR;
 
     while (cur_arg) {
-        Var new_var = {.is_const = false, .addr_offset = addr_offset++};
+        Var new_var = {.type = VarType::NUM, .is_const = false, .addr_offset = addr_offset++};
 
         TreeNode* def = *L(cur_arg);
 
@@ -135,15 +129,11 @@ static Status::Statuses asm_add_func_args_var_table_(BackData* data, TreeNode* c
             TYPE_IS_VAR(*R(def))) {
 
             new_var.var_num = ELEM(*R(def))->data.var;
-        } else {
-            DAMAGED_TREE("var defenition expected in function args (func defenition)");
-            return Status::TREE_ERROR;
-        }
+        } else
+            return DAMAGED_TREE("var defenition expected in function args (func defenition)");
 
-        if (scope->find_var(new_var.var_num)) {
-            STATUS_CHECK(syntax_error(*DEBUG_INFO(*R(def)), "This name is already used"));
-            return Status::SYNTAX_ERROR;
-        }
+        if (scope->find_var(new_var.var_num))
+            return syntax_error(*DEBUG_INFO(*R(def)), "This name is already used");
 
         if (!scope->vars.push_back(&new_var))
             return Status::MEMORY_EXCEED;

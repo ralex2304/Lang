@@ -75,10 +75,8 @@ static Status::Statuses diff_do_diff_find_diff_operators_(MidData* data, TreeNod
 
     ssize_t tmp_arg_var_num = *ARG_VAR_NUM;
 
-    if (!TYPE_IS_VAR(*R(*node))) {
-        DAMAGED_TREE("Diff operator must have right var child");
-        return Status::TREE_ERROR;
-    }
+    if (!TYPE_IS_VAR(*R(*node)))
+        return DAMAGED_TREE("Diff operator must have right var child");
 
     *ARG_VAR_NUM = *VAR_NUM(*R(*node));
 

@@ -26,7 +26,12 @@ static Status::Statuses asm_var_assignment_header_(FILE* file, const char* var_n
 
 static Status::Statuses asm_arr_elem_assignment_header_(FILE* file, const char* var_name);
 
+static const char* jump_str_(const OperNum jmp_type);
+
+static const char* math_oper_str_(const OperNum math_op);
+
 static size_t asm_count_args_(TreeNode* arg);
+
 
 Var* asm_search_var(Stack* scopes, size_t var_num, bool* is_global) {
     assert(scopes);
@@ -94,10 +99,8 @@ static Status::Statuses declare_global_var_or_func_(BackData* data, FILE* file, 
 
         def = *R(def);
 
-        if (!NODE_IS_OPER(def, OperNum::VAR_DEFINITION) && !NODE_IS_OPER(def, OperNum::ARRAY_DEFINITION)) {
-            STATUS_CHECK(syntax_error(*DEBUG_INFO(def), "Only var can be const"));
-            return Status::SYNTAX_ERROR;
-        }
+        if (!NODE_IS_OPER(def, OperNum::VAR_DEFINITION) && !NODE_IS_OPER(def, OperNum::ARRAY_DEFINITION))
+            return syntax_error(*DEBUG_INFO(def), "Only var can be const");
     }
 
     if (NODE_IS_OPER(def, OperNum::VAR_DEFINITION)) {
@@ -137,10 +140,8 @@ static Status::Statuses declare_global_var_(BackData* data, FILE* file, ScopeDat
 
     new_var->var_num = ELEM(*L(def))->data.var;
 
-    if (var_table->find_var(new_var->var_num) != nullptr) {
-        STATUS_CHECK(syntax_error(*DEBUG_INFO(def), "variable has been already declared"));
-        return Status::SYNTAX_ERROR;
-    }
+    if (var_table->find_var(new_var->var_num) != nullptr)
+        return syntax_error(*DEBUG_INFO(def), "variable has been already declared");
 
     STATUS_CHECK(asm_initialise_global_var_(data, file, *R(def), new_var));
 
@@ -163,17 +164,13 @@ static Status::Statuses declare_global_array_(BackData* data, FILE* file,
 
     new_var->var_num = ELEM(*L(*L(def)))->data.var;
 
-    if (!TYPE_IS_NUM(*R(*L(def)))) {
-        STATUS_CHECK(syntax_error(*DEBUG_INFO(*R(*L(def))), "array size must be const expression"));
-        return Status::SYNTAX_ERROR;
-    }
+    if (!TYPE_IS_NUM(*R(*L(def))))
+        return syntax_error(*DEBUG_INFO(*R(*L(def))), "array size must be const expression");
 
     ssize_t arr_size = (ssize_t)*NUM_VAL(*R(*L(def)));
-    if (arr_size < 1) {
-        STATUS_CHECK(syntax_error(*DEBUG_INFO(*R(*L(def))), "array size must be at least 1 "
-                                                            "instead of %zd"));
-        return Status::SYNTAX_ERROR;
-    }
+    if (arr_size < 1)
+        return syntax_error(*DEBUG_INFO(*R(*L(def))), "array size must be at least 1 "
+                                                      "instead of %zd", arr_size);
 
     new_var->size = arr_size;
 
@@ -197,10 +194,8 @@ static Status::Statuses declare_global_func_(BackData* data, FILE* file, TreeNod
     Func new_func = {.func_num = ELEM(*L(*L(def)))->data.var,
                         .arg_num = asm_count_args_(*R(*L(def)))};
 
-    if (data->func_table.find_func(new_func.func_num) != nullptr) {
-        STATUS_CHECK(syntax_error(*DEBUG_INFO(def), "Function has been already declared"));
-        return Status::SYNTAX_ERROR;
-    }
+    if (data->func_table.find_func(new_func.func_num) != nullptr)
+        return syntax_error(*DEBUG_INFO(def), "Function has been already declared");
 
     if (!data->func_table.funcs.push_back(&new_func))
         return Status::MEMORY_EXCEED;
@@ -257,10 +252,8 @@ static Status::Statuses asm_initialise_global_array_(BackData* data, FILE* file,
 
     size_t i = 0;
     while (values && *L(values)) {
-        if (i >= var->size) {
-            STATUS_CHECK(syntax_error(*DEBUG_INFO(*L(values)), "too many initialiser values"));
-            return Status::SYNTAX_ERROR;
-        }
+        if (i >= var->size)
+            return syntax_error(*DEBUG_INFO(*L(values)), "too many initialiser values");
 
         STATUS_CHECK(asm_eval_global_expr_(data, file, *L(values)));
 
@@ -407,10 +400,8 @@ static Status::Statuses asm_eval_global_expr_(BackData* data, FILE* file, TreeNo
     assert(file);
     assert(expr);
 
-    if (NODE_IS_OPER(expr, OperNum::FUNC_CALL)) {
-        STATUS_CHECK(syntax_error(*DEBUG_INFO(expr), "Function call is forbidden here"));
-        return Status::SYNTAX_ERROR;
-    }
+    if (NODE_IS_OPER(expr, OperNum::FUNC_CALL))
+        return syntax_error(*DEBUG_INFO(expr), "Function call is forbidden here");
 
     if (*L(expr) != nullptr)
         STATUS_CHECK(asm_eval_global_expr_(data, file, *L(expr)));
@@ -428,10 +419,8 @@ static Status::Statuses asm_eval_global_expr_(BackData* data, FILE* file, TreeNo
 
         Var* var = data->scopes.data[0].find_var(ELEM(expr)->data.var);
 
-        if (var == nullptr) {
-            STATUS_CHECK(syntax_error(*DEBUG_INFO(expr), "Unknown variable"));
-            return Status::SYNTAX_ERROR;
-        }
+        if (var == nullptr)
+            return syntax_error(*DEBUG_INFO(expr), "Unknown variable");
 
         STATUS_CHECK(asm_push_var_val(file, var->addr_offset, true));
 
@@ -452,48 +441,11 @@ static Status::Statuses asm_write_global_oper_(FILE* file, OperNum oper, DebugIn
     assert(file);
     assert(debug_info);
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wswitch-enum"
-    switch (oper) {
-        case OperNum::MATH_ADD:
-            PRINTF_(0, "add\n");
-            break;
-        case OperNum::MATH_SUB:
-            PRINTF_(0, "sub\n");
-            break;
-        case OperNum::MATH_MUL:
-            PRINTF_(0, "mul\n");
-            break;
-        case OperNum::MATH_DIV:
-            PRINTF_(0, "div\n");
-            break;
-        case OperNum::MATH_POW:
-            PRINTF_(0, "pow\n");
-            break;
-        case OperNum::MATH_NEGATIVE:
-            PRINTF_(0, "push -1\n");
-            PRINTF_(0, "mul\n");
-            break;
-        case OperNum::MATH_SQRT:
-            PRINTF_(0, "sqrt\n");
-            break;
-        case OperNum::MATH_SIN:
-            PRINTF_(0, "sin\n");
-            break;
-        case OperNum::MATH_COS:
-            PRINTF_(0, "cos\n");
-            break;
-        case OperNum::MATH_LN:
-            PRINTF_(0, "ln\n");
-            break;
+    const char* oper_str = math_oper_str_(oper);
+    if (oper_str == nullptr)
+        return syntax_error(*debug_info, "This operator is forbidden in global scope");
 
-        default:
-            STATUS_CHECK(syntax_error(*debug_info, "This operator is forbidden in global scope"));
-            break;
-    }
-#pragma GCC diagnostic pop
-
-    PRINTF_NO_TAB_("\n");
+    PRINTF_(0, "%s\n\n", oper_str);
 
     return Status::NORMAL_WORK;
 }
@@ -538,14 +490,17 @@ Status::Statuses asm_init_regs(FILE* file) {
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_logic_compare(FILE* file, const char* jump) {
-    assert(jump);
+Status::Statuses asm_logic_compare(FILE* file, const OperNum jump) {
     assert(file);
 
     static size_t counter = 0;
     counter++;
 
-    PRINTF_(+1, "%s ___compare_%zu_true\n", jump, counter);
+    const char* jump_str = jump_str_(jump);
+    if (jump_str == nullptr)
+        return Status::TREE_ERROR;
+
+    PRINTF_(+1, "%s ___compare_%zu_true\n", jump_str, counter);
     PRINTF_( 0, "push 0\n");
     PRINTF_(-1, "jmp ___compare_%zu_end\n", counter);
 
@@ -620,10 +575,8 @@ Status::Statuses asm_assign_var(BackData* data, FILE* file, TreeNode* var_node) 
     Var* var = (asm_search_var(&data->scopes, var_num, &is_global_));
     assert(var);
 
-    if (var->type != VarType::NUM) {
-        STATUS_CHECK(syntax_error(*DEBUG_INFO(var_node), "can't assign to array var"));
-        return Status::SYNTAX_ERROR;
-    }
+    if (var->type != VarType::NUM)
+        return syntax_error(*DEBUG_INFO(var_node), "can't assign to array var");
 
     STATUS_CHECK(asm_var_assignment_header_(file, *(const char**)data->vars[var_num]));
 
@@ -644,10 +597,8 @@ Status::Statuses asm_assign_arr_elem(BackData* data, FILE* file, TreeNode* var_n
     Var* var = asm_search_var(&data->scopes, var_num, &is_global_);
     assert(var);
 
-    if (var->type != VarType::ARRAY) {
-        STATUS_CHECK(syntax_error(*DEBUG_INFO(var_node), "can't take index of non array var"));
-        return Status::SYNTAX_ERROR;
-    }
+    if (var->type != VarType::ARRAY)
+        return syntax_error(*DEBUG_INFO(var_node), "can't take index of non array var");
 
     STATUS_CHECK(asm_arr_elem_assignment_header_(file, *(const char**)data->vars[var_num]));
 
@@ -669,7 +620,7 @@ Status::Statuses asm_assign_arr_elem_same(FILE* file) {
 Status::Statuses asm_swap_last_stk_vals(FILE* file) {
     assert(file);
 
-    PRINTF_(0, "; swap last stk files\n");
+    PRINTF_(0, "; swap last stk vals\n");
     PRINTF_(0, "pop rdx\n");
     PRINTF_(0, "pop rex\n");
     PRINTF_(0, "push rdx\n");
@@ -809,8 +760,58 @@ Status::Statuses asm_break(FILE* file, size_t cnt) {
     return Status::NORMAL_WORK;
 }
 
+#define CASE_(jmp_, str_jmp_) \
+            case OperNum::jmp_: return str_jmp_;
+
+static const char* jump_str_(const OperNum jmp_type) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wswitch-enum"
+    switch (jmp_type) {
+        CASE_(LOGIC_GREAT,     "ja");
+        CASE_(LOGIC_LOWER,     "jb");
+        CASE_(LOGIC_NOT_EQUAL, "jne");
+        CASE_(LOGIC_EQUAL,     "je");
+        CASE_(LOGIC_GREAT_EQ,  "jae");
+        CASE_(LOGIC_LOWER_EQ,  "jbe");
+
+        default:
+            return nullptr;
+    };
+#pragma GCC diagnostic pop
+
+    return nullptr;
+}
+#undef CASE_
+
+#define CASE_(oper_, str_oper_) \
+            case OperNum::oper_: return str_oper_;
+
+static const char* math_oper_str_(const OperNum math_op) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wswitch-enum"
+    switch (math_op) {
+        CASE_(MATH_ADD,      "add");
+        CASE_(MATH_SUB,      "sub");
+        CASE_(MATH_MUL,      "mul");
+        CASE_(MATH_DIV,      "div");
+        CASE_(MATH_POW,      "pow");
+        CASE_(MATH_SQRT,     "sqrt");
+        CASE_(MATH_SIN,      "sin");
+        CASE_(MATH_COS,      "cos");
+        CASE_(MATH_LN,       "ln");
+        CASE_(MATH_NEGATIVE, "; neg:\npush -1\nmul")
+
+        default:
+            return nullptr;
+    };
+#pragma GCC diagnostic pop
+
+    return nullptr;
+}
+#undef CASE_
+
 Status::Statuses asm_prepost_oper_var(FILE* file, const size_t addr_offset, const bool is_global,
-                                      const char* oper) {
+                                      const OperNum oper) {
     assert(file);
     assert(oper);
 
@@ -819,7 +820,7 @@ Status::Statuses asm_prepost_oper_var(FILE* file, const size_t addr_offset, cons
     STATUS_CHECK(asm_push_var_val(file, addr_offset, is_global));
 
     PRINTF_( 0, "push 1\n");
-    PRINTF_( 0, "%s\n", oper);
+    STATUS_CHECK(asm_math_operator(file, oper));
 
     STATUS_CHECK(asm_pop_var_value(file, addr_offset, is_global));
 
@@ -827,7 +828,7 @@ Status::Statuses asm_prepost_oper_var(FILE* file, const size_t addr_offset, cons
 }
 
 Status::Statuses asm_prepost_oper_arr_elem(FILE* file, const size_t addr_offset, const bool is_global,
-                                           const char* oper) {
+                                           const OperNum oper) {
     assert(file);
     assert(oper);
 
@@ -836,14 +837,14 @@ Status::Statuses asm_prepost_oper_arr_elem(FILE* file, const size_t addr_offset,
     STATUS_CHECK(asm_push_arr_elem_val(file, addr_offset, is_global));
 
     PRINTF_( 0, "push 1\n");
-    PRINTF_( 0, "%s\n", oper);
+    STATUS_CHECK(asm_math_operator(file, oper));
 
     STATUS_CHECK(asm_pop_arr_elem_value_the_same(file));
 
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_prepost_oper_arr_elem_the_same(FILE* file, const char* oper) {
+Status::Statuses asm_prepost_oper_arr_elem_the_same(FILE* file, const OperNum oper) {
     assert(file);
     assert(oper);
 
@@ -852,9 +853,104 @@ Status::Statuses asm_prepost_oper_arr_elem_the_same(FILE* file, const char* oper
     STATUS_CHECK(asm_push_arr_elem_val_the_same(file));
 
     PRINTF_( 0, "push 1\n");
-    PRINTF_( 0, "%s\n", oper);
+    STATUS_CHECK(asm_math_operator(file, oper));
 
     STATUS_CHECK(asm_pop_arr_elem_value_the_same(file));
+
+    return Status::NORMAL_WORK;
+}
+
+Status::Statuses asm_fps(FILE* file, const int val) {
+    assert(file);
+
+    ASM_PRINT_COMMAND(0, "fps %d\n", val);
+
+    return Status::NORMAL_WORK;
+}
+
+Status::Statuses asm_video_show_frame(FILE* file) {
+    assert(file);
+
+    ASM_PRINT_COMMAND(0, "shw\n");
+
+    return Status::NORMAL_WORK;
+}
+
+Status::Statuses asm_math_operator(FILE* file, const OperNum math_oper_type) {
+    assert(file);
+
+    const char* math_oper_str = math_oper_str_(math_oper_type);
+    if (math_oper_str == nullptr)
+        return Status::TREE_ERROR;
+
+    ASM_PRINT_COMMAND(0, "%s\n", math_oper_str);
+
+    return Status::NORMAL_WORK;
+}
+
+Status::Statuses asm_get_returned_value(FILE* file) {
+    assert(file);
+
+    ASM_PRINT_COMMAND(0, "push rax\n");
+
+    return Status::NORMAL_WORK;
+};
+
+Status::Statuses asm_insert_empty_line(FILE* file) {
+    assert(file);
+
+    ASM_PRINT_COMMAND_NO_TAB("\n");
+
+    return Status::NORMAL_WORK;
+}
+
+Status::Statuses asm_comment(FILE* file, const char* comment) {
+    assert(file);
+
+    ASM_PRINT_COMMAND(0, "; %s\n", comment);
+
+    return Status::NORMAL_WORK;
+}
+
+Status::Statuses asm_tab(FILE* file) {
+    ASM_PRINT_COMMAND(+1, "");
+
+    return Status::NORMAL_WORK;
+};
+
+Status::Statuses asm_untab(FILE* file) {
+    ASM_PRINT_COMMAND(-1, "");
+
+    return Status::NORMAL_WORK;
+}
+
+Status::Statuses asm_read_double(FILE* file) {
+    ASM_PRINT_COMMAND(0, "in\n");
+
+    return Status::NORMAL_WORK;
+}
+
+Status::Statuses asm_write_returned_value(FILE* file) {
+    ASM_PRINT_COMMAND(0, "pop rax\n\n");
+
+    return Status::NORMAL_WORK;
+}
+
+Status::Statuses asm_ret(FILE* file) {
+    ASM_PRINT_COMMAND(0, "ret\n\n");
+
+    return Status::NORMAL_WORK;
+}
+
+
+Status::Statuses asm_push_immed_operand(FILE* file, double imm) {
+    ASM_PRINT_COMMAND(0, "push %g\n", imm);
+
+    return Status::NORMAL_WORK;
+}
+
+Status::Statuses asm_print_double(FILE* file) {
+    ASM_PRINT_COMMAND(0, "out\n\n");
 
     return Status::NORMAL_WORK;
 }

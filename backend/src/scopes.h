@@ -17,7 +17,7 @@ enum class VarType {
 struct Var {
     size_t var_num = 0;
 
-    VarType type = {};
+    VarType type = VarType::NONE;
     size_t size = 1;
 
     bool is_const = true;

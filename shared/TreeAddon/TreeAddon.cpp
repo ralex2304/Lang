@@ -28,7 +28,7 @@ Status::Statuses tree_dtor_untied_subtree(TreeNode** node) {
     return Status::NORMAL_WORK;
 }
 
-void tree_is_damaged(Tree* tree, const char* err_msg) {
+Status::Statuses tree_is_damaged(Tree* tree, const char* err_msg) {
     assert(tree);
 
     if (err_msg == nullptr)
@@ -38,6 +38,8 @@ void tree_is_damaged(Tree* tree, const char* err_msg) {
     log_printf(&log_file, HTML_RED("Tree is damaged:") " %s\n", err_msg);
 
     TREE_DUMP(tree);
+
+    return Status::TREE_ERROR;
 }
 
 static Status::Statuses tree_copy_subtree_traversal_(Tree* tree, TreeNode* src,

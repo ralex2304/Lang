@@ -24,7 +24,7 @@ Status::Statuses syntax_error(DebugInfo info, const char* format, ...) {
 
     va_end(arg_list);
 
-    return Status::NORMAL_WORK;
+    return Status::SYNTAX_ERROR;
 }
 
 Status::Statuses warning(DebugInfo info, const char* format, ...) {

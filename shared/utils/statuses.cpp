@@ -15,8 +15,6 @@ Status::Statuses Status::raise(const Statuses status) {
         STATUS_CASE_(MEMORY_EXCEED,     "Not enough memory");
         STATUS_CASE_(OUTPUT_ERROR,      "Output error");
         STATUS_CASE_(INPUT_ERROR,       "Input error");
-        STATUS_CASE_(WRONG_CMD,         "User is hopelessly stupid");
-        STATUS_CASE_(TOO_MANY_ATTEMPTS, "User is too stubborn");
         STATUS_CASE_(TREE_ERROR,        "Operation with Tree failed");
         STATUS_CASE_(STACK_ERROR,       "Operation with Stack failed");
         STATUS_CASE_(SYNTAX_ERROR,      "Syntax error found");

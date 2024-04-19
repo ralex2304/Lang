@@ -32,9 +32,16 @@ ___func_0:
         push [rbx + 1]
         out
 
-        push [rbx + 1]
         push 10
+        push [rbx + 1]
+        ; swap last stk vals
+        pop rdx
+        pop rex
+        push rdx
+        push rex
+
         add
+
         ; var assignment: переменная
         pop [rbx + 1]
 

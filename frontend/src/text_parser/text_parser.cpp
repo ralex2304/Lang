@@ -73,9 +73,7 @@ Status::Statuses TextParser::Main(ParseData* data, size_t* const pos, TreeNode**
     if (IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::TERMINATOR))
         return Status::NORMAL_WORK;
 
-    STATUS_CHECK(syntax_error(DEBUG_INFO(CUR_TOKEN), "Unexpected expression"));
-
-    return Status::SYNTAX_ERROR;
+    return SYNTAX_ERROR("Unexpected expression");
 }
 
 Status::Statuses TextParser::CH_DefFunc(ParseData* data, size_t* const pos, TreeNode** dest,
@@ -147,10 +145,8 @@ Status::Statuses TextParser::CH_DefVar(ParseData* data, size_t* const pos, TreeN
         assert(array_size_expr);
 
         if (!IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::CLOSE_INDEX_BRACE)) {
-            STATUS_CHECK(syntax_error(DEBUG_INFO(CUR_TOKEN), "Expected index brace closing"),
-                                                        tree_dtor_untied_subtree(&array_size_expr));
             tree_dtor_untied_subtree(&array_size_expr);
-            return Status::SYNTAX_ERROR;
+            return SYNTAX_ERROR("Expected index brace closing");
         }
         (*pos)++;
     }
@@ -291,9 +287,9 @@ static Status::Statuses CH_Def_func_(ParseData* data, size_t* const pos, TreeNod
 
     if (!IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::CLOSE_BRACE)) {
         tree_dtor_untied_subtree(&left_subtree);
-        STATUS_CHECK(syntax_error(DEBUG_INFO(CUR_TOKEN), "Expected separator"));
-        return Status::SYNTAX_ERROR;
+        return SYNTAX_ERROR("Expected separator");
     }
+
     (*pos)++;
 
     if (IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::CMD_SEPARATOR))
@@ -325,18 +321,15 @@ Status::Statuses TextParser::FuncArgsDef(ParseData* data, size_t* const pos, Tre
     TreeNode* parent = nullptr;
 
     do {
-        if (!IS_TOKEN_TYPE(CUR_TOKEN, TokenType::VAR)) {
-            STATUS_CHECK(syntax_error(DEBUG_INFO(CUR_TOKEN), "Expected var or function name"));
-            return Status::SYNTAX_ERROR;
-        }
+        if (!IS_TOKEN_TYPE(CUR_TOKEN, TokenType::VAR))
+            return SYNTAX_ERROR("Expected var or function name");
+
         DebugInfo def_debug_info = DEBUG_INFO(CUR_TOKEN);
         size_t var_num = CUR_TOKEN.data.var;
         (*pos)++;
 
-        if (!IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::VAR)) {
-            STATUS_CHECK(syntax_error(DEBUG_INFO(CUR_TOKEN), "Expected var or function declaration"));
-            return Status::SYNTAX_ERROR;
-        }
+        if (!IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::VAR))
+            return SYNTAX_ERROR("Expected var or function declaration");
 
         TreeNode* var_node = nullptr;
         STATUS_CHECK(new_var_node(&var_node, var_num, DEBUG_INFO(CUR_TOKEN)));
@@ -419,10 +412,9 @@ Status::Statuses TextParser::CH_Commands(ParseData* data, size_t* const pos, Tre
     if (IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::CMD_SEPARATOR))
         (*pos)++;
 
-    if (!IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::CLOSE_SCOPE)) {
-        STATUS_CHECK(syntax_error(DEBUG_INFO(CUR_TOKEN), "Expected scope closing"));
-        return Status::SYNTAX_ERROR;
-    }
+    if (!IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::CLOSE_SCOPE))
+        return SYNTAX_ERROR("Expected scope closing");
+
     (*pos)++;
 
     return Status::NORMAL_WORK;
@@ -460,10 +452,9 @@ Status::Statuses TextParser::CH_FuncCall(ParseData* data, size_t* const pos, Tre
                                                             tree_dtor_untied_subtree(&func_args));
     (*size)++;
 
-    if (!IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::CLOSE_BRACE)) {
-        STATUS_CHECK(syntax_error(DEBUG_INFO(CUR_TOKEN), "Expected closing brace"));
-        return Status::SYNTAX_ERROR;
-    }
+    if (!IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::CLOSE_BRACE))
+        return SYNTAX_ERROR("Expected closing brace");
+
     (*pos)++;
 
     return Status::NORMAL_WORK;
@@ -531,8 +522,7 @@ Status::Statuses TextParser::Command(ParseData* data, size_t* const pos, TreeNod
     if (*dest != nullptr)
         return Status::NORMAL_WORK;
 
-    STATUS_CHECK(syntax_error(DEBUG_INFO(CUR_TOKEN), "Expected command or commands"));
-    return Status::SYNTAX_ERROR;
+    return SYNTAX_ERROR("Expected command or commands");
 }
 
 Status::Statuses TextParser::SimpleCommand(ParseData* data, size_t* const pos, TreeNode** dest,
@@ -588,19 +578,17 @@ Status::Statuses TextParser::Clause(ParseData* data, size_t* const pos, TreeNode
     assert(*dest == nullptr);
     assert(pos);
 
-    if (!IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::OPEN_BRACE)) {
-        STATUS_CHECK(syntax_error(DEBUG_INFO(CUR_TOKEN), "Expected opening brace"));
-        return Status::SYNTAX_ERROR;
-    }
+    if (!IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::OPEN_BRACE))
+        return SYNTAX_ERROR("Expected opening brace");
+
     (*pos)++;
 
     STATUS_CHECK(Expr(data, pos, dest, size));
     assert(*dest);
 
-    if (!IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::CLOSE_BRACE)) {
-        STATUS_CHECK(syntax_error(DEBUG_INFO(CUR_TOKEN), "Expected closing brace"));
-        return Status::SYNTAX_ERROR;
-    }
+    if (!IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::CLOSE_BRACE))
+        return SYNTAX_ERROR("Expected closing brace");
+
     (*pos)++;
 
     return Status::NORMAL_WORK;
@@ -624,8 +612,7 @@ Status::Statuses TextParser::ClauseAction(ParseData* data, size_t* const pos, Tr
     if (*dest != nullptr)
         return Status::NORMAL_WORK;
 
-    STATUS_CHECK(syntax_error(DEBUG_INFO(CUR_TOKEN), "Expected command or commands"));
-    return Status::SYNTAX_ERROR;
+    return SYNTAX_ERROR("Expected command or commands");
 }
 
 Status::Statuses TextParser::CH_SimpleClause(ParseData* data, size_t* const pos, TreeNode** dest,
@@ -712,11 +699,10 @@ Status::Statuses TextParser::CH_PostClause(ParseData* data, size_t* const pos, T
     STATUS_CHECK(ClauseAction(data, pos, &clause_action, size), tree_dtor_untied_subtree(&clause_action));
 
     if (!((oper == OperNum::DO_WHILE && IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::DO_WHILE_WHILE)) ||
-          (oper == OperNum::DO_IF    && IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::DO_IF_IF)))) {
+          (oper == OperNum::DO_IF    && IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::DO_IF_IF))))
 
-        STATUS_CHECK(syntax_error(DEBUG_INFO(CUR_TOKEN), "Expected end of prefix-clause expression"));
-        return Status::SYNTAX_ERROR;
-    }
+        return SYNTAX_ERROR("Expected end of prefix-clause expression");
+
     (*pos)++;
 
     TreeNode* clause = nullptr;
@@ -805,11 +791,9 @@ Status::Statuses TextParser::Expr(ParseData* data, size_t* const pos, TreeNode**
             STATUS_CHECK(Expr(data, pos, &arr_index_expr, size));
 
             if (!IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::CLOSE_INDEX_BRACE)) {
-                STATUS_CHECK(syntax_error(DEBUG_INFO(CUR_TOKEN), "Expected index brace closing"),
-                                                            tree_dtor_untied_subtree(&arr_index_expr));
                 tree_dtor_untied_subtree(&arr_index_expr);
                 *size = begin_size;
-                return Status::SYNTAX_ERROR;
+                return SYNTAX_ERROR("Expected index brace closing");
             }
             (*pos)++;
         }
@@ -1175,10 +1159,9 @@ Status::Statuses TextParser::MathLvl5(ParseData* data, size_t* const pos, TreeNo
 
         STATUS_CHECK(Expr(data, pos, dest, size));
 
-        if (!IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::CLOSE_BRACE)) {
-            STATUS_CHECK(syntax_error(DEBUG_INFO(CUR_TOKEN), "Expected closing brace"));
-            return Status::SYNTAX_ERROR;
-        }
+        if (!IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::CLOSE_BRACE))
+            return SYNTAX_ERROR("Expected closing brace");
+
         (*pos)++;
 
         if (parent)
@@ -1222,10 +1205,9 @@ Status::Statuses TextParser::CH_Binary(ParseData* data, size_t* const pos, TreeN
         return Status::NORMAL_WORK;
     (*pos)++;
 
-    if (!IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::OPEN_BRACE)) {
-        STATUS_CHECK(syntax_error(DEBUG_INFO(CUR_TOKEN), "Expected opening brace"));
-        return Status::SYNTAX_ERROR;
-    }
+    if (!IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::OPEN_BRACE))
+        return SYNTAX_ERROR("Expected opening brace");
+
     (*pos)++;
 
     TreeNode* arg1 = nullptr;
@@ -1233,17 +1215,14 @@ Status::Statuses TextParser::CH_Binary(ParseData* data, size_t* const pos, TreeN
 
     if (!IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::VAR_SEPARATOR)) {
         tree_dtor_untied_subtree(&arg1);
-
-        STATUS_CHECK(syntax_error(DEBUG_INFO(CUR_TOKEN), "Expected next argument"));
-        return Status::SYNTAX_ERROR;
+        return SYNTAX_ERROR("Expected next argument");
     }
     (*pos)++;
 
     if (!IS_TOKEN_TYPE(CUR_TOKEN, TokenType::VAR)) {
         tree_dtor_untied_subtree(&arg1);
 
-        STATUS_CHECK(syntax_error(DEBUG_INFO(CUR_TOKEN), "Expected var name"));
-        return Status::SYNTAX_ERROR;
+        return SYNTAX_ERROR("Expected var name");
     }
 
     TreeNode* var_node = nullptr;
@@ -1256,8 +1235,7 @@ Status::Statuses TextParser::CH_Binary(ParseData* data, size_t* const pos, TreeN
         tree_dtor_untied_subtree(&arg1);
         tree_dtor_untied_subtree(&var_node);
 
-        STATUS_CHECK(syntax_error(DEBUG_INFO(CUR_TOKEN), "Expected closing brace"));
-        return Status::SYNTAX_ERROR;
+        return SYNTAX_ERROR("Expected closing brace");
     }
     (*pos)++;
 
@@ -1308,10 +1286,9 @@ Status::Statuses TextParser::CH_Unary(ParseData* data, size_t* const pos, TreeNo
     DebugInfo debug_info = DEBUG_INFO(CUR_TOKEN);
     (*pos)++;
 
-    if (!IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::OPEN_BRACE)) {
-        STATUS_CHECK(syntax_error(DEBUG_INFO(CUR_TOKEN), "Expected opening brace"));
-        return Status::SYNTAX_ERROR;
-    }
+    if (!IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::OPEN_BRACE))
+        return SYNTAX_ERROR("Expected opening brace");
+
     (*pos)++;
 
     TreeNode* expr = nullptr;
@@ -1319,8 +1296,7 @@ Status::Statuses TextParser::CH_Unary(ParseData* data, size_t* const pos, TreeNo
 
     if (!IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::CLOSE_BRACE)) {
         tree_dtor_untied_subtree(&expr);
-        STATUS_CHECK(syntax_error(DEBUG_INFO(CUR_TOKEN), "Expected closing brace"));
-        return Status::SYNTAX_ERROR;
+        return SYNTAX_ERROR("Expected closing brace");
     }
     (*pos)++;
 
@@ -1439,10 +1415,9 @@ Status::Statuses TextParser::Postfix(ParseData* data, size_t* const pos, TreeNod
     assert(*dest == nullptr);
     assert(pos);
 
-    if (!IS_TOKEN_TYPE(CUR_TOKEN, TokenType::VAR)) {
-        STATUS_CHECK(syntax_error(DEBUG_INFO(CUR_TOKEN), "Expected var name"));
-        return Status::SYNTAX_ERROR;
-    }
+    if (!IS_TOKEN_TYPE(CUR_TOKEN, TokenType::VAR))
+        return SYNTAX_ERROR("Expected var name");
+
     size_t var_num = CUR_TOKEN.data.var;
     DebugInfo var_debug_info = DEBUG_INFO(CUR_TOKEN);
     (*pos)++;
@@ -1455,10 +1430,8 @@ Status::Statuses TextParser::Postfix(ParseData* data, size_t* const pos, TreeNod
         assert(arr_index_expr);
 
         if (!IS_TOKEN_TERM_EQ(CUR_TOKEN, TerminalNum::CLOSE_INDEX_BRACE)) {
-            STATUS_CHECK(syntax_error(DEBUG_INFO(CUR_TOKEN), "Expected index brace closing"),
-                                                        tree_dtor_untied_subtree(&arr_index_expr));
             tree_dtor_untied_subtree(&arr_index_expr);
-            return Status::SYNTAX_ERROR;
+            return SYNTAX_ERROR("Expected index brace closing");
         }
         (*pos)++;
     }

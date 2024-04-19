@@ -72,9 +72,7 @@ Status::Statuses tokenizer_process(const char* text_str, Vector* tokens, Vector*
         STATUS_CHECK(tokenizer_add_var_(&text, tokens, vars, &is_found));
         if (is_found) continue;
 
-        STATUS_CHECK(syntax_error(DEBUG_INFO_(text), "unknown symbol"));
-
-        return Status::SYNTAX_ERROR;
+        return syntax_error(DEBUG_INFO_(text), "unknown symbol");
     }
 
     Token term_token = {.type = TokenType::TERM, .data = {.term = TerminalNum::TERMINATOR},
@@ -166,10 +164,8 @@ static Status::Statuses tokenizer_skip_multiline_comment_(TextData* text, bool* 
             continue;
         }
 
-        if (text->str[text->pos] == '\0') {
-            syntax_error(debug_info, "multiline comment must be closed");
-            return Status::SYNTAX_ERROR;
-        }
+        if (text->str[text->pos] == '\0')
+            return syntax_error(debug_info, "multiline comment must be closed");
 
         text->pos++;
     }

@@ -53,7 +53,7 @@ Status::Statuses asm_halt(FILE* file);
 
 Status::Statuses asm_init_regs(FILE* file);
 
-Status::Statuses asm_logic_compare(FILE* file, const char* jump);
+Status::Statuses asm_logic_compare(FILE* file, const OperNum jump);
 
 Status::Statuses asm_begin_func_defenition(BackData* data, FILE* file, const size_t func_num);
 
@@ -86,12 +86,38 @@ Status::Statuses asm_break(FILE* file, size_t cnt);
 inline Status::Statuses asm_if_else_end(FILE* file, size_t cnt) { return asm_if_end(file, cnt); }
 
 Status::Statuses asm_prepost_oper_var(FILE* file, const size_t addr_offset, const bool is_global,
-                                      const char* oper);
+                                      const OperNum oper);
 
 Status::Statuses asm_prepost_oper_arr_elem(FILE* file, const size_t addr_offset, const bool is_global,
-                                           const char* oper);
+                                           const OperNum oper);
 
-Status::Statuses asm_prepost_oper_arr_elem_the_same(FILE* file, const char* oper);
+Status::Statuses asm_prepost_oper_arr_elem_the_same(FILE* file, const OperNum oper);
+
+Status::Statuses asm_fps(FILE* file, const int val);
+
+Status::Statuses asm_video_show_frame(FILE* file);
+
+Status::Statuses asm_math_operator(FILE* file, const OperNum math_op);
+
+Status::Statuses asm_get_returned_value(FILE* file);
+
+Status::Statuses asm_insert_empty_line(FILE* file);
+
+Status::Statuses asm_comment(FILE* file, const char* comment);
+
+Status::Statuses asm_tab(FILE* file);
+
+Status::Statuses asm_untab(FILE* file);
+
+Status::Statuses asm_read_double(FILE* file);
+
+Status::Statuses asm_print_double(FILE* file);
+
+Status::Statuses asm_write_returned_value(FILE* file);
+
+Status::Statuses asm_ret(FILE* file);
+
+Status::Statuses asm_push_immed_operand(FILE* file, double imm);
 
 size_t asm_count_addr_offset(Stack* scopes);
 

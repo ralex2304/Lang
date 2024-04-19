@@ -35,5 +35,6 @@
 #define VAR_ELEM(var_num_, debug_)  {.type = TreeElemType::VAR,  .data = {.var = var_num_}, \
                                      .debug_info = debug_}
 
+#define SYNTAX_ERROR(...) syntax_error(DEBUG_INFO(CUR_TOKEN), __VA_ARGS__)
 
 #endif //< #ifndef TEXT_PARSER_DSL_H_

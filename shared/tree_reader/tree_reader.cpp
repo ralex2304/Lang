@@ -7,6 +7,11 @@ static Status::Statuses read_tree_(Tree* tree, char* text, size_t* const pos);
 
 static Status::Statuses read_vars_(Vector* vars, char* text, size_t* const pos);
 
+static Status::Statuses read_debug_info_(char* text, size_t* const pos, TreeElem* elem);
+
+static Status::Statuses read_elem_value_(char* text, size_t* const pos, TreeElem* elem);
+
+static Status::Statuses read_elem_type_(char* text, size_t* const pos, TreeElem* elem);
 
 
 Status::Statuses read_tree(Tree* tree, Vector* vars, char** text, const char* filename) {
@@ -65,8 +70,6 @@ static Status::Statuses read_tree_(Tree* tree, char* text, size_t* const pos) {
     return Status::NORMAL_WORK;
 }
 
-
-
 static Status::Statuses read_tree_traversal_(Tree* tree, char* text, size_t* const pos,
                                              TreeNode** node, TreeNode* parent) {
     assert(tree);
@@ -75,8 +78,9 @@ static Status::Statuses read_tree_traversal_(Tree* tree, char* text, size_t* con
     assert(node);
     assert(*node == nullptr);
 
-    if (strncmp("(nil)", text + *pos, 5) == 0) {
-        *pos += 5;
+    const char nil[] = "(nil)";
+    if (strncmp(nil, text + *pos, sizeof(nil) - 1) == 0) {
+        *pos += sizeof(nil) - 1;
         return Status::NORMAL_WORK;
     }
 
@@ -87,65 +91,13 @@ static Status::Statuses read_tree_traversal_(Tree* tree, char* text, size_t* con
 
     TreeElem elem = {};
 
-    if (strncmp("{\"", text + *pos, 2) == 0) {
-        *pos += 2;
-        char* filename_end = strchr(text + *pos, '"');
-        if (filename_end == nullptr)
-            ERR_("'\"' not found\n");
+    STATUS_CHECK(read_debug_info_(text, pos, &elem));
 
-        *filename_end = '\0';
-        elem.debug_info.filename = text + *pos;
-
-        *pos += filename_end - text - *pos + 1;
-
-        int len = -1;
-        if (sscanf(text + *pos, ", %zu, %zu, %zu %n", &elem.debug_info.line, &elem.debug_info.symbol,
-                                                    &elem.debug_info.line_position, &len) != 3)
-            ERR_("Expected debug info\n");
-        assert(len > 0);
-
-        *pos += len;
-
-        if (strncmp("}, ", text + *pos, 3) != 0)
-            ERR_("Expected \"}, \" instead of \"%.10s\"\n", text + *pos);
-        *pos += 3;
-    }
-
-    int len = -1;
-    int type = -1;
-    if (sscanf(text + *pos, "%d, %n", &type, &len) != 1)
-        ERR_("Expected type\n");
-    assert(len > 0);
-
-    elem.type = (TreeElemType)type;
-    *pos += len;
+    STATUS_CHECK(read_elem_type_(text, pos, &elem));
 
     if (text[*pos] == ' ') (*pos)++;
 
-    int oper = -1;
-
-    switch (elem.type) {
-        case TreeElemType::OPER:
-            oper = -1;
-            if (sscanf(text + *pos, "%d %n", &oper, &len) != 1)
-                ERR_("Expected oper num\n");
-            elem.data.oper = (OperNum)oper;
-            break;
-        case TreeElemType::VAR:
-            if (sscanf(text + *pos, "%zu %n", &elem.data.var, &len) != 1)
-                ERR_("Expected var num\n");
-            break;
-        case TreeElemType::NUM:
-            if (sscanf(text + *pos, "%lg %n", &elem.data.num, &len) != 1)
-                ERR_("Expected number\n");
-            break;
-
-        case TreeElemType::NONE:
-        default:
-            ERR_("Unknown type \"%d\"\n", (int)elem.type);
-            break;
-    }
-    *pos += len;
+    STATUS_CHECK(read_elem_value_(text, pos, &elem));
 
     if (strncmp(", ", text + *pos, 2) != 0)
         ERR_("Expected \", \"\n");
@@ -156,14 +108,97 @@ static Status::Statuses read_tree_traversal_(Tree* tree, char* text, size_t* con
 
     STATUS_CHECK(read_tree_traversal_(tree, text, pos, &(*node)->left, *node));
 
-    if (text[*pos] == ' ')
-        (*pos)++;
+    if (text[*pos] == ' ') (*pos)++;
 
     STATUS_CHECK(read_tree_traversal_(tree, text, pos, &(*node)->right, *node));
 
     if (text[*pos] != ')')
         ERR_("Expected ')'\n");
     (*pos)++;
+
+    return Status::NORMAL_WORK;
+}
+
+static Status::Statuses read_elem_value_(char* text, size_t* const pos, TreeElem* elem) {
+    assert(text);
+    assert(pos);
+    assert(elem);
+
+    int len = -1;
+    int oper = -1;
+
+    switch (elem->type) {
+        case TreeElemType::OPER:
+            if (sscanf(text + *pos, "%d %n", &oper, &len) != 1)
+                ERR_("Expected oper num\n");
+            elem->data.oper = (OperNum)oper;
+            break;
+
+        case TreeElemType::VAR:
+            if (sscanf(text + *pos, "%zu %n", &elem->data.var, &len) != 1)
+                ERR_("Expected var num\n");
+            break;
+
+        case TreeElemType::NUM:
+            if (sscanf(text + *pos, "%lg %n", &elem->data.num, &len) != 1)
+                ERR_("Expected number\n");
+            break;
+
+        case TreeElemType::NONE:
+        default:
+            ERR_("Unknown type \"%d\"\n", (int)elem->type);
+    }
+    *pos += len;
+
+    return Status::NORMAL_WORK;
+}
+
+static Status::Statuses read_elem_type_(char* text, size_t* const pos, TreeElem* elem) {
+    assert(text);
+    assert(pos);
+    assert(elem);
+
+    int len = -1;
+    int type = -1;
+    if (sscanf(text + *pos, "%d, %n", &type, &len) != 1)
+        ERR_("Expected type\n");
+    assert(len > 0);
+
+    elem->type = (TreeElemType)type;
+    *pos += len;
+
+    return Status::NORMAL_WORK;
+}
+
+static Status::Statuses read_debug_info_(char* text, size_t* const pos, TreeElem* elem) {
+    assert(text);
+    assert(pos);
+    assert(elem);
+
+    if (strncmp("{\"", text + *pos, 2) != 0)
+        return Status::NORMAL_WORK;
+
+    *pos += 2;
+    char* filename_end = strchr(text + *pos, '"');
+    if (filename_end == nullptr)
+        ERR_("'\"' not found\n");
+
+    *filename_end = '\0';
+    elem->debug_info.filename = text + *pos;
+
+    *pos += filename_end - text - *pos + 1;
+
+    int len = -1;
+    if (sscanf(text + *pos, ", %zu, %zu, %zu %n", &elem->debug_info.line, &elem->debug_info.symbol,
+                                                    &elem->debug_info.line_position, &len) != 3)
+        ERR_("Expected debug info\n");
+    assert(len > 0);
+
+    *pos += len;
+
+    if (strncmp("}, ", text + *pos, 3) != 0)
+        ERR_("Expected \"}, \" instead of \"%.10s\"\n", text + *pos);
+    *pos += 3;
 
     return Status::NORMAL_WORK;
 }

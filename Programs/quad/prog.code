@@ -146,9 +146,10 @@ ___func_4:
         push 1
         out
 
-        push -1
         push [rbx + 1]
-        mul
+        ; neg:
+push -1
+mul
 
         push 2
         push [rbx + 0]
@@ -175,9 +176,10 @@ ___func_4:
     push 2
     out
 
-    push -1
     push [rbx + 1]
-    mul
+    ; neg:
+push -1
+mul
 
     push [rbx + 3]
     sub
@@ -190,9 +192,10 @@ ___func_4:
 
     out
 
-    push -1
     push [rbx + 1]
-    mul
+    ; neg:
+push -1
+mul
 
     push [rbx + 3]
     add
@@ -266,9 +269,10 @@ ___func_5:
     push 1
     out
 
-    push -1
     push [rbx + 1]
-    mul
+    ; neg:
+push -1
+mul
 
     push [rbx + 0]
     div

@@ -17,8 +17,6 @@ struct Status {
         MEMORY_EXCEED     =  3,  //< Memory allocation failed
         OUTPUT_ERROR      =  4,  //< Output writing error
         INPUT_ERROR       =  5,  //< Input reading error
-        WRONG_CMD         =  6,  //< Wrong cmd was recieved from user
-        TOO_MANY_ATTEMPTS =  7,  //< User made too many attempts
         TREE_ERROR        =  8,  //< Tree error
         STACK_ERROR       =  9,  //< Stack error
         SYNTAX_ERROR      =  10, //< Syntax error

@@ -111,10 +111,8 @@ static Status::Statuses dead_traversal_check_if_(MidData* data, TreeNode** node)
     assert(*node);
     assert(NODE_IS_OPER(*node, OperNum::IF));
 
-    if (*L(*node) == nullptr || *R(*node) == nullptr) {
-        DAMAGED_TREE("IF missing subtree(s)");
-        return Status::TREE_ERROR;
-    }
+    if (*L(*node) == nullptr || *R(*node) == nullptr)
+        return DAMAGED_TREE("IF missing subtree(s)");
 
     if (TYPE_IS_NUM(*L(*node))) {
         bool is_true = !IS_DOUBLE_EQ(0, *NUM_VAL(*L(*node)));
@@ -148,10 +146,8 @@ static Status::Statuses dead_traversal_check_while_(MidData* data, TreeNode** no
     assert(*node);
     assert(NODE_IS_OPER(*node, OperNum::WHILE));
 
-    if (*L(*node) == nullptr || *R(*node) == nullptr) {
-        DAMAGED_TREE("WHILE missing subtree(s)");
-        return Status::TREE_ERROR;
-    }
+    if (*L(*node) == nullptr || *R(*node) == nullptr)
+        return DAMAGED_TREE("WHILE missing subtree(s)");
 
     if (TYPE_IS_NUM(*L(*node))) {
         bool is_true = !IS_DOUBLE_EQ(0, *NUM_VAL(*L(*node)));
@@ -181,10 +177,8 @@ static Status::Statuses optimise_else_(MidData* data, TreeNode** clause_oper, bo
     assert(clause_oper);
     assert(*clause_oper);
 
-    if (*L(*R(*clause_oper)) == nullptr || *R(*R(*clause_oper)) == nullptr) {
-        DAMAGED_TREE("ELSE missing subtree(s)");
-        return Status::TREE_ERROR;
-    }
+    if (*L(*R(*clause_oper)) == nullptr || *R(*R(*clause_oper)) == nullptr)
+        return DAMAGED_TREE("ELSE missing subtree(s)");
 
     if (is_true) {
         TREE_DELETE_SUBTREE(R(*R(*clause_oper)));
@@ -203,10 +197,8 @@ static Status::Statuses dead_traversal_check_post_clause_(MidData* data, TreeNod
     assert(node);
     assert(*node);
 
-    if (*L(*node) == nullptr || *R(*node) == nullptr) {
-        DAMAGED_TREE("post clause oper missing subtree(s)");
-        return Status::TREE_ERROR;
-    }
+    if (*L(*node) == nullptr || *R(*node) == nullptr)
+        return DAMAGED_TREE("post clause oper missing subtree(s)");
 
     if (TYPE_IS_NUM(*L(*node))) {
         bool is_true = !IS_DOUBLE_EQ(0, *NUM_VAL(*L(*node)));
