@@ -27,6 +27,70 @@ static const char* jump_str_(const OperNum jmp_type);
                     return Status::OUTPUT_ERROR;                \
             } while (0)
 
+Status::Statuses asm_spu_if_begin(FILE* file, size_t cnt) {
+    assert(file);
+
+    PRINTF_("; if begin\n");
+
+    PRINTF_("push 0\n");
+    PRINTF_("je ___if_%zu_end\n", cnt);
+
+    return Status::NORMAL_WORK;
+}
+
+Status::Statuses asm_spu_end(FILE* file) {
+    assert(file);
+
+    PRINTF_("hlt\n\n");
+
+    return Status::NORMAL_WORK;
+}
+
+Status::Statuses asm_spu_begin_func_definition(FILE* file, const size_t func_num, String func_name) {
+    assert(file);
+    assert(func_name.s);
+
+    PRINTF_NO_TAB_("; =========================== Function definition =========================\n");
+
+    PRINTF_NO_TAB_("; func name: %.*s\n", PRINTF_STRING_(func_name));
+
+    PRINTF_NO_TAB_("___func_%zu:\n", func_num);
+
+    return Status::NORMAL_WORK;
+}
+
+Status::Statuses asm_spu_end_func_definition(FILE* file) {
+    assert(file);
+
+    PRINTF_("ret\n");
+
+    PRINTF_NO_TAB_("; ------------------------- Function definition end -----------------------\n\n\n");
+
+    return Status::NORMAL_WORK;
+}
+
+Status::Statuses asm_spu_call_function(FILE* file, size_t func_num, size_t offset, String func_name) {
+    assert(file);
+    assert(func_name.s);
+
+    PRINTF_("; func call: %.*s\n", PRINTF_STRING_(func_name));
+
+    PRINTF_("push rbx\n");
+    PRINTF_("push rbx + %zu\n", offset);
+    PRINTF_("pop rbx\n");
+    PRINTF_("call ___func_%zu\n", func_num);
+    PRINTF_("pop rbx\n");
+
+    PRINTF_("; func call end\n\n");
+
+    return Status::NORMAL_WORK;
+}
+
+Status::Statuses asm_spu_ret(FILE* file) {
+    PRINTF_("ret\n\n");
+
+    return Status::NORMAL_WORK;
+}
 
 Status::Statuses asm_spu_pop_var_value(FILE* file, size_t addr_offset, bool is_global) {
     assert(file);
@@ -157,23 +221,6 @@ Status::Statuses asm_spu_write_global_oper(FILE* file, OperNum oper, DebugInfo* 
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_spu_call_function(FILE* file, size_t func_num, size_t offset, String func_name) {
-    assert(file);
-    assert(func_name.s);
-
-    PRINTF_("; func call: %.*s\n", PRINTF_STRING_(func_name));
-
-    PRINTF_("push rbx\n");
-    PRINTF_("push rbx + %zu\n", offset);
-    PRINTF_("pop rbx\n");
-    PRINTF_("call ___func_%zu\n", func_num);
-    PRINTF_("pop rbx\n");
-
-    PRINTF_("; func call end\n\n");
-
-    return Status::NORMAL_WORK;
-}
-
 Status::Statuses asm_spu_start(FILE* file) {
     assert(file);
 
@@ -191,14 +238,6 @@ Status::Statuses asm_spu_start(FILE* file) {
     PRINTF_("pop rbx\n");
 
     PRINTF_("; Regs initialisation end\n\n");
-
-    return Status::NORMAL_WORK;
-}
-
-Status::Statuses asm_spu_end(FILE* file) {
-    assert(file);
-
-    PRINTF_("hlt\n\n");
 
     return Status::NORMAL_WORK;
 }
@@ -243,29 +282,6 @@ Status::Statuses asm_spu_arr_elem_assignment_header(FILE* file, const char* var_
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_spu_begin_func_definition(FILE* file, const size_t func_num, String func_name) {
-    assert(file);
-    assert(func_name.s);
-
-    PRINTF_NO_TAB_("; =========================== Function definition =========================\n");
-
-    PRINTF_NO_TAB_("; func name: %.*s\n", PRINTF_STRING_(func_name));
-
-    PRINTF_NO_TAB_("___func_%zu:\n", func_num);
-
-    return Status::NORMAL_WORK;
-}
-
-Status::Statuses asm_spu_end_func_definition(FILE* file) {
-    assert(file);
-
-    PRINTF_("ret\n");
-
-    PRINTF_NO_TAB_("; ------------------------- Function definition end -----------------------\n\n\n");
-
-    return Status::NORMAL_WORK;
-}
-
 Status::Statuses asm_spu_swap_last_stk_vals(FILE* file) {
     assert(file);
 
@@ -274,17 +290,6 @@ Status::Statuses asm_spu_swap_last_stk_vals(FILE* file) {
     PRINTF_("pop rex\n");
     PRINTF_("push rdx\n");
     PRINTF_("push rex\n\n");
-
-    return Status::NORMAL_WORK;
-}
-
-Status::Statuses asm_spu_if_begin(FILE* file, size_t cnt) {
-    assert(file);
-
-    PRINTF_("; if begin\n");
-
-    PRINTF_("push 0\n");
-    PRINTF_("je ___if_%zu_end\n", cnt);
 
     return Status::NORMAL_WORK;
 }
@@ -321,6 +326,10 @@ Status::Statuses asm_spu_if_else_middle(FILE* file, size_t cnt) {
     PRINTF_NO_TAB_("___if_%zu_else:\n", cnt);
 
     return Status::NORMAL_WORK;
+}
+
+Status::Statuses asm_spu_if_else_end(FILE* file, size_t cnt) {
+    return asm_spu_if_end(file, cnt);
 }
 
 Status::Statuses asm_spu_do_if_check_clause(FILE* file, size_t cnt) {
@@ -575,12 +584,6 @@ Status::Statuses asm_spu_write_returned_value(FILE* file) {
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_spu_ret(FILE* file) {
-    PRINTF_("ret\n\n");
-
-    return Status::NORMAL_WORK;
-}
-
 Status::Statuses asm_spu_push_immed_operand(FILE* file, double imm) {
     PRINTF_("push %g\n", imm);
 
@@ -591,8 +594,4 @@ Status::Statuses asm_spu_print_double(FILE* file) {
     PRINTF_("out\n\n");
 
     return Status::NORMAL_WORK;
-}
-
-Status::Statuses asm_spu_if_else_end(FILE* file, size_t cnt) {
-    return asm_spu_if_end(file, cnt);
 }

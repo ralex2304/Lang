@@ -27,7 +27,7 @@ ___func_0:
         ; var assignment: переменная
         pop [rbx + 0]
 
-        ; new scope
+        ; scope begin
         push [rbx + 0]
         out
 
@@ -53,6 +53,7 @@ ___func_0:
         push [rbx + 1]
         out
 
+        ; scope end
         push [rbx + 0]
         out
 

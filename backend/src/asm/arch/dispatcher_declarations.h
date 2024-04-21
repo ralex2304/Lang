@@ -1,3 +1,14 @@
+FUNC_DEF(start)
+
+FUNC_DEF(end)
+
+FUNC_DEF(begin_func_definition, const size_t func_num, String func_name)
+
+FUNC_DEF(end_func_definition)
+
+FUNC_DEF(call_function, size_t func_num, size_t offset, String func_name)
+
+FUNC_DEF(ret)
 
 FUNC_DEF(pop_var_value, size_t addr_offset, bool is_global)
 
@@ -19,21 +30,11 @@ FUNC_DEF(push_arr_elem_val_the_same)
 
 FUNC_DEF(write_global_oper, OperNum oper, DebugInfo* debug_info)
 
-FUNC_DEF(call_function, size_t func_num, size_t offset, String func_name)
-
-FUNC_DEF(start)
-
-FUNC_DEF(end)
-
 FUNC_DEF(logic_compare, const OperNum jump)
 
 FUNC_DEF(var_assignment_header, const char* var_name)
 
 FUNC_DEF(arr_elem_assignment_header, const char* var_name)
-
-FUNC_DEF(begin_func_definition, const size_t func_num, String func_name)
-
-FUNC_DEF(end_func_definition)
 
 FUNC_DEF(swap_last_stk_vals)
 
@@ -44,6 +45,8 @@ FUNC_DEF(if_end, size_t cnt)
 FUNC_DEF(if_else_begin, size_t cnt)
 
 FUNC_DEF(if_else_middle, size_t cnt)
+
+FUNC_DEF(if_else_end, size_t cnt)
 
 FUNC_DEF(do_if_check_clause, size_t cnt)
 
@@ -83,10 +86,6 @@ FUNC_DEF(read_double)
 
 FUNC_DEF(write_returned_value)
 
-FUNC_DEF(ret)
-
 FUNC_DEF(push_immed_operand, double imm)
 
 FUNC_DEF(print_double)
-
-FUNC_DEF(if_else_end, size_t cnt)
