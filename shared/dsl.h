@@ -157,18 +157,6 @@ inline bool dsl_is_double_equal(const double a, const double b) {
 #define CHECK_VAR_FOR_ASSIGNMENT(node_) \
             STATUS_CHECK(asm_check_var_for_assign_(data, node_))
 
-#define ASM_PRINT_COMMAND(lvl_change_, ...)                                             \
-            do {                                                                        \
-                if (AsmPrint::asm_printf(lvl_change_, file, __VA_ARGS__) < 0)           \
-                    return Status::OUTPUT_ERROR;                                        \
-            } while (0)
-
-#define ASM_PRINT_COMMAND_NO_TAB(...)                                                   \
-            do {                                                                        \
-                if (AsmPrint::asm_printf_with_tab(0, file, __VA_ARGS__) < 0)            \
-                    return Status::OUTPUT_ERROR;                                        \
-            } while (0)
-
 #define BINARY_MATH()   \
             STATUS_CHECK(asm_binary_math_(data, node, NODE_DATA(node)->oper, is_val_needed))
 
@@ -186,12 +174,6 @@ inline bool dsl_is_double_equal(const double a, const double b) {
 
 #define ASM_COMMENT(comment_)   \
             STATUS_CHECK(ASM_DISP.comment(data->out_file, comment_))
-
-#define ASM_TAB()   \
-            STATUS_CHECK(ASM_DISP.tab(data->out_file))
-
-#define ASM_UNTAB() \
-            STATUS_CHECK(ASM_DISP.untab(data->out_file))
 
 #define ASM_READ_DOUBLE()   \
             STATUS_CHECK(ASM_DISP.read_double(data->out_file))

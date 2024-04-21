@@ -21,9 +21,9 @@ FUNC_DEF(write_global_oper, OperNum oper, DebugInfo* debug_info)
 
 FUNC_DEF(call_function, size_t func_num, size_t offset, String func_name)
 
-FUNC_DEF(halt)
+FUNC_DEF(start)
 
-FUNC_DEF(init_regs)
+FUNC_DEF(end)
 
 FUNC_DEF(logic_compare, const OperNum jump)
 
@@ -78,10 +78,6 @@ FUNC_DEF(get_returned_value)
 FUNC_DEF(insert_empty_line)
 
 FUNC_DEF(comment, const char* comment)
-
-FUNC_DEF(tab)
-
-FUNC_DEF(untab)
 
 FUNC_DEF(read_double)
 

@@ -2,19 +2,39 @@
 
 #include "dsl.h"
 
+/*
+register usage:
+    rax - func return val
+    rbx - local var addr frame
+    rcx - array elem index
+    rdx - calculations
+    rex - calculations
+*/
+
 static const char* math_oper_str_(const OperNum math_op);
 
 static const char* jump_str_(const OperNum jmp_type);
+
+#define PRINTF_(format_, ...)                                           \
+            do {                                                        \
+                if (fprintf(file, ASM_TAB format_, ## __VA_ARGS__) < 0) \
+                    return Status::OUTPUT_ERROR;                        \
+            } while (0)
+
+#define PRINTF_NO_TAB_(format_, ...)                            \
+            do {                                                \
+                if (fprintf(file, format_, ## __VA_ARGS__) < 0) \
+                    return Status::OUTPUT_ERROR;                \
+            } while (0)
 
 
 Status::Statuses asm_spu_pop_var_value(FILE* file, size_t addr_offset, bool is_global) {
     assert(file);
 
-    if (is_global) {
-        PRINTF_(0, "pop [%zu]\n", addr_offset);
-    } else {
-        PRINTF_(0, "pop [rbx + %zu]\n", addr_offset);
-    }
+    if (is_global)
+        PRINTF_("pop [%zu]\n", addr_offset);
+    else
+        PRINTF_("pop [rbx + %zu]\n", addr_offset);
 
     PRINTF_NO_TAB_("\n");
 
@@ -24,19 +44,16 @@ Status::Statuses asm_spu_pop_var_value(FILE* file, size_t addr_offset, bool is_g
 Status::Statuses asm_spu_pop_arr_elem_value(FILE* file, size_t addr_offset, bool is_global) {
     assert(file);
 
-    if (is_global) {
-        PRINTF_(0, "push %zu\n", addr_offset);
-    } else {
-        PRINTF_(0, "push rbx + %zu\n", addr_offset);
-    }
+    if (is_global)
+        PRINTF_("push %zu\n", addr_offset);
+    else
+        PRINTF_("push rbx + %zu\n", addr_offset);
 
-    PRINTF_(0, "add\n");
+    PRINTF_("add\n");
 
-    PRINTF_(0, "pop rcx\n");
+    PRINTF_("pop rcx\n");
 
-    PRINTF_(0, "pop [rcx]\n");
-
-    PRINTF_NO_TAB_("\n");
+    PRINTF_("pop [rcx]\n\n");
 
     return Status::NORMAL_WORK;
 }
@@ -44,17 +61,14 @@ Status::Statuses asm_spu_pop_arr_elem_value(FILE* file, size_t addr_offset, bool
 Status::Statuses asm_spu_save_arr_elem_addr(FILE* file, size_t addr_offset, bool is_global) {
     assert(file);
 
-    if (is_global) {
-        PRINTF_(0, "push %zu\n", addr_offset);
-    } else {
-        PRINTF_(0, "push rbx + %zu\n", addr_offset);
-    }
+    if (is_global)
+        PRINTF_("push %zu\n", addr_offset);
+    else
+        PRINTF_("push rbx + %zu\n", addr_offset);
 
-    PRINTF_(0, "add\n");
+    PRINTF_("add\n");
 
-    PRINTF_(0, "pop rcx\n");
-
-    PRINTF_NO_TAB_("\n");
+    PRINTF_("pop rcx\n\n");
 
     return Status::NORMAL_WORK;
 }
@@ -62,9 +76,7 @@ Status::Statuses asm_spu_save_arr_elem_addr(FILE* file, size_t addr_offset, bool
 Status::Statuses asm_spu_pop_arr_elem_value_the_same(FILE* file) {
     assert(file);
 
-    PRINTF_(0, "pop [rcx]\n");
-
-    PRINTF_NO_TAB_("\n");
+    PRINTF_("pop [rcx]\n\n");
 
     return Status::NORMAL_WORK;
 }
@@ -74,16 +86,14 @@ Status::Statuses asm_spu_pop_arr_elem_value_with_const_index(FILE* file, size_t 
     assert(file);
 
     if (is_global) {
-        PRINTF_(0, "push %zu\n", addr_offset + index);
+        PRINTF_("push %zu\n", addr_offset + index);
     } else {
-        PRINTF_(0, "push rbx + %zu\n", addr_offset + index);
+        PRINTF_("push rbx + %zu\n", addr_offset + index);
     }
 
-    PRINTF_(0, "pop rcx\n");
+    PRINTF_("pop rcx\n");
 
-    PRINTF_(0, "pop [rcx]\n");
-
-    PRINTF_NO_TAB_("\n");
+    PRINTF_("pop [rcx]\n\n");
 
     return Status::NORMAL_WORK;
 }
@@ -92,7 +102,7 @@ Status::Statuses asm_spu_push_const(FILE* file, double num) {
     assert(file);
     assert(isfinite(num));
 
-    PRINTF_(0, "push %lg\n", num);
+    PRINTF_("push %lg\n", num);
 
     return Status::NORMAL_WORK;
 }
@@ -100,11 +110,10 @@ Status::Statuses asm_spu_push_const(FILE* file, double num) {
 Status::Statuses asm_spu_push_var_val(FILE* file, size_t addr_offset, bool is_global) {
     assert(file);
 
-    if (is_global) {
-        PRINTF_(0, "push [%zu]\n", addr_offset);
-    } else {
-        PRINTF_(0, "push [rbx + %zu]\n", addr_offset);
-    }
+    if (is_global)
+        PRINTF_("push [%zu]\n", addr_offset);
+    else
+        PRINTF_("push [rbx + %zu]\n", addr_offset);
 
     return Status::NORMAL_WORK;
 }
@@ -113,16 +122,16 @@ Status::Statuses asm_spu_push_arr_elem_val(FILE* file, size_t addr_offset, bool 
     assert(file);
 
     if (is_global) {
-        PRINTF_(0, "push rbx\n");
+        PRINTF_("push rbx\n");
     } else {
-        PRINTF_(0, "push rbx + %zu\n", addr_offset);
+        PRINTF_("push rbx + %zu\n", addr_offset);
     }
 
-    PRINTF_(0, "add\n");
+    PRINTF_("add\n");
 
-    PRINTF_(0, "pop rcx\n");
+    PRINTF_("pop rcx\n");
 
-    PRINTF_(0, "push [rcx]\n");
+    PRINTF_("push [rcx]\n");
 
     return Status::NORMAL_WORK;
 }
@@ -130,7 +139,7 @@ Status::Statuses asm_spu_push_arr_elem_val(FILE* file, size_t addr_offset, bool 
 Status::Statuses asm_spu_push_arr_elem_val_the_same(FILE* file) {
     assert(file);
 
-    PRINTF_(0, "push [rcx]\n");
+    PRINTF_("push [rcx]\n");
 
     return Status::NORMAL_WORK;
 }
@@ -143,7 +152,7 @@ Status::Statuses asm_spu_write_global_oper(FILE* file, OperNum oper, DebugInfo* 
     if (oper_str == nullptr)
         return syntax_error(*debug_info, "This operator is forbidden in global scope");
 
-    PRINTF_(0, "%s\n\n", oper_str);
+    PRINTF_("%s\n\n", oper_str);
 
     return Status::NORMAL_WORK;
 }
@@ -152,38 +161,44 @@ Status::Statuses asm_spu_call_function(FILE* file, size_t func_num, size_t offse
     assert(file);
     assert(func_name.s);
 
-    PRINTF_(+1, "; func call: %.*s\n", PRINTF_STRING_(func_name));
+    PRINTF_("; func call: %.*s\n", PRINTF_STRING_(func_name));
 
-    PRINTF_( 0, "push rbx\n");
-    PRINTF_( 0, "push rbx + %zu\n", offset);
-    PRINTF_( 0, "pop rbx\n");
-    PRINTF_( 0, "call ___func_%zu\n", func_num);
-    PRINTF_( 0, "pop rbx\n");
+    PRINTF_("push rbx\n");
+    PRINTF_("push rbx + %zu\n", offset);
+    PRINTF_("pop rbx\n");
+    PRINTF_("call ___func_%zu\n", func_num);
+    PRINTF_("pop rbx\n");
 
-    PRINTF_(-1, "; func call end\n");
-
-    return Status::NORMAL_WORK;
-}
-
-Status::Statuses asm_spu_halt(FILE* file) {
-    assert(file);
-
-    PRINTF_(0, "hlt\n\n");
+    PRINTF_("; func call end\n\n");
 
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_spu_init_regs(FILE* file) {
+Status::Statuses asm_spu_start(FILE* file) {
     assert(file);
 
-    PRINTF_(+1, "; Regs initialisation\n");
+    PRINTF_NO_TAB_("; Program start\n\n");
 
-    PRINTF_(0, "push 0\n");
-    PRINTF_(0, "pop rax\n");
-    PRINTF_(0, "push 0\n");
-    PRINTF_(0, "pop rbx\n");
+    PRINTF_NO_TAB_("jmp _start\n\n");
 
-    PRINTF_(-1, "; Regs initialisation end\n\n");
+    PRINTF_NO_TAB_("_start:\n");
+
+    PRINTF_("; Regs initialisation\n");
+
+    PRINTF_("push 0\n");
+    PRINTF_("pop rax\n");
+    PRINTF_("push 0\n");
+    PRINTF_("pop rbx\n");
+
+    PRINTF_("; Regs initialisation end\n\n");
+
+    return Status::NORMAL_WORK;
+}
+
+Status::Statuses asm_spu_end(FILE* file) {
+    assert(file);
+
+    PRINTF_("hlt\n\n");
 
     return Status::NORMAL_WORK;
 }
@@ -198,14 +213,14 @@ Status::Statuses asm_spu_logic_compare(FILE* file, const OperNum jump) {
     if (jump_str == nullptr)
         return Status::TREE_ERROR;
 
-    PRINTF_(+1, "%s ___compare_%zu_true\n", jump_str, counter);
-    PRINTF_( 0, "push 0\n");
-    PRINTF_(-1, "jmp ___compare_%zu_end\n", counter);
+    PRINTF_("%s ___compare_%zu_true\n", jump_str, counter);
+    PRINTF_("push 0\n");
+    PRINTF_("jmp ___compare_%zu_end\n\n", counter);
 
-    PRINTF_(+1, "___compare_%zu_true:\n", counter);
-    PRINTF_( 0, "push 1\n");
+    PRINTF_NO_TAB_("___compare_%zu_true:\n", counter);
+    PRINTF_("push 1\n");
 
-    PRINTF_(-1, "___compare_%zu_end:\n\n",  counter);
+    PRINTF_NO_TAB_("___compare_%zu_end:\n\n",  counter);
 
     return Status::NORMAL_WORK;
 }
@@ -214,7 +229,7 @@ Status::Statuses asm_spu_var_assignment_header(FILE* file, const char* var_name)
     assert(file);
     assert(var_name);
 
-    PRINTF_(0, "; var assignment: %s\n", var_name);
+    PRINTF_("; var assignment: %s\n", var_name);
 
     return Status::NORMAL_WORK;
 }
@@ -223,7 +238,7 @@ Status::Statuses asm_spu_arr_elem_assignment_header(FILE* file, const char* var_
     assert(file);
     assert(var_name);
 
-    PRINTF_(0, "; arr elem assignment: %s\n", var_name);
+    PRINTF_("; arr elem assignment: %s\n", var_name);
 
     return Status::NORMAL_WORK;
 }
@@ -232,11 +247,11 @@ Status::Statuses asm_spu_begin_func_definition(FILE* file, const size_t func_num
     assert(file);
     assert(func_name.s);
 
-    PRINTF_( 0, "; =========================== Function definition =========================\n");
+    PRINTF_NO_TAB_("; =========================== Function definition =========================\n");
 
-    PRINTF_( 0, "; func name: %.*s\n", PRINTF_STRING_(func_name));
+    PRINTF_NO_TAB_("; func name: %.*s\n", PRINTF_STRING_(func_name));
 
-    PRINTF_(+1, "___func_%zu:\n", func_num);
+    PRINTF_NO_TAB_("___func_%zu:\n", func_num);
 
     return Status::NORMAL_WORK;
 }
@@ -244,9 +259,9 @@ Status::Statuses asm_spu_begin_func_definition(FILE* file, const size_t func_num
 Status::Statuses asm_spu_end_func_definition(FILE* file) {
     assert(file);
 
-    PRINTF_(-1, "ret\n");
+    PRINTF_("ret\n");
 
-    PRINTF_(0, "; ------------------------- Function definition end -----------------------\n\n\n");
+    PRINTF_NO_TAB_("; ------------------------- Function definition end -----------------------\n\n\n");
 
     return Status::NORMAL_WORK;
 }
@@ -254,11 +269,11 @@ Status::Statuses asm_spu_end_func_definition(FILE* file) {
 Status::Statuses asm_spu_swap_last_stk_vals(FILE* file) {
     assert(file);
 
-    PRINTF_(0, "; swap last stk vals\n");
-    PRINTF_(0, "pop rdx\n");
-    PRINTF_(0, "pop rex\n");
-    PRINTF_(0, "push rdx\n");
-    PRINTF_(0, "push rex\n\n");
+    PRINTF_("; swap last stk vals\n");
+    PRINTF_("pop rdx\n");
+    PRINTF_("pop rex\n");
+    PRINTF_("push rdx\n");
+    PRINTF_("push rex\n\n");
 
     return Status::NORMAL_WORK;
 }
@@ -266,10 +281,10 @@ Status::Statuses asm_spu_swap_last_stk_vals(FILE* file) {
 Status::Statuses asm_spu_if_begin(FILE* file, size_t cnt) {
     assert(file);
 
-    PRINTF_( 0, "; if begin\n");
+    PRINTF_("; if begin\n");
 
-    PRINTF_( 0, "push 0\n");
-    PRINTF_(+1, "je ___if_%zu_end\n", cnt);
+    PRINTF_("push 0\n");
+    PRINTF_("je ___if_%zu_end\n", cnt);
 
     return Status::NORMAL_WORK;
 }
@@ -277,8 +292,9 @@ Status::Statuses asm_spu_if_begin(FILE* file, size_t cnt) {
 Status::Statuses asm_spu_if_end(FILE* file, size_t cnt) {
     assert(file);
 
-    PRINTF_(-1, "___if_%zu_end:\n", cnt);
-    PRINTF_( 0, "; if end\n\n");
+    PRINTF_NO_TAB_("___if_%zu_end:\n", cnt);
+
+    PRINTF_("; if end\n\n");
 
     return Status::NORMAL_WORK;
 }
@@ -286,10 +302,10 @@ Status::Statuses asm_spu_if_end(FILE* file, size_t cnt) {
 Status::Statuses asm_spu_if_else_begin(FILE* file, size_t cnt) {
     assert(file);
 
-    PRINTF_( 0, "; if-else begin\n");
+    PRINTF_("; if-else begin\n");
 
-    PRINTF_( 0, "push 0\n");
-    PRINTF_(+1, "je ___if_%zu_else\n", cnt);
+    PRINTF_("push 0\n");
+    PRINTF_("je ___if_%zu_else\n", cnt);
 
     return Status::NORMAL_WORK;
 }
@@ -297,12 +313,12 @@ Status::Statuses asm_spu_if_else_begin(FILE* file, size_t cnt) {
 Status::Statuses asm_spu_if_else_middle(FILE* file, size_t cnt) {
     assert(file);
 
-    PRINTF_( 0, "jmp ___if_%zu_end\n", cnt);
+    PRINTF_("jmp ___if_%zu_end\n", cnt);
 
 
-    PRINTF_(-1, "; if-else else\n");
+    PRINTF_("; if-else else\n");
 
-    PRINTF_(+1, "___if_%zu_else:\n", cnt);
+    PRINTF_NO_TAB_("___if_%zu_else:\n", cnt);
 
     return Status::NORMAL_WORK;
 }
@@ -310,15 +326,15 @@ Status::Statuses asm_spu_if_else_middle(FILE* file, size_t cnt) {
 Status::Statuses asm_spu_do_if_check_clause(FILE* file, size_t cnt) {
     assert(file);
 
-    PRINTF_( 0, "; do-if clause check\n");
+    PRINTF_("; do-if clause check\n");
 
-    PRINTF_( 0, "push 0\n");
-    PRINTF_(+1, "jne ___do_if_%zu_end\n", cnt);
+    PRINTF_("push 0\n");
+    PRINTF_("jne ___do_if_%zu_end\n", cnt);
 
-    PRINTF_( 0, "pop [-1] ; <= seg fault\n");
-    PRINTF_( 0, "hlt\n");
+    PRINTF_("pop [-1] ; <= seg fault\n");
+    PRINTF_("hlt\n");
 
-    PRINTF_(-1, "___do_if_%zu_end:\n\n", cnt);
+    PRINTF_NO_TAB_("___do_if_%zu_end:\n\n", cnt);
 
     return Status::NORMAL_WORK;
 }
@@ -326,9 +342,9 @@ Status::Statuses asm_spu_do_if_check_clause(FILE* file, size_t cnt) {
 Status::Statuses asm_spu_while_begin(FILE* file, size_t cnt) {
     assert(file);
 
-    PRINTF_( 0, "; while begin\n");
+    PRINTF_("; while begin\n");
 
-    PRINTF_(+1, "___while_%zu_begin:\n", cnt);
+    PRINTF_NO_TAB_("___while_%zu_begin:\n", cnt);
 
     return Status::NORMAL_WORK;
 }
@@ -336,10 +352,10 @@ Status::Statuses asm_spu_while_begin(FILE* file, size_t cnt) {
 Status::Statuses asm_spu_while_check_clause(FILE* file, size_t cnt) {
     assert(file);
 
-    PRINTF_( 0, "; while clause check\n");
+    PRINTF_("; while clause check\n");
 
-    PRINTF_( 0, "push 0\n");
-    PRINTF_( 0, "je ___while_%zu_end\n\n", cnt);
+    PRINTF_("push 0\n");
+    PRINTF_("je ___while_%zu_end\n\n", cnt);
 
     return Status::NORMAL_WORK;
 }
@@ -347,10 +363,11 @@ Status::Statuses asm_spu_while_check_clause(FILE* file, size_t cnt) {
 Status::Statuses asm_spu_while_end(FILE* file, size_t cnt) {
     assert(file);
 
-    PRINTF_( 0, "jmp ___while_%zu_begin\n\n", cnt);
+    PRINTF_("jmp ___while_%zu_begin\n\n", cnt);
 
-    PRINTF_(-1, "___while_%zu_end:\n", cnt);
-    PRINTF_( 0, "; while end\n\n");
+    PRINTF_NO_TAB_("___while_%zu_end:\n", cnt);
+
+    PRINTF_("; while end\n\n");
 
     return Status::NORMAL_WORK;
 }
@@ -358,10 +375,10 @@ Status::Statuses asm_spu_while_end(FILE* file, size_t cnt) {
 Status::Statuses asm_spu_while_else_check_clause(FILE* file, size_t cnt) {
     assert(file);
 
-    PRINTF_( 0, "; while-else clause check\n");
+    PRINTF_("; while-else clause check\n");
 
-    PRINTF_( 0, "push 0\n");
-    PRINTF_( 0, "je ___while_%zu_else\n\n", cnt);
+    PRINTF_("push 0\n");
+    PRINTF_("je ___while_%zu_else\n\n", cnt);
 
     return Status::NORMAL_WORK;
 }
@@ -369,9 +386,9 @@ Status::Statuses asm_spu_while_else_check_clause(FILE* file, size_t cnt) {
 Status::Statuses asm_spu_while_else_else(FILE* file, size_t cnt) {
     assert(file);
 
-    PRINTF_(-1, "; while-else else\n");
+    PRINTF_("; while-else else\n");
 
-    PRINTF_(+1, "___while_%zu_else:\n", cnt);
+    PRINTF_NO_TAB_("___while_%zu_else:\n", cnt);
 
     return Status::NORMAL_WORK;
 }
@@ -379,8 +396,8 @@ Status::Statuses asm_spu_while_else_else(FILE* file, size_t cnt) {
 Status::Statuses asm_spu_Continue(FILE* file, size_t cnt) {
     assert(file);
 
-    PRINTF_( 0, "; continue\n");
-    PRINTF_( 0, "jmp ___while_%zu_begin\n\n", cnt);
+    PRINTF_("; continue\n");
+    PRINTF_("jmp ___while_%zu_begin\n\n", cnt);
 
     return Status::NORMAL_WORK;
 }
@@ -388,8 +405,8 @@ Status::Statuses asm_spu_Continue(FILE* file, size_t cnt) {
 Status::Statuses asm_spu_Break(FILE* file, size_t cnt) {
     assert(file);
 
-    PRINTF_( 0, "; break\n");
-    PRINTF_( 0, "jmp ___while_%zu_end\n\n", cnt);
+    PRINTF_("; break\n");
+    PRINTF_("jmp ___while_%zu_end\n\n", cnt);
 
     return Status::NORMAL_WORK;
 }
@@ -433,7 +450,7 @@ static const char* math_oper_str_(const OperNum math_op) {
         CASE_(MATH_SIN,      "sin");
         CASE_(MATH_COS,      "cos");
         CASE_(MATH_LN,       "ln");
-        CASE_(MATH_NEGATIVE, "; neg:\npush -1\nmul")
+        CASE_(MATH_NEGATIVE, "push -1\n" ASM_TAB "mul")
 
         default:
             return nullptr;
@@ -449,11 +466,11 @@ Status::Statuses asm_spu_prepost_oper_var(FILE* file, const size_t addr_offset, 
     assert(file);
     assert(oper);
 
-    PRINTF_( 0, "; prepost oper\n");
+    PRINTF_("; prepost oper\n");
 
     STATUS_CHECK(asm_spu_push_var_val(file, addr_offset, is_global));
 
-    PRINTF_( 0, "push 1\n");
+    PRINTF_("push 1\n");
     STATUS_CHECK(asm_spu_math_operator(file, oper));
 
     STATUS_CHECK(asm_spu_pop_var_value(file, addr_offset, is_global));
@@ -466,11 +483,11 @@ Status::Statuses asm_spu_prepost_oper_arr_elem(FILE* file, const size_t addr_off
     assert(file);
     assert(oper);
 
-    PRINTF_( 0, "; prepost oper with arr elem\n");
+    PRINTF_("; prepost oper with arr elem\n");
 
     STATUS_CHECK(asm_spu_push_arr_elem_val(file, addr_offset, is_global));
 
-    PRINTF_( 0, "push 1\n");
+    PRINTF_("push 1\n");
     STATUS_CHECK(asm_spu_math_operator(file, oper));
 
     STATUS_CHECK(asm_spu_pop_arr_elem_value_the_same(file));
@@ -482,11 +499,11 @@ Status::Statuses asm_spu_prepost_oper_arr_elem_the_same(FILE* file, const OperNu
     assert(file);
     assert(oper);
 
-    PRINTF_( 0, "; prepost oper with arr elem\n");
+    PRINTF_("; prepost oper with arr elem\n");
 
     STATUS_CHECK(asm_spu_push_arr_elem_val_the_same(file));
 
-    PRINTF_( 0, "push 1\n");
+    PRINTF_("push 1\n");
     STATUS_CHECK(asm_spu_math_operator(file, oper));
 
     STATUS_CHECK(asm_spu_pop_arr_elem_value_the_same(file));
@@ -497,7 +514,7 @@ Status::Statuses asm_spu_prepost_oper_arr_elem_the_same(FILE* file, const OperNu
 Status::Statuses asm_spu_fps(FILE* file, const int val) {
     assert(file);
 
-    ASM_PRINT_COMMAND(0, "fps %d\n", val);
+    PRINTF_("fps %d\n", val);
 
     return Status::NORMAL_WORK;
 }
@@ -505,7 +522,7 @@ Status::Statuses asm_spu_fps(FILE* file, const int val) {
 Status::Statuses asm_spu_video_show_frame(FILE* file) {
     assert(file);
 
-    ASM_PRINT_COMMAND(0, "shw\n");
+    PRINTF_("shw\n");
 
     return Status::NORMAL_WORK;
 }
@@ -517,7 +534,7 @@ Status::Statuses asm_spu_math_operator(FILE* file, const OperNum math_oper_type)
     if (math_oper_str == nullptr)
         return Status::TREE_ERROR;
 
-    ASM_PRINT_COMMAND(0, "%s\n", math_oper_str);
+    PRINTF_("%s\n", math_oper_str);
 
     return Status::NORMAL_WORK;
 }
@@ -525,7 +542,7 @@ Status::Statuses asm_spu_math_operator(FILE* file, const OperNum math_oper_type)
 Status::Statuses asm_spu_get_returned_value(FILE* file) {
     assert(file);
 
-    ASM_PRINT_COMMAND(0, "push rax\n");
+    PRINTF_("push rax\n");
 
     return Status::NORMAL_WORK;
 };
@@ -533,7 +550,7 @@ Status::Statuses asm_spu_get_returned_value(FILE* file) {
 Status::Statuses asm_spu_insert_empty_line(FILE* file) {
     assert(file);
 
-    ASM_PRINT_COMMAND_NO_TAB("\n");
+    PRINTF_NO_TAB_("\n");
 
     return Status::NORMAL_WORK;
 }
@@ -541,50 +558,37 @@ Status::Statuses asm_spu_insert_empty_line(FILE* file) {
 Status::Statuses asm_spu_comment(FILE* file, const char* comment) {
     assert(file);
 
-    ASM_PRINT_COMMAND(0, "; %s\n", comment);
-
-    return Status::NORMAL_WORK;
-}
-
-Status::Statuses asm_spu_tab(FILE* file) {
-    ASM_PRINT_COMMAND(+1, "");
-
-    return Status::NORMAL_WORK;
-};
-
-Status::Statuses asm_spu_untab(FILE* file) {
-    ASM_PRINT_COMMAND(-1, "");
+    PRINTF_("; %s\n", comment);
 
     return Status::NORMAL_WORK;
 }
 
 Status::Statuses asm_spu_read_double(FILE* file) {
-    ASM_PRINT_COMMAND(0, "in\n");
+    PRINTF_("in\n");
 
     return Status::NORMAL_WORK;
 }
 
 Status::Statuses asm_spu_write_returned_value(FILE* file) {
-    ASM_PRINT_COMMAND(0, "pop rax\n\n");
+    PRINTF_("pop rax\n\n");
 
     return Status::NORMAL_WORK;
 }
 
 Status::Statuses asm_spu_ret(FILE* file) {
-    ASM_PRINT_COMMAND(0, "ret\n\n");
+    PRINTF_("ret\n\n");
 
     return Status::NORMAL_WORK;
 }
 
-
 Status::Statuses asm_spu_push_immed_operand(FILE* file, double imm) {
-    ASM_PRINT_COMMAND(0, "push %g\n", imm);
+    PRINTF_("push %g\n", imm);
 
     return Status::NORMAL_WORK;
 }
 
 Status::Statuses asm_spu_print_double(FILE* file) {
-    ASM_PRINT_COMMAND(0, "out\n\n");
+    PRINTF_("out\n\n");
 
     return Status::NORMAL_WORK;
 }

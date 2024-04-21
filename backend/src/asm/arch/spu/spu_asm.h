@@ -13,7 +13,6 @@
 #include "TreeAddon/TreeAddon.h"
 #include "file/file.h"
 #include "error_printer/error_printer.h"
-#include "../asm_print.h"
 
 #define FUNC_DEF(name_, ...) \
             Status::Statuses asm_spu_##name_(FILE* file, ## __VA_ARGS__);

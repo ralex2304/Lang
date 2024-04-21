@@ -16,7 +16,7 @@ struct String {
     size_t len = 0;
 };
 
-#define PRINTF_STRING_(string_)     (string_).len, (string_).s
+#define PRINTF_STRING_(string_)     (int)((string_).len), (string_).s
 
 struct DebugInfo {
     const char* filename = nullptr;

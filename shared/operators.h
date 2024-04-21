@@ -2,15 +2,6 @@
 static_assert(0 && "DEF_OPER is not defined");
 #endif //< #ifndef DEF_OPER
 
-/*
-register usage:
-    rax - func return val
-    rbx - local var addr frame
-    rcx - array elem index
-    rdx - calculations
-    rex - calculations
-*/
-
 //   | NUM |      NAME      | TYPE | MATH_TYPE | IS_CHILD_VAL_NEEDED | ASM_COMMAND
 
 DEF_OPER(1,  CMD_SEPARATOR,   LIST,   MATH_L_R, NO_VAL, NO_VAL,   {
@@ -158,14 +149,14 @@ DEF_OPER(67, BREAK,           LEAF,   NO_MATH,  STOP, STOP,       { ASM_MAKE_BRE
 DEF_OPER(68, CONTINUE,        LEAF,   NO_MATH,  STOP, STOP,       { ASM_MAKE_CONTINUE(node); })
 
 DEF_OPER(69, NEW_SCOPE,       UNARY,  MATH_R,   STOP, NO_VAL,     {
-    ASM_COMMENT("new scope");
-    ASM_TAB();
+    ASM_COMMENT("scope begin");
     ENTER_SCOPE(nullptr);
 
     EVAL_SUBTREE_NO_VAL(*R(node));
 
     EXIT_SCOPE();
-    ASM_UNTAB();
+
+    ASM_COMMENT("scope end");
 })
 
 DEF_OPER(70, IN,              LEAF,   NO_MATH,  STOP, STOP,       { ASM_READ_DOUBLE(); })

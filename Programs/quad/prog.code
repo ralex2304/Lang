@@ -1,75 +1,83 @@
-; Regs initialisation
-    push 0
-    pop rax
-    push 0
-    pop rbx
-; Regs initialisation end
+; Program start
 
-; func call: остров_в_океане
-    push rbx
-    push rbx + 0
-    pop rbx
-    call ___func_0
-    pop rbx
-; func call end
-hlt
+jmp _start
+
+_start:
+        ; Regs initialisation
+        push 0
+        pop rax
+        push 0
+        pop rbx
+        ; Regs initialisation end
+
+        ; func call: остров_в_океане
+        push rbx
+        push rbx + 0
+        pop rbx
+        call ___func_0
+        pop rbx
+        ; func call end
+
+        hlt
 
 ; =========================== Function definition =========================
 ; func name: остров_в_океане
 ___func_0:
-    in
-    ; var assignment: А
-    pop [rbx + 0]
+        in
+        ; var assignment: А
+        pop [rbx + 0]
 
-    in
-    ; var assignment: Б
-    pop [rbx + 1]
+        in
+        ; var assignment: Б
+        pop [rbx + 1]
 
-    in
-    ; var assignment: В
-    pop [rbx + 2]
+        in
+        ; var assignment: В
+        pop [rbx + 2]
 
-    push [rbx + 0]
-    pop [rbx + 3]
+        push [rbx + 0]
+        pop [rbx + 3]
 
-    push [rbx + 1]
-    pop [rbx + 4]
+        push [rbx + 1]
+        pop [rbx + 4]
 
-    push [rbx + 2]
-    pop [rbx + 5]
+        push [rbx + 2]
+        pop [rbx + 5]
 
-    ; func call: квадратка
+        ; func call: квадратка
         push rbx
         push rbx + 3
         pop rbx
         call ___func_4
         pop rbx
-    ; func call end
-    push rax
+        ; func call end
 
-    pop rax
+        push rax
 
-    ret
+        pop rax
 
-ret
+        ret
+
+        ret
 ; ------------------------- Function definition end -----------------------
 
 
 ; =========================== Function definition =========================
 ; func name: квадратка
 ___func_4:
-    push [rbx + 0]
-    push 0
-    je ___compare_1_true
+        push [rbx + 0]
         push 0
-    jmp ___compare_1_end
-    ___compare_1_true:
-        push 1
-    ___compare_1_end:
+        je ___compare_1_true
+        push 0
+        jmp ___compare_1_end
 
-    ; if begin
-    push 0
-    je ___if_5_end
+___compare_1_true:
+        push 1
+___compare_1_end:
+
+        ; if begin
+        push 0
+        je ___if_5_end
         push [rbx + 1]
         pop [rbx + 3]
 
@@ -77,45 +85,47 @@ ___func_4:
         pop [rbx + 4]
 
         ; func call: не_квадратка
-            push rbx
-            push rbx + 3
-            pop rbx
-            call ___func_5
-            pop rbx
+        push rbx
+        push rbx + 3
+        pop rbx
+        call ___func_5
+        pop rbx
         ; func call end
+
         push rax
 
         pop rax
 
         ret
 
-    ___if_5_end:
-    ; if end
+___if_5_end:
+        ; if end
 
-    push [rbx + 1]
-    push [rbx + 1]
-    mul
-    push 4
-    push [rbx + 0]
-    push [rbx + 2]
-    mul
-    mul
-    sub
-    ; var assignment: дискр
-    pop [rbx + 3]
+        push [rbx + 1]
+        push [rbx + 1]
+        mul
+        push 4
+        push [rbx + 0]
+        push [rbx + 2]
+        mul
+        mul
+        sub
+        ; var assignment: дискр
+        pop [rbx + 3]
 
-    push [rbx + 3]
-    push 0
-    jb ___compare_2_true
+        push [rbx + 3]
         push 0
-    jmp ___compare_2_end
-    ___compare_2_true:
-        push 1
-    ___compare_2_end:
+        jb ___compare_2_true
+        push 0
+        jmp ___compare_2_end
 
-    ; if begin
-    push 0
-    je ___if_6_end
+___compare_2_true:
+        push 1
+___compare_2_end:
+
+        ; if begin
+        push 0
+        je ___if_6_end
         push 0
         out
 
@@ -124,28 +134,28 @@ ___func_4:
 
         ret
 
-    ___if_6_end:
-    ; if end
+___if_6_end:
+        ; if end
 
-    push [rbx + 3]
-    push 0
-    je ___compare_3_true
+        push [rbx + 3]
         push 0
-    jmp ___compare_3_end
-    ___compare_3_true:
-        push 1
-    ___compare_3_end:
+        je ___compare_3_true
+        push 0
+        jmp ___compare_3_end
 
-    ; if begin
-    push 0
-    je ___if_7_end
+___compare_3_true:
+        push 1
+___compare_3_end:
+
+        ; if begin
+        push 0
+        je ___if_7_end
         push 1
         out
 
         push [rbx + 1]
-        ; neg:
-push -1
-mul
+        push -1
+        mul
         push 2
         push [rbx + 0]
         mul
@@ -157,86 +167,86 @@ mul
 
         ret
 
-    ___if_7_end:
-    ; if end
+___if_7_end:
+        ; if end
 
-    push [rbx + 3]
-    sqrt
-    ; var assignment: дискр
-    pop [rbx + 3]
+        push [rbx + 3]
+        sqrt
+        ; var assignment: дискр
+        pop [rbx + 3]
 
-    push 2
-    out
+        push 2
+        out
 
-    push [rbx + 1]
-    ; neg:
-push -1
-mul
-    push [rbx + 3]
-    sub
-    push 2
-    push [rbx + 0]
-    mul
-    div
-    out
+        push [rbx + 1]
+        push -1
+        mul
+        push [rbx + 3]
+        sub
+        push 2
+        push [rbx + 0]
+        mul
+        div
+        out
 
-    push [rbx + 1]
-    ; neg:
-push -1
-mul
-    push [rbx + 3]
-    add
-    push 2
-    push [rbx + 0]
-    mul
-    div
-    out
+        push [rbx + 1]
+        push -1
+        mul
+        push [rbx + 3]
+        add
+        push 2
+        push [rbx + 0]
+        mul
+        div
+        out
 
-    push 0
-    pop rax
+        push 0
+        pop rax
 
-    ret
+        ret
 
-ret
+        ret
 ; ------------------------- Function definition end -----------------------
 
 
 ; =========================== Function definition =========================
 ; func name: не_квадратка
 ___func_5:
-    push [rbx + 0]
-    push 0
-    je ___compare_4_true
+        push [rbx + 0]
         push 0
-    jmp ___compare_4_end
-    ___compare_4_true:
-        push 1
-    ___compare_4_end:
+        je ___compare_4_true
+        push 0
+        jmp ___compare_4_end
 
-    ; if begin
-    push 0
-    je ___if_10_end
+___compare_4_true:
+        push 1
+___compare_4_end:
+
+        ; if begin
+        push 0
+        je ___if_10_end
         push [rbx + 1]
         push 0
         je ___compare_5_true
-            push 0
+        push 0
         jmp ___compare_5_end
-        ___compare_5_true:
-            push 1
-        ___compare_5_end:
+
+___compare_5_true:
+        push 1
+___compare_5_end:
 
         ; if begin
         push 0
         je ___if_11_end
-            push -1
-            out
+        push -1
+        out
 
-            push 0
-            pop rax
+        push 0
+        pop rax
 
-            ret
+        ret
 
-        ___if_11_end:
+___if_11_end:
         ; if end
 
         push 0
@@ -247,26 +257,25 @@ ___func_5:
 
         ret
 
-    ___if_10_end:
-    ; if end
+___if_10_end:
+        ; if end
 
-    push 1
-    out
+        push 1
+        out
 
-    push [rbx + 1]
-    ; neg:
-push -1
-mul
-    push [rbx + 0]
-    div
-    out
+        push [rbx + 1]
+        push -1
+        mul
+        push [rbx + 0]
+        div
+        out
 
-    push 0
-    pop rax
+        push 0
+        pop rax
 
-    ret
+        ret
 
-ret
+        ret
 ; ------------------------- Function definition end -----------------------
 
 

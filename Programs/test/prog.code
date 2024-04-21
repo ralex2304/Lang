@@ -1,63 +1,69 @@
-; Regs initialisation
-    push 0
-    pop rax
-    push 0
-    pop rbx
-; Regs initialisation end
+; Program start
 
-; func call: министерство
-    push rbx
-    push rbx + 0
-    pop rbx
-    call ___func_0
-    pop rbx
-; func call end
-hlt
+jmp _start
+
+_start:
+        ; Regs initialisation
+        push 0
+        pop rax
+        push 0
+        pop rbx
+        ; Regs initialisation end
+
+        ; func call: министерство
+        push rbx
+        push rbx + 0
+        pop rbx
+        call ___func_0
+        pop rbx
+        ; func call end
+
+        hlt
 
 ; =========================== Function definition =========================
 ; func name: министерство
 ___func_0:
-    push 0
-    push rbx + 0
-    pop rcx
-    pop [rcx]
+        push 0
+        push rbx + 0
+        pop rcx
+        pop [rcx]
 
-    push 1
-    push rbx + 1
-    pop rcx
-    pop [rcx]
+        push 1
+        push rbx + 1
+        pop rcx
+        pop [rcx]
 
-    push 2
-    push rbx + 2
-    pop rcx
-    pop [rcx]
+        push 2
+        push rbx + 2
+        pop rcx
+        pop [rcx]
 
-    push 3
-    push rbx + 3
-    pop rcx
-    pop [rcx]
+        push 3
+        push rbx + 3
+        pop rcx
+        pop [rcx]
 
-    push 4
-    push rbx + 4
-    pop rcx
-    pop [rcx]
+        push 4
+        push rbx + 4
+        pop rcx
+        pop [rcx]
 
-    push 5
-    push rbx + 5
-    pop rcx
-    pop [rcx]
+        push 5
+        push rbx + 5
+        pop rcx
+        pop [rcx]
 
-    push 6
-    push rbx + 6
-    pop rcx
-    pop [rcx]
+        push 6
+        push rbx + 6
+        pop rcx
+        pop [rcx]
 
-    push 0
-    ; var assignment: индекс
-    pop [rbx + 10]
+        push 0
+        ; var assignment: индекс
+        pop [rbx + 10]
 
-    ; while begin
-    ___while_3_begin:
+        ; while begin
+___while_3_begin:
         push [rbx + 10]
         ; prepost oper
         push [rbx + 10]
@@ -71,11 +77,12 @@ ___func_0:
         push [rcx]
         push 5
         jb ___compare_1_true
-            push 0
+        push 0
         jmp ___compare_1_end
-        ___compare_1_true:
-            push 1
-        ___compare_1_end:
+
+___compare_1_true:
+        push 1
+___compare_1_end:
 
         ; while clause check
         push 0
@@ -90,10 +97,10 @@ ___func_0:
 
         jmp ___while_3_begin
 
-    ___while_3_end:
-    ; while end
+___while_3_end:
+        ; while end
 
-ret
+        ret
 ; ------------------------- Function definition end -----------------------
 
 

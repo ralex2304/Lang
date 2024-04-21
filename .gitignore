@@ -1,4 +1,5 @@
 .vscode
+.VSCodeCounter
 /main
 /frontend/main
 /middleend/main

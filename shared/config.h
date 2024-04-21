@@ -13,4 +13,7 @@
 
 #endif //< #ifdef DEBUG
 
+// 8
+#define ASM_TAB "        "
+
 #endif //< #ifndef CONFIG_H_

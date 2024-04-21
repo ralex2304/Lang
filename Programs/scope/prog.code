@@ -1,27 +1,33 @@
-; Regs initialisation
-    push 0
-    pop rax
-    push 0
-    pop rbx
-; Regs initialisation end
+; Program start
 
-; func call: остров_в_океане
-    push rbx
-    push rbx + 0
-    pop rbx
-    call ___func_0
-    pop rbx
-; func call end
-hlt
+jmp _start
+
+_start:
+        ; Regs initialisation
+        push 0
+        pop rax
+        push 0
+        pop rbx
+        ; Regs initialisation end
+
+        ; func call: остров_в_океане
+        push rbx
+        push rbx + 0
+        pop rbx
+        call ___func_0
+        pop rbx
+        ; func call end
+
+        hlt
 
 ; =========================== Function definition =========================
 ; func name: остров_в_океане
 ___func_0:
-    push 5
-    ; var assignment: переменная
-    pop [rbx + 0]
+        push 5
+        ; var assignment: переменная
+        pop [rbx + 0]
 
-    ; new scope
+        ; new scope
         push [rbx + 0]
         out
 
@@ -47,15 +53,15 @@ ___func_0:
         push [rbx + 1]
         out
 
-    push [rbx + 0]
-    out
+        push [rbx + 0]
+        out
 
-    push 0
-    pop rax
+        push 0
+        pop rax
 
-    ret
+        ret
 
-ret
+        ret
 ; ------------------------- Function definition end -----------------------
 
 

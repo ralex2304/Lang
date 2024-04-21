@@ -20,13 +20,13 @@ Status::Statuses make_asm(BackData* data) {
     if (main_func == -1)
         return syntax_error(*DEBUG_INFO(data->tree.root), "main function not found");
 
-    STATUS_CHECK(ASM_DISP.init_regs(data->out_file));
+    STATUS_CHECK(ASM_DISP.start(data->out_file));
 
     STATUS_CHECK(asm_common_initialise_global_scope(data));
 
     STATUS_CHECK(asm_common_call_function(data, main_func, asm_common_count_addr_offset(&data->scopes)));
 
-    STATUS_CHECK(ASM_DISP.halt(data->out_file));
+    STATUS_CHECK(ASM_DISP.end(data->out_file));
 
     STATUS_CHECK(asm_func_def_(data));
 
