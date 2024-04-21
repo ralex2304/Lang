@@ -80,6 +80,8 @@ inline bool dsl_is_double_equal(const double a, const double b) {
 
 #define SYNTAX_ERROR(...) syntax_error(*DEBUG_INFO(node), __VA_ARGS__)
 
+#define ASM_DISP data->asm_disp
+
 //=====================================codegen dsl==================================================
 
 #define ASSIGNMENT_WITH_ACTION(cmd_)                            \
@@ -89,7 +91,7 @@ inline bool dsl_is_double_equal(const double a, const double b) {
             ASM_MATH_OPERATOR(cmd_)
 
 #define ASM_SWAP_LAST_STK_VALS()    \
-            STATUS_CHECK(asm_swap_last_stk_vals(file))
+            STATUS_CHECK(ASM_DISP.swap_last_stk_vals(data->out_file))
 
 #define VAR_DEFINITION_ASSIGNMENT(node_)            \
             do {                                    \
@@ -103,7 +105,7 @@ inline bool dsl_is_double_equal(const double a, const double b) {
 
 #define ARRAY_DEFINITION_ASSIGNMENT(node_)          \
             if (*R(node_) != nullptr)               \
-                STATUS_CHECK(asm_array_definition_assignment_(data, file, node_))
+                STATUS_CHECK(asm_array_definition_assignment_(data, node_))
 
 #define LOGIC(jump_)                \
             EVAL_SUBTREE_GET_VAL(*L(node)); \
@@ -111,16 +113,16 @@ inline bool dsl_is_double_equal(const double a, const double b) {
             LOGIC_COMPARE_(NODE_DATA(node)->oper)
 
 #define LOGIC_COMPARE_(jump_)       \
-            STATUS_CHECK(asm_logic_compare(file, jump_))
+            STATUS_CHECK(ASM_DISP.logic_compare(data->out_file, jump_))
 
 #define EVAL_SUBTREE_GET_VAL(node_)         \
-            STATUS_CHECK(asm_command_traversal(data, file, node_, true))
+            STATUS_CHECK(asm_command_traversal(data, node_, true))
 
 #define EVAL_SUBTREE_NO_VAL(node_)          \
-            STATUS_CHECK(asm_command_traversal(data, file, node_, false))
+            STATUS_CHECK(asm_command_traversal(data, node_, false))
 
 #define EVAL_SUBTREE(node_, is_val_needed_) \
-            STATUS_CHECK(asm_command_traversal(data, file, node_, is_val_needed_))
+            STATUS_CHECK(asm_command_traversal(data, node_, is_val_needed_))
 
 #define ADD_NUM_VAR(node_)          \
             STATUS_CHECK(asm_add_num_var_(data, node_, false))
@@ -139,134 +141,134 @@ inline bool dsl_is_double_equal(const double a, const double b) {
                 if (NODE_IS_OPER(node_, OperNum::ARRAY_ELEM)) {             \
                     ASM_COMMENT("arr elem index:");                         \
                     EVAL_SUBTREE_GET_VAL(*R(node_));                        \
-                    STATUS_CHECK(asm_assign_arr_elem(data, file, node_));   \
+                    STATUS_CHECK(asm_common_assign_arr_elem(data, node_));  \
                 } else                                                      \
-                    STATUS_CHECK(asm_assign_var(data, file, node_));        \
+                    STATUS_CHECK(asm_common_assign_var(data, node_));       \
             } while (0)
 
 #define ASSIGN_VAR_VAL_SAME(node_)                                          \
             do {                                                            \
-                if (NODE_IS_OPER(node_, OperNum::ARRAY_ELEM)) {             \
-                    STATUS_CHECK(asm_assign_arr_elem_same(file));           \
-                } else                                                      \
-                    STATUS_CHECK(asm_assign_var(data, file, node_));        \
+                if (NODE_IS_OPER(node_, OperNum::ARRAY_ELEM))               \
+                    STATUS_CHECK(asm_common_assign_arr_elem_same(data));    \
+                else                                                        \
+                    STATUS_CHECK(asm_common_assign_var(data, node_));       \
             } while (0)
 
 #define CHECK_VAR_FOR_ASSIGNMENT(node_) \
             STATUS_CHECK(asm_check_var_for_assign_(data, node_))
 
-#define ASM_PRINT_COMMAND(lvl_change_, ...)                                     \
-            do {                                                                \
-                if (AsmPrint::asm_printf(lvl_change_, file, __VA_ARGS__) < 0)   \
-                    return Status::OUTPUT_ERROR;                                \
+#define ASM_PRINT_COMMAND(lvl_change_, ...)                                             \
+            do {                                                                        \
+                if (AsmPrint::asm_printf(lvl_change_, file, __VA_ARGS__) < 0)           \
+                    return Status::OUTPUT_ERROR;                                        \
             } while (0)
 
-#define ASM_PRINT_COMMAND_NO_TAB(...)                                           \
-            do {                                                                \
-                if (AsmPrint::asm_printf_with_tab(0, file, __VA_ARGS__) < 0)    \
-                    return Status::OUTPUT_ERROR;                                \
+#define ASM_PRINT_COMMAND_NO_TAB(...)                                                   \
+            do {                                                                        \
+                if (AsmPrint::asm_printf_with_tab(0, file, __VA_ARGS__) < 0)            \
+                    return Status::OUTPUT_ERROR;                                        \
             } while (0)
 
 #define BINARY_MATH()   \
-            STATUS_CHECK(asm_binary_math_(data, file, node, NODE_DATA(node)->oper, is_val_needed))
+            STATUS_CHECK(asm_binary_math_(data, node, NODE_DATA(node)->oper, is_val_needed))
 
 #define UNARY_MATH()    \
-            STATUS_CHECK(asm_unary_math_(data, file, node, NODE_DATA(node)->oper, is_val_needed))
+            STATUS_CHECK(asm_unary_math_(data, node, NODE_DATA(node)->oper, is_val_needed))
 
 #define UNARY_MATH_SPEC(oper_)  \
-            STATUS_CHECK(asm_unary_math_(data, file, node, oper_, is_val_needed))
+            STATUS_CHECK(asm_unary_math_(data, node, oper_, is_val_needed))
 
 #define ASM_MATH_OPERATOR(oper_)    \
-            STATUS_CHECK(asm_math_operator(file, oper_));
+            STATUS_CHECK(ASM_DISP.math_operator(data->out_file, oper_));
 
 #define ASM_PUSH_IMMED_OPERAND(imm_)    \
-            STATUS_CHECK(asm_push_immed_operand(file, imm_))
+            STATUS_CHECK(ASM_DISP.push_immed_operand(data->out_file, imm_))
 
 #define ASM_COMMENT(comment_)   \
-            STATUS_CHECK(asm_comment(file, comment_))
+            STATUS_CHECK(ASM_DISP.comment(data->out_file, comment_))
 
 #define ASM_TAB()   \
-            STATUS_CHECK(asm_tab(file))
+            STATUS_CHECK(ASM_DISP.tab(data->out_file))
 
 #define ASM_UNTAB() \
-            STATUS_CHECK(asm_untab(file))
+            STATUS_CHECK(ASM_DISP.untab(data->out_file))
 
 #define ASM_READ_DOUBLE()   \
-            STATUS_CHECK(asm_read_double(file))
+            STATUS_CHECK(ASM_DISP.read_double(data->out_file))
 
 #define ASM_PRINT_DOUBLE()  \
-            STATUS_CHECK(asm_print_double(file))
+            STATUS_CHECK(ASM_DISP.print_double(data->out_file))
 
 #define ASM_RET()   \
-            STATUS_CHECK(asm_ret(file))
+            STATUS_CHECK(ASM_DISP.ret(data->out_file))
 
 #define ASM_WRITE_RETURNED_VALUE()  \
-            STATUS_CHECK(asm_write_returned_value(file))
+            STATUS_CHECK(ASM_DISP.write_returned_value(data->out_file))
 
 #define ASM_NEGATIVE()  \
-            STATUS_CHECK(asm_negative(file))
+            STATUS_CHECK(ASM_DISP.negative(data->out_file))
 
 #define DAMAGED_TREE(err_msg_)  \
             tree_is_damaged(&data->tree, err_msg_);
 
 #define ENTER_SCOPE(num_)                                   \
-            if (!asm_create_scope(&data->scopes, num_))     \
+            if (!asm_common_create_scope(&data->scopes, num_))     \
                 return Status::STACK_ERROR
 
 #define ENTER_LOOP_SCOPE(num_)                                      \
-            if (!asm_create_scope(&data->scopes, num_, true))       \
+            if (!asm_common_create_scope(&data->scopes, num_, true))       \
                 return Status::STACK_ERROR
 
 #define EXIT_SCOPE()    \
-            STATUS_CHECK(asm_pop_var_table(&data->scopes))
+            STATUS_CHECK(asm_common_pop_var_table(&data->scopes))
 
-#define EVAL_FUNC_ARGS(node_, offset_, arg_count_)                                      \
-            STATUS_CHECK(asm_eval_func_args_(data, file, node_, offset_, arg_count_,    \
+#define EVAL_FUNC_ARGS(node_, offset_, arg_count_)                                \
+            STATUS_CHECK(asm_eval_func_args_(data, node_, offset_, arg_count_,    \
                                              DEBUG_INFO(node_)))
 
 #define FIND_FUNC(num_) \
             (data->func_table.find_func(num_))
 
 #define PROVIDE_FUNC_CALL()    \
-            STATUS_CHECK(asm_provide_func_call_(data, file, node, is_val_needed))
+            STATUS_CHECK(asm_provide_func_call_(data, node, is_val_needed))
 
 #define GET_ARR_ELEM_VAL()      \
-            STATUS_CHECK(asm_get_arr_elem_val_(data, file, node, is_val_needed))
+            STATUS_CHECK(asm_get_arr_elem_val_(data, node, is_val_needed))
 
 #define ASM_SET_FPS(value_node_)    \
-            STATUS_CHECK(asm_make_set_fps_(data, file, value_node_))
+            STATUS_CHECK(asm_make_set_fps_(data, value_node_))
 
 #define ASM_VIDEO_SHOW_FRAME()  \
-            STATUS_CHECK(asm_video_show_frame(file));
+            STATUS_CHECK(ASM_DISP.video_show_frame(data->out_file));
 
 #define ASM_MAKE_IF(node_)  \
-            STATUS_CHECK(asm_make_if_(data, file, node_))
+            STATUS_CHECK(asm_make_if_(data, node_))
 
 #define ASM_MAKE_IF_ELSE(node_)     \
-            STATUS_CHECK(asm_make_if_else_(data, file, node_))
+            STATUS_CHECK(asm_make_if_else_(data, node_))
 
 #define ASM_MAKE_WHILE(node_)   \
-            STATUS_CHECK(asm_make_while_(data, file, node_))
+            STATUS_CHECK(asm_make_while_(data, node_))
 
 #define ASM_MAKE_WHILE_ELSE(node_)   \
-            STATUS_CHECK(asm_make_while_else_(data, file, node_))
+            STATUS_CHECK(asm_make_while_else_(data, node_))
 
 #define ASM_MAKE_BREAK(node_)       \
-            STATUS_CHECK(asm_make_break_(data, file, node_))
+            STATUS_CHECK(asm_make_break_(data, node_))
 
 #define ASM_MAKE_CONTINUE(node_)    \
-            STATUS_CHECK(asm_make_continue_(data, file, node_))
+            STATUS_CHECK(asm_make_continue_(data, node_))
 
 #define ASM_MAKE_DO_WHILE(node_)    \
-            STATUS_CHECK(asm_make_do_while_(data, file, node_))
+            STATUS_CHECK(asm_make_do_while_(data, node_))
 
 #define ASM_MAKE_DO_IF(node_)   \
-            STATUS_CHECK(asm_make_do_if_(data, file, node_))
+            STATUS_CHECK(asm_make_do_if_(data, node_))
 
 #define PREFIX_OPER(oper_)  \
-            STATUS_CHECK(asm_make_prefix_oper_(data, file, node, oper_, is_val_needed))
+            STATUS_CHECK(asm_make_prefix_oper_(data, node, oper_, is_val_needed))
 
 #define POSTFIX_OPER(oper_) \
-            STATUS_CHECK(asm_make_postfix_oper_(data, file, node, oper_, is_val_needed))
+            STATUS_CHECK(asm_make_postfix_oper_(data, node, oper_, is_val_needed))
 
 #endif //< #ifndef LANG_DSL_H_

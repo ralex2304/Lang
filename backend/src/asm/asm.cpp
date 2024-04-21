@@ -2,34 +2,15 @@
 
 #include "dsl.h"
 
-static Status::Statuses make_asm_process_(BackData* data, FILE* file);
-
-static Status::Statuses asm_func_def_(BackData* data, FILE* file);
+static Status::Statuses asm_func_def_(BackData* data);
 
 static Status::Statuses asm_add_func_args_var_table_(BackData* data, TreeNode* cur_arg);
 
-static Status::Statuses asm_func_def_make_body_(BackData* data, FILE* file, TreeNode* root_cmd);
+static Status::Statuses asm_func_def_make_body_(BackData* data, TreeNode* root_cmd);
 
 
-Status::Statuses make_asm(BackData* data, const char* filename) {
+Status::Statuses make_asm(BackData* data) {
     assert(data);
-    assert(filename);
-
-    FILE* file = {};
-    if (!file_open(&file, filename, "wb"))
-        return Status::OUTPUT_ERROR;
-
-    STATUS_CHECK(make_asm_process_(data, file), file_close(file));
-
-    if (!file_close(file))
-        return Status::OUTPUT_ERROR;
-
-    return Status::NORMAL_WORK;
-}
-
-static Status::Statuses make_asm_process_(BackData* data, FILE* file) {
-    assert(data);
-    assert(file);
 
     ssize_t main_func = -1;
     for (size_t i = 0; i < MAX_SYNONYMS_NUM && main_func == -1; i++)
@@ -39,22 +20,21 @@ static Status::Statuses make_asm_process_(BackData* data, FILE* file) {
     if (main_func == -1)
         return syntax_error(*DEBUG_INFO(data->tree.root), "main function not found");
 
-    STATUS_CHECK(asm_init_regs(file));
+    STATUS_CHECK(ASM_DISP.init_regs(data->out_file));
 
-    STATUS_CHECK(asm_initialise_global_scope(data, file));
+    STATUS_CHECK(asm_common_initialise_global_scope(data));
 
-    STATUS_CHECK(asm_call_function(data, file, main_func, asm_count_addr_offset(&data->scopes)));
+    STATUS_CHECK(asm_common_call_function(data, main_func, asm_common_count_addr_offset(&data->scopes)));
 
-    STATUS_CHECK(asm_halt(file));
+    STATUS_CHECK(ASM_DISP.halt(data->out_file));
 
-    STATUS_CHECK(asm_func_def_(data, file));
+    STATUS_CHECK(asm_func_def_(data));
 
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses asm_func_def_(BackData* data, FILE* file) {
+static Status::Statuses asm_func_def_(BackData* data) {
     assert(data);
-    assert(file);
 
     TreeNode* cur_cmd = data->tree.root;
 
@@ -77,13 +57,13 @@ static Status::Statuses asm_func_def_(BackData* data, FILE* file) {
 
         STATUS_CHECK(asm_add_func_args_var_table_(data, args_subtree));
 
-        STATUS_CHECK(asm_begin_func_defenition(data, file, func_num));
+        STATUS_CHECK(asm_common_begin_func_defenition(data, func_num));
 
-        STATUS_CHECK(asm_func_def_make_body_(data, file, *R(def)));
+        STATUS_CHECK(asm_func_def_make_body_(data, *R(def)));
 
-        STATUS_CHECK(asm_pop_var_table(&data->scopes));
+        STATUS_CHECK(asm_common_pop_var_table(&data->scopes));
 
-        STATUS_CHECK(asm_end_func_definition(file));
+        STATUS_CHECK(ASM_DISP.end_func_definition(data->out_file));
 
         cur_cmd = *R(cur_cmd);
     }
@@ -91,16 +71,15 @@ static Status::Statuses asm_func_def_(BackData* data, FILE* file) {
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses asm_func_def_make_body_(BackData* data, FILE* file, TreeNode* root_cmd) {
+static Status::Statuses asm_func_def_make_body_(BackData* data, TreeNode* root_cmd) {
     assert(data);
-    assert(file);
 
-    if (!asm_create_scope(&data->scopes))
+    if (!asm_common_create_scope(&data->scopes))
         return Status::STACK_ERROR;
 
     EVAL_SUBTREE_NO_VAL(root_cmd);
 
-    STATUS_CHECK(asm_pop_var_table(&data->scopes));
+    STATUS_CHECK(asm_common_pop_var_table(&data->scopes));
 
     return Status::NORMAL_WORK;
 }
@@ -109,9 +88,9 @@ static Status::Statuses asm_add_func_args_var_table_(BackData* data, TreeNode* c
     assert(data);
     // cur_arg can be nullptr
 
-    size_t addr_offset = asm_count_addr_offset(&data->scopes);
+    size_t addr_offset = asm_common_count_addr_offset(&data->scopes);
 
-    ScopeData* scope = asm_create_scope(&data->scopes);
+    ScopeData* scope = asm_common_create_scope(&data->scopes);
     if (scope == nullptr)
         return Status::STACK_ERROR;
 

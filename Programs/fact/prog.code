@@ -58,7 +58,6 @@ ___func_1:
         push [rbx + 0]
         push 1
         sub
-
         pop [rbx + 1]
 
         ; func call: факториал
@@ -72,7 +71,6 @@ ___func_1:
 
         push [rbx + 0]
         mul
-
         pop rax
 
         ret

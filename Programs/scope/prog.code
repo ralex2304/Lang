@@ -41,7 +41,6 @@ ___func_0:
         push rex
 
         add
-
         ; var assignment: переменная
         pop [rbx + 1]
 

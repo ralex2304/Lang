@@ -95,16 +95,12 @@ ___func_4:
     push [rbx + 1]
     push [rbx + 1]
     mul
-
     push 4
     push [rbx + 0]
     push [rbx + 2]
     mul
-
     mul
-
     sub
-
     ; var assignment: дискр
     pop [rbx + 3]
 
@@ -150,13 +146,10 @@ ___func_4:
         ; neg:
 push -1
 mul
-
         push 2
         push [rbx + 0]
         mul
-
         div
-
         out
 
         push 0
@@ -169,7 +162,6 @@ mul
 
     push [rbx + 3]
     sqrt
-
     ; var assignment: дискр
     pop [rbx + 3]
 
@@ -180,32 +172,24 @@ mul
     ; neg:
 push -1
 mul
-
     push [rbx + 3]
     sub
-
     push 2
     push [rbx + 0]
     mul
-
     div
-
     out
 
     push [rbx + 1]
     ; neg:
 push -1
 mul
-
     push [rbx + 3]
     add
-
     push 2
     push [rbx + 0]
     mul
-
     div
-
     out
 
     push 0
@@ -273,10 +257,8 @@ ___func_5:
     ; neg:
 push -1
 mul
-
     push [rbx + 0]
     div
-
     out
 
     push 0

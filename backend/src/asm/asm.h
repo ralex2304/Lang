@@ -9,9 +9,9 @@
 #include TREE_INCLUDE
 #include "file/file.h"
 #include "error_printer/error_printer.h"
-#include "output/output.h"
+#include "arch/dispatcher.h"
 #include "traversal.h"
 
-Status::Statuses make_asm(BackData* data, const char* filename);
+Status::Statuses make_asm(BackData* data);
 
 #endif //< #ifndef ASM_ASM_H_

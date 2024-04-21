@@ -2,89 +2,83 @@
 
 #include "dsl.h"
 
-static Status::Statuses asm_command_traversal_var_(BackData* data, FILE* file, TreeNode* node,
-                                                   bool is_val_needed);
+static Status::Statuses asm_command_traversal_var_(BackData* data, TreeNode* node, bool is_val_needed);
 
 static Status::Statuses asm_add_num_var_(BackData* data, TreeNode* node, bool is_const);
 
 static Status::Statuses asm_check_var_for_assign_(BackData* data, TreeNode* node, Var* var = nullptr);
 
-static Status::Statuses asm_provide_func_call_(BackData* data, FILE* file, TreeNode* node,
-                                               bool is_val_needed);
+static Status::Statuses asm_provide_func_call_(BackData* data, TreeNode* node, bool is_val_needed);
 
-static Status::Statuses asm_get_arr_elem_val_(BackData* data, FILE* file, TreeNode* node,
-                                              bool is_val_needed);
+static Status::Statuses asm_get_arr_elem_val_(BackData* data, TreeNode* node, bool is_val_needed);
 
-static Status::Statuses asm_array_definition_assignment_(BackData* data, FILE* file, TreeNode* node);
+static Status::Statuses asm_array_definition_assignment_(BackData* data, TreeNode* node);
 
 static Status::Statuses asm_add_array_(BackData* data, TreeNode* node, bool is_const);
 
-static Status::Statuses asm_eval_func_args_(BackData* data, FILE* file, TreeNode* cur_sep,
-                                            size_t addr_offset,
+static Status::Statuses asm_eval_func_args_(BackData* data, TreeNode* cur_sep, size_t addr_offset,
                                             ssize_t arg_cnt, DebugInfo* debug_info);
 
-static Status::Statuses asm_binary_math_(BackData* data, FILE* file, TreeNode* node,
+static Status::Statuses asm_binary_math_(BackData* data, TreeNode* node,
                                          const OperNum math_op, bool is_val_needed);
 
-static Status::Statuses asm_unary_math_(BackData* data, FILE* file, TreeNode* node,
+static Status::Statuses asm_unary_math_(BackData* data, TreeNode* node,
                                         const OperNum math_op, bool is_val_needed);
 
-static Status::Statuses asm_make_set_fps_(BackData* data, FILE* file, TreeNode* val_node);
+static Status::Statuses asm_make_set_fps_(BackData* data, TreeNode* val_node);
 
-static Status::Statuses asm_make_if_(BackData* data, FILE* file, TreeNode* node);
+static Status::Statuses asm_make_if_(BackData* data, TreeNode* node);
 
-static Status::Statuses asm_make_do_if_(BackData* data, FILE* file, TreeNode* node);
+static Status::Statuses asm_make_do_if_(BackData* data, TreeNode* node);
 
-static Status::Statuses asm_make_if_else_(BackData* data, FILE* file, TreeNode* node);
+static Status::Statuses asm_make_if_else_(BackData* data, TreeNode* node);
 
-static Status::Statuses asm_make_while_(BackData* data, FILE* file, TreeNode* parent_node);
+static Status::Statuses asm_make_while_(BackData* data, TreeNode* parent_node);
 
-static Status::Statuses asm_make_do_while_(BackData* data, FILE* file, TreeNode* node);
+static Status::Statuses asm_make_do_while_(BackData* data, TreeNode* node);
 
-static Status::Statuses asm_make_while_else_(BackData* data, FILE* file, TreeNode* parent_node);
+static Status::Statuses asm_make_while_else_(BackData* data, TreeNode* parent_node);
 
-static Status::Statuses asm_make_continue_(BackData* data, FILE* file, TreeNode* node);
+static Status::Statuses asm_make_continue_(BackData* data, TreeNode* node);
 
-static Status::Statuses asm_make_break_(BackData* data, FILE* file, TreeNode* node);
+static Status::Statuses asm_make_break_(BackData* data, TreeNode* node);
 
-static Status::Statuses asm_make_prefix_oper_(BackData* data, FILE* file, TreeNode* node,
+static Status::Statuses asm_make_prefix_oper_(BackData* data, TreeNode* node,
                                               const OperNum oper, bool is_val_needed);
 
-static Status::Statuses asm_make_postfix_oper_(BackData* data, FILE* file, TreeNode* node,
+static Status::Statuses asm_make_postfix_oper_(BackData* data, TreeNode* node,
                                                const OperNum oper, bool is_val_needed);
 
 static Status::Statuses asm_make_prepost_init_var_(BackData* data, TreeNode* node,
                                                    bool* is_array_elem, TreeNode** var_node,
                                                    Var** var, bool* is_global);
 
-static Status::Statuses asm_make_prefix_oper_eval_(BackData* data, FILE* file, TreeNode* node,
+static Status::Statuses asm_make_prefix_oper_eval_(BackData* data, TreeNode* node,
                                                    const bool is_array_elem, const Var* var,
                                                    const bool is_global, TreeNode* var_node,
                                                    const OperNum oper);
 
-static Status::Statuses asm_make_postfix_oper_eval_(BackData* data, FILE* file, TreeNode* node,
+static Status::Statuses asm_make_postfix_oper_eval_(BackData* data, TreeNode* node,
                                                     const bool is_array_elem, const Var* var,
                                                     const bool is_global, TreeNode* var_node,
                                                     const OperNum oper, bool is_val_needed);
 
 
-Status::Statuses asm_command_traversal(BackData* data, FILE* file, TreeNode* node,
-                                       bool is_val_needed) {
+Status::Statuses asm_command_traversal(BackData* data, TreeNode* node, bool is_val_needed) {
     assert(data);
-    assert(file);
 
     if (node == nullptr)
         return Status::NORMAL_WORK;
 
     if (TYPE_IS_NUM(node)) {
         if (is_val_needed)
-            STATUS_CHECK(asm_push_const(file, NODE_DATA(node)->num));
+            STATUS_CHECK(ASM_DISP.push_const(data->out_file, NODE_DATA(node)->num));
 
         return Status::NORMAL_WORK;
     }
 
     if (TYPE_IS_VAR(node)) {
-        STATUS_CHECK(asm_command_traversal_var_(data, file, node, is_val_needed));
+        STATUS_CHECK(asm_command_traversal_var_(data, node, is_val_needed));
 
         return Status::NORMAL_WORK;
     }
@@ -114,15 +108,13 @@ Status::Statuses asm_command_traversal(BackData* data, FILE* file, TreeNode* nod
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses asm_command_traversal_var_(BackData* data, FILE* file, TreeNode* node,
-                                                   bool is_val_needed) {
+static Status::Statuses asm_command_traversal_var_(BackData* data, TreeNode* node, bool is_val_needed) {
     assert(data);
-    assert(file);
     assert(node);
     assert(TYPE_IS_VAR(node));
 
     bool is_global = false;
-    Var* var = asm_search_var(&data->scopes, NODE_DATA(node)->var, &is_global);
+    Var* var = asm_common_search_var(&data->scopes, NODE_DATA(node)->var, &is_global);
 
     if (var == nullptr)
         return SYNTAX_ERROR("Unknown var name");
@@ -131,7 +123,7 @@ static Status::Statuses asm_command_traversal_var_(BackData* data, FILE* file, T
         return SYNTAX_ERROR("Expected numeric var");
 
     if (is_val_needed)
-        STATUS_CHECK(asm_push_var_val(file, var->addr_offset, is_global));
+        STATUS_CHECK(ASM_DISP.push_var_val(data->out_file, var->addr_offset, is_global));
 
     return Status::NORMAL_WORK;
 }
@@ -150,7 +142,7 @@ static Status::Statuses asm_add_num_var_(BackData* data, TreeNode* node, bool is
                    .type = VarType::NUM,
                    .size = 1,
                    .is_const = is_const,
-                   .addr_offset = asm_count_addr_offset(&data->scopes)};
+                   .addr_offset = asm_common_count_addr_offset(&data->scopes)};
 
     if (!LAST_VAR_TABLE.vars.push_back(&new_var))
         return Status::MEMORY_EXCEED;
@@ -183,7 +175,7 @@ static Status::Statuses asm_add_array_(BackData* data, TreeNode* node, bool is_c
                    .type = VarType::ARRAY,
                    .size = (size_t)array_size,
                    .is_const = is_const,
-                   .addr_offset = asm_count_addr_offset(&data->scopes)};
+                   .addr_offset = asm_common_count_addr_offset(&data->scopes)};
 
     if (!LAST_VAR_TABLE.vars.push_back(&new_var))
         return Status::MEMORY_EXCEED;
@@ -201,9 +193,9 @@ static Status::Statuses asm_check_var_for_assign_(BackData* data, TreeNode* node
 
     if (var == nullptr) {
         if (TYPE_IS_VAR(node))
-            var = asm_search_var(&data->scopes, NODE_DATA(node)->var, nullptr);
+            var = asm_common_search_var(&data->scopes, NODE_DATA(node)->var, nullptr);
         else
-            var = asm_search_var(&data->scopes, NODE_DATA(*L(node))->var, nullptr);
+            var = asm_common_search_var(&data->scopes, NODE_DATA(*L(node))->var, nullptr);
     }
 
     if (var == nullptr)
@@ -215,11 +207,9 @@ static Status::Statuses asm_check_var_for_assign_(BackData* data, TreeNode* node
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses asm_eval_func_args_(BackData* data, FILE* file, TreeNode* cur_sep,
-                                            size_t addr_offset,
+static Status::Statuses asm_eval_func_args_(BackData* data, TreeNode* cur_sep, size_t addr_offset,
                                             ssize_t arg_cnt, DebugInfo* debug_info) {
     assert(data);
-    assert(file);
     assert(debug_info);
 
     while (cur_sep && NODE_IS_OPER(cur_sep, OperNum::VAR_SEPARATOR)) {
@@ -227,7 +217,7 @@ static Status::Statuses asm_eval_func_args_(BackData* data, FILE* file, TreeNode
 
         EVAL_SUBTREE_GET_VAL(cur_sep->left);
 
-        STATUS_CHECK(asm_pop_var_value(file, addr_offset, false));
+        STATUS_CHECK(ASM_DISP.pop_var_value(data->out_file, addr_offset, false));
 
         cur_sep = cur_sep->right;
         addr_offset++;
@@ -241,10 +231,8 @@ static Status::Statuses asm_eval_func_args_(BackData* data, FILE* file, TreeNode
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses asm_provide_func_call_(BackData* data, FILE* file, TreeNode* node,
-                                               bool is_val_needed) {
+static Status::Statuses asm_provide_func_call_(BackData* data, TreeNode* node, bool is_val_needed) {
     assert(data);
-    assert(file);
     assert(node);
 
     size_t func_num = NODE_DATA(*L(node))->var;
@@ -253,31 +241,29 @@ static Status::Statuses asm_provide_func_call_(BackData* data, FILE* file, TreeN
     if (func == nullptr)
         return SYNTAX_ERROR("Function name was not declared in this scope");
 
-    size_t offset = asm_count_addr_offset(&data->scopes);
+    size_t offset = asm_common_count_addr_offset(&data->scopes);
 
     EVAL_FUNC_ARGS(*R(node), offset, func->arg_num);
 
     if (!TYPE_IS_VAR(*L(node)))
         return DAMAGED_TREE("incorrect var arguments list in function call");
 
-    STATUS_CHECK(asm_call_function(data, file, func_num, offset));
+    STATUS_CHECK(asm_common_call_function(data, func_num, offset));
 
     if (is_val_needed)
-        STATUS_CHECK(asm_get_returned_value(file));
+        STATUS_CHECK(ASM_DISP.get_returned_value(data->out_file));
 
-    STATUS_CHECK(asm_insert_empty_line(file));
+    STATUS_CHECK(ASM_DISP.insert_empty_line(data->out_file));
 
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses asm_get_arr_elem_val_(BackData* data, FILE* file, TreeNode* node,
-                                              bool is_val_needed) {
+static Status::Statuses asm_get_arr_elem_val_(BackData* data, TreeNode* node, bool is_val_needed) {
     assert(data);
-    assert(file);
     assert(node);
 
     bool is_global = false;
-    Var* var = asm_search_var(&data->scopes, NODE_DATA(*L(node))->var, &is_global);
+    Var* var = asm_common_search_var(&data->scopes, NODE_DATA(*L(node))->var, &is_global);
 
     if (var == nullptr)
         return SYNTAX_ERROR("unknown var name");
@@ -288,21 +274,20 @@ static Status::Statuses asm_get_arr_elem_val_(BackData* data, FILE* file, TreeNo
     if (is_val_needed) {
         EVAL_SUBTREE_GET_VAL(*R(node));
 
-        STATUS_CHECK(asm_push_arr_elem_val(file, var->addr_offset, is_global));
+        STATUS_CHECK(ASM_DISP.push_arr_elem_val(data->out_file, var->addr_offset, is_global));
     }
 
     return Status::NORMAL_WORK;
 }
 
 
-static Status::Statuses asm_array_definition_assignment_(BackData* data, FILE* file, TreeNode* node) {
+static Status::Statuses asm_array_definition_assignment_(BackData* data, TreeNode* node) {
     assert(data);
-    assert(file);
     assert(node);
     assert(NODE_IS_OPER(node, OperNum::ARRAY_DEFINITION));
 
     bool is_global = false;
-    const Var* var = asm_search_var(&data->scopes, (size_t)*VAR_NUM(*L(*L(node))), &is_global);
+    const Var* var = asm_common_search_var(&data->scopes, (size_t)*VAR_NUM(*L(*L(node))), &is_global);
     assert(var);
     assert(var->type == VarType::ARRAY);
 
@@ -317,7 +302,9 @@ static Status::Statuses asm_array_definition_assignment_(BackData* data, FILE* f
 
         EVAL_SUBTREE_GET_VAL(*L(cur_separator));
 
-        STATUS_CHECK(asm_pop_arr_elem_value_with_const_index(file, var->addr_offset, i++, is_global));
+        STATUS_CHECK(ASM_DISP.pop_arr_elem_value_with_const_index(data->out_file,
+                                                                        var->addr_offset,
+                                                                        i++, is_global));
 
         cur_separator = *R(cur_separator);
     }
@@ -325,25 +312,23 @@ static Status::Statuses asm_array_definition_assignment_(BackData* data, FILE* f
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses asm_binary_math_(BackData* data, FILE* file, TreeNode* node,
+static Status::Statuses asm_binary_math_(BackData* data, TreeNode* node,
                                          const OperNum math_op, bool is_val_needed) {
     assert(data);
-    assert(file);
     assert(node);
 
     EVAL_SUBTREE(*L(node), is_val_needed);
     EVAL_SUBTREE(*R(node), is_val_needed);
 
     if (is_val_needed)
-        STATUS_CHECK(asm_math_operator(file, math_op));
+        STATUS_CHECK(ASM_DISP.math_operator(data->out_file, math_op));
 
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses asm_unary_math_(BackData* data, FILE* file, TreeNode* node,
+static Status::Statuses asm_unary_math_(BackData* data, TreeNode* node,
                                         const OperNum math_op, bool is_val_needed) {
     assert(data);
-    assert(file);
     assert(node);
 
     assert(*L(node) == nullptr);
@@ -351,32 +336,30 @@ static Status::Statuses asm_unary_math_(BackData* data, FILE* file, TreeNode* no
     EVAL_SUBTREE(*R(node), is_val_needed);
 
     if (is_val_needed)
-        STATUS_CHECK(asm_math_operator(file, math_op));
+        STATUS_CHECK(ASM_DISP.math_operator(data->out_file, math_op));
 
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses asm_make_if_(BackData* data, FILE* file, TreeNode* node) {
+static Status::Statuses asm_make_if_(BackData* data, TreeNode* node) {
     assert(data);
-    assert(file);
 
     size_t scope_num = 0;
     ENTER_SCOPE(&scope_num);
 
-    STATUS_CHECK(asm_if_begin(file, scope_num));
+    STATUS_CHECK(ASM_DISP.if_begin(data->out_file, scope_num));
 
     EVAL_SUBTREE_GET_VAL(node);
 
-    STATUS_CHECK(asm_if_end(file, scope_num));
+    STATUS_CHECK(ASM_DISP.if_end(data->out_file, scope_num));
 
     EXIT_SCOPE();
 
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses asm_make_do_if_(BackData* data, FILE* file, TreeNode* node) {
+static Status::Statuses asm_make_do_if_(BackData* data, TreeNode* node) {
     assert(data);
-    assert(file);
     assert(node);
 
     size_t scope_num = 0;
@@ -386,69 +369,66 @@ static Status::Statuses asm_make_do_if_(BackData* data, FILE* file, TreeNode* no
 
     EXIT_SCOPE();
 
-    STATUS_CHECK(asm_do_if_check_clause(file, scope_num));
+    STATUS_CHECK(ASM_DISP.do_if_check_clause(data->out_file, scope_num));
 
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses asm_make_if_else_(BackData* data, FILE* file, TreeNode* node) {
+static Status::Statuses asm_make_if_else_(BackData* data, TreeNode* node) {
     assert(data);
-    assert(file);
     assert(node);
 
     size_t scope_num = 0;
     ENTER_SCOPE(&scope_num);
 
-    STATUS_CHECK(asm_if_else_begin(file, scope_num));
+    STATUS_CHECK(ASM_DISP.if_else_begin(data->out_file, scope_num));
 
     EVAL_SUBTREE_GET_VAL(*L(node));
 
-    STATUS_CHECK(asm_if_else_middle(file, scope_num));
+    STATUS_CHECK(ASM_DISP.if_else_middle(data->out_file, scope_num));
 
     EXIT_SCOPE();
     ENTER_SCOPE(nullptr);
 
     EVAL_SUBTREE_GET_VAL(*R(node));
 
-    STATUS_CHECK(asm_if_else_end(file, scope_num));
+    STATUS_CHECK(ASM_DISP.if_else_end(data->out_file, scope_num));
 
     EXIT_SCOPE();
 
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses asm_make_while_(BackData* data, FILE* file, TreeNode* parent_node) {
+static Status::Statuses asm_make_while_(BackData* data, TreeNode* parent_node) {
     assert(data);
-    assert(file);
     assert(parent_node);
 
     size_t scope_num = 0;
     ENTER_LOOP_SCOPE(&scope_num);
 
-    STATUS_CHECK(asm_while_begin(file, scope_num));
+    STATUS_CHECK(ASM_DISP.while_begin(data->out_file, scope_num));
 
     EVAL_SUBTREE_GET_VAL(*L(parent_node));
 
-    STATUS_CHECK(asm_while_check_clause(file, scope_num));
+    STATUS_CHECK(ASM_DISP.while_check_clause(data->out_file, scope_num));
 
     EVAL_SUBTREE_NO_VAL(*R(parent_node));
 
-    STATUS_CHECK(asm_while_end(file, scope_num));
+    STATUS_CHECK(ASM_DISP.while_end(data->out_file, scope_num));
 
     EXIT_SCOPE();
 
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses asm_make_do_while_(BackData* data, FILE* file, TreeNode* node) {
+static Status::Statuses asm_make_do_while_(BackData* data, TreeNode* node) {
     assert(data);
-    assert(file);
     assert(node);
 
     size_t scope_num = 0;
     ENTER_LOOP_SCOPE(&scope_num);
 
-    STATUS_CHECK(asm_while_begin(file, scope_num));
+    STATUS_CHECK(ASM_DISP.while_begin(data->out_file, scope_num));
 
     EVAL_SUBTREE_NO_VAL(*R(node));
 
@@ -456,88 +436,83 @@ static Status::Statuses asm_make_do_while_(BackData* data, FILE* file, TreeNode*
 
     EVAL_SUBTREE_GET_VAL(*L(node));
 
-    STATUS_CHECK(asm_while_check_clause(file, scope_num));
+    STATUS_CHECK(ASM_DISP.while_check_clause(data->out_file, scope_num));
 
-    STATUS_CHECK(asm_while_end(file, scope_num));
+    STATUS_CHECK(ASM_DISP.while_end(data->out_file, scope_num));
 
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses asm_make_while_else_(BackData* data, FILE* file, TreeNode* parent_node) {
+static Status::Statuses asm_make_while_else_(BackData* data, TreeNode* parent_node) {
     assert(data);
-    assert(file);
     assert(parent_node);
 
     size_t scope_num = 0;
     ENTER_LOOP_SCOPE(&scope_num);
 
-    STATUS_CHECK(asm_while_begin(file, scope_num));
+    STATUS_CHECK(ASM_DISP.while_begin(data->out_file, scope_num));
 
     EVAL_SUBTREE_GET_VAL(*L(parent_node));
 
-    STATUS_CHECK(asm_while_else_check_clause(file, scope_num));
+    STATUS_CHECK(ASM_DISP.while_else_check_clause(data->out_file, scope_num));
 
     EVAL_SUBTREE_NO_VAL(*L(*R(parent_node)));
 
     EXIT_SCOPE();
     ENTER_SCOPE(nullptr);
 
-    STATUS_CHECK(asm_while_else_else(file, scope_num));
+    STATUS_CHECK(ASM_DISP.while_else_else(data->out_file, scope_num));
 
     EVAL_SUBTREE_NO_VAL(*R(*R(parent_node)));
 
-    STATUS_CHECK(asm_while_end(file, scope_num));
+    STATUS_CHECK(ASM_DISP.while_end(data->out_file, scope_num));
 
     EXIT_SCOPE();
 
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses asm_make_set_fps_(BackData* data, FILE* file, TreeNode* val_node) {
+static Status::Statuses asm_make_set_fps_(BackData* data, TreeNode* val_node) {
     assert(data);
-    assert(file);
     assert(val_node);
 
     if (!TYPE_IS_NUM(val_node))
         return DAMAGED_TREE("Set fps must have const argument");
 
-    STATUS_CHECK(asm_fps(file, (int)(NODE_DATA(val_node)->num)));
+    STATUS_CHECK(ASM_DISP.fps(data->out_file, (int)(NODE_DATA(val_node)->num)));
 
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses asm_make_continue_(BackData* data, FILE* file, TreeNode* node) {
+static Status::Statuses asm_make_continue_(BackData* data, TreeNode* node) {
     assert(data);
-    assert(file);
 
-    ssize_t scope_num = find_loop_scope_num(data);
+    ssize_t scope_num = asm_common_find_loop_scope_num(data);
 
     if (scope_num < 0)
         return SYNTAX_ERROR("\"continue\" must be inside loop");
 
-    STATUS_CHECK(asm_continue(file, scope_num));
+    STATUS_CHECK(ASM_DISP.Continue(data->out_file, scope_num));
 
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses asm_make_break_(BackData* data, FILE* file, TreeNode* node) {
+static Status::Statuses asm_make_break_(BackData* data, TreeNode* node) {
     assert(data);
-    assert(file);
 
-    ssize_t scope_num = find_loop_scope_num(data);
+    ssize_t scope_num = asm_common_find_loop_scope_num(data);
 
     if (scope_num < 0)
         return SYNTAX_ERROR("\"break\" must be inside loop");
 
-    STATUS_CHECK(asm_break(file, scope_num));
+    STATUS_CHECK(ASM_DISP.Break(data->out_file, scope_num));
 
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses asm_make_prefix_oper_(BackData* data, FILE* file, TreeNode* node,
+static Status::Statuses asm_make_prefix_oper_(BackData* data, TreeNode* node,
                                               const OperNum oper, bool is_val_needed) {
     assert(data);
-    assert(file);
     assert(node);
 
     if (*L(node) == nullptr || !(TYPE_IS_VAR(*L(node)) || NODE_IS_OPER(*L(node), OperNum::ARRAY_ELEM)))
@@ -549,16 +524,16 @@ static Status::Statuses asm_make_prefix_oper_(BackData* data, FILE* file, TreeNo
     bool is_global = false;
     STATUS_CHECK(asm_make_prepost_init_var_(data, node, &is_array_elem, &var_node, &var, &is_global));
 
-    STATUS_CHECK(asm_make_prefix_oper_eval_(data, file, node, is_array_elem, var, is_global,
+    STATUS_CHECK(asm_make_prefix_oper_eval_(data, node, is_array_elem, var, is_global,
                                             var_node, oper));
 
     if (*R(node) == nullptr || TYPE_IS_VAR(*R(node))) { //< This is the last oper
 
         if (is_val_needed) {
             if (is_array_elem || var->type == VarType::ARRAY)
-                STATUS_CHECK(asm_push_arr_elem_val_the_same(file));
+                STATUS_CHECK(ASM_DISP.push_arr_elem_val_the_same(data->out_file));
             else
-                STATUS_CHECK(asm_push_var_val(file, var->addr_offset, is_global));
+                STATUS_CHECK(ASM_DISP.push_var_val(data->out_file, var->addr_offset, is_global));
         }
 
         return Status::NORMAL_WORK;
@@ -574,12 +549,11 @@ static Status::Statuses asm_make_prefix_oper_(BackData* data, FILE* file, TreeNo
     return DAMAGED_TREE("Right child of prefix oper must be null, var or other prepost-opers");
 }
 
-static Status::Statuses asm_make_prefix_oper_eval_(BackData* data, FILE* file, TreeNode* node,
+static Status::Statuses asm_make_prefix_oper_eval_(BackData* data, TreeNode* node,
                                                    const bool is_array_elem, const Var* var,
                                                    const bool is_global, TreeNode* var_node,
                                                    const OperNum oper) {
     assert(data);
-    assert(file);
     assert(node);
     assert(var);
     assert(var_node);
@@ -590,19 +564,18 @@ static Status::Statuses asm_make_prefix_oper_eval_(BackData* data, FILE* file, T
 
     if (is_array_elem) {
         EVAL_SUBTREE_GET_VAL(*R(*L(node)));
-        STATUS_CHECK(asm_prepost_oper_arr_elem(file, var->addr_offset, is_global, oper));
+        STATUS_CHECK(ASM_DISP.prepost_oper_arr_elem(data->out_file, var->addr_offset, is_global, oper));
     } else if (var->type == VarType::ARRAY)
-        STATUS_CHECK(asm_prepost_oper_arr_elem_the_same(file, oper));
+        STATUS_CHECK(ASM_DISP.prepost_oper_arr_elem_the_same(data->out_file, oper));
     else
-        STATUS_CHECK(asm_prepost_oper_var(file, var->addr_offset, is_global, oper));
+        STATUS_CHECK(ASM_DISP.prepost_oper_var(data->out_file, var->addr_offset, is_global, oper));
 
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses asm_make_postfix_oper_(BackData* data, FILE* file, TreeNode* node,
+static Status::Statuses asm_make_postfix_oper_(BackData* data, TreeNode* node,
                                                const OperNum oper, bool is_val_needed) {
     assert(data);
-    assert(file);
     assert(node);
 
     if (*L(node) == nullptr || !(TYPE_IS_VAR(*L(node)) || NODE_IS_OPER(*L(node), OperNum::ARRAY_ELEM)))
@@ -616,7 +589,7 @@ static Status::Statuses asm_make_postfix_oper_(BackData* data, FILE* file, TreeN
 
     STATUS_CHECK(asm_check_var_for_assign_(data, *L(node), var));
 
-    STATUS_CHECK(asm_make_postfix_oper_eval_(data, file, node, is_array_elem, var, is_global,
+    STATUS_CHECK(asm_make_postfix_oper_eval_(data, node, is_array_elem, var, is_global,
                                              var_node, oper, is_val_needed));
 
     if (*R(node) == nullptr || TYPE_IS_VAR(*R(node))) //< This is the last oper
@@ -649,19 +622,18 @@ static Status::Statuses asm_make_prepost_init_var_(BackData* data, TreeNode* nod
         *var_node = *L(*L(node));
     }
 
-    *var = asm_search_var(&data->scopes, NODE_DATA(*var_node)->var, is_global);
+    *var = asm_common_search_var(&data->scopes, NODE_DATA(*var_node)->var, is_global);
 
     STATUS_CHECK(asm_check_var_for_assign_(data, *L(node), *var));
 
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses asm_make_postfix_oper_eval_(BackData* data, FILE* file, TreeNode* node,
+static Status::Statuses asm_make_postfix_oper_eval_(BackData* data, TreeNode* node,
                                                     const bool is_array_elem, const Var* var,
                                                     const bool is_global, TreeNode* var_node,
                                                     const OperNum oper, bool is_val_needed) {
     assert(data);
-    assert(file);
     assert(node);
     assert(var);
     assert(var_node);
@@ -671,22 +643,22 @@ static Status::Statuses asm_make_postfix_oper_eval_(BackData* data, FILE* file, 
             return syntax_error(*DEBUG_INFO(var_node), "array var expected");
 
         EVAL_SUBTREE_GET_VAL(*R(*L(node)));
-        STATUS_CHECK(asm_save_arr_elem_addr(file, var->addr_offset, is_global));
+        STATUS_CHECK(ASM_DISP.save_arr_elem_addr(data->out_file, var->addr_offset, is_global));
     }
 
     if (is_val_needed) {
         if (is_array_elem || var->type == VarType::ARRAY)
-            STATUS_CHECK(asm_push_arr_elem_val_the_same(file));
+            STATUS_CHECK(ASM_DISP.push_arr_elem_val_the_same(data->out_file));
         else
-            STATUS_CHECK(asm_push_var_val(file, var->addr_offset, is_global));
+            STATUS_CHECK(ASM_DISP.push_var_val(data->out_file, var->addr_offset, is_global));
 
         is_val_needed = false;
     }
 
     if (is_array_elem || var->type == VarType::ARRAY)
-        STATUS_CHECK(asm_prepost_oper_arr_elem_the_same(file, oper));
+        STATUS_CHECK(ASM_DISP.prepost_oper_arr_elem_the_same(data->out_file, oper));
     else
-        STATUS_CHECK(asm_prepost_oper_var(file, var->addr_offset, is_global, oper));
+        STATUS_CHECK(ASM_DISP.prepost_oper_var(data->out_file, var->addr_offset, is_global, oper));
 
     return Status::NORMAL_WORK;
 }
