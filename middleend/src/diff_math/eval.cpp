@@ -77,8 +77,8 @@ Status::Statuses diff_eval_calc(const double left_val, const double right_val,
 
         OPER_CASE_(LOGIC_GREAT,     (double)((left_val > right_val) && !IS_DOUBLE_EQ(left_val, right_val)));
         OPER_CASE_(LOGIC_LOWER,     (double)((left_val < right_val) && !IS_DOUBLE_EQ(left_val, right_val)));
-        OPER_CASE_(LOGIC_GREAT_EQ,  (double)((left_val > right_val) &&  IS_DOUBLE_EQ(left_val, right_val)));
-        OPER_CASE_(LOGIC_LOWER_EQ,  (double)((left_val < right_val) &&  IS_DOUBLE_EQ(left_val, right_val)));
+        OPER_CASE_(LOGIC_GREAT_EQ,  (double)((left_val > right_val) ||  IS_DOUBLE_EQ(left_val, right_val)));
+        OPER_CASE_(LOGIC_LOWER_EQ,  (double)((left_val < right_val) ||  IS_DOUBLE_EQ(left_val, right_val)));
         OPER_CASE_(LOGIC_EQUAL,     (double)( IS_DOUBLE_EQ(left_val, right_val)));
         OPER_CASE_(LOGIC_NOT_EQUAL, (double)(!IS_DOUBLE_EQ(left_val, right_val)));
 
