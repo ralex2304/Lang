@@ -182,7 +182,7 @@ Status::Statuses asm_common_eval_global_expr(BackData* data, TreeNode* expr) {
         STATUS_CHECK(asm_common_eval_global_expr(data, *R(expr)));
 
     if (TYPE_IS_NUM(expr)) {
-        STATUS_CHECK(ASM_DISP.push_const(data->out_file, ELEM(expr)->data.num));
+        STATUS_CHECK(ASM_DISP.push_const(&data->asm_d, ELEM(expr)->data.num));
 
         return Status::NORMAL_WORK;
     }
@@ -194,13 +194,13 @@ Status::Statuses asm_common_eval_global_expr(BackData* data, TreeNode* expr) {
         if (var == nullptr)
             return syntax_error(*DEBUG_INFO(expr), "Unknown variable");
 
-        STATUS_CHECK(ASM_DISP.push_var_val(data->out_file, var->addr_offset, true));
+        STATUS_CHECK(ASM_DISP.push_var_val(&data->asm_d, var->addr_offset, true));
 
         return Status::NORMAL_WORK;
     }
 
     if (TYPE_IS_OPER(expr)) {
-        STATUS_CHECK(ASM_DISP.write_global_oper(data->out_file, ELEM(expr)->data.oper,
+        STATUS_CHECK(ASM_DISP.write_global_oper(&data->asm_d, ELEM(expr)->data.oper,
                                                                       DEBUG_INFO(expr)));
 
         return Status::NORMAL_WORK;
@@ -235,9 +235,9 @@ Status::Statuses asm_common_assign_var(BackData* data, TreeNode* var_node) {
     if (var->type != VarType::NUM)
         return syntax_error(*DEBUG_INFO(var_node), "can't assign to array var");
 
-    STATUS_CHECK(ASM_DISP.var_assignment_header(data->out_file, *(const char**)data->vars[var_num]));
+    STATUS_CHECK(ASM_DISP.var_assignment_header(&data->asm_d, *(const char**)data->vars[var_num]));
 
-    STATUS_CHECK(ASM_DISP.pop_var_value(data->out_file, var->addr_offset, is_global_));
+    STATUS_CHECK(ASM_DISP.pop_var_value(&data->asm_d, var->addr_offset, is_global_));
 
     return Status::NORMAL_WORK;
 }
@@ -256,10 +256,10 @@ Status::Statuses asm_common_assign_arr_elem(BackData* data, TreeNode* var_node) 
     if (var->type != VarType::ARRAY)
         return syntax_error(*DEBUG_INFO(var_node), "can't take index of non array var");
 
-    STATUS_CHECK(ASM_DISP.arr_elem_assignment_header(data->out_file,
+    STATUS_CHECK(ASM_DISP.arr_elem_assignment_header(&data->asm_d,
                                                            *(const char**)data->vars[var_num]));
 
-    STATUS_CHECK(ASM_DISP.pop_arr_elem_value(data->out_file, var->addr_offset, is_global_));
+    STATUS_CHECK(asm_common_pop_arr_elem_value(data, var->addr_offset, is_global_));
 
     return Status::NORMAL_WORK;
 }
@@ -267,9 +267,9 @@ Status::Statuses asm_common_assign_arr_elem(BackData* data, TreeNode* var_node) 
 Status::Statuses asm_common_assign_arr_elem_same(BackData* data) {
     assert(data);
 
-    STATUS_CHECK(ASM_DISP.arr_elem_assignment_header(data->out_file, "*the same*"));
+    STATUS_CHECK(ASM_DISP.arr_elem_assignment_header(&data->asm_d, "*the same*"));
 
-    STATUS_CHECK(ASM_DISP.pop_arr_elem_value_the_same(data->out_file));
+    STATUS_CHECK(ASM_DISP.pop_arr_elem_value_the_same(&data->asm_d));
 
     return Status::NORMAL_WORK;
 }
@@ -305,6 +305,26 @@ Status::Statuses asm_common_pop_var_table(Stack* scopes) {
     return Status::NORMAL_WORK;
 }
 
+Status::Statuses asm_common_pop_arr_elem_value(BackData* data, size_t addr_offset, bool is_global) {
+    assert(data);
+
+    STATUS_CHECK(ASM_DISP.save_arr_elem_addr(&data->asm_d, addr_offset, is_global));
+
+    STATUS_CHECK(ASM_DISP.pop_arr_elem_value_the_same(&data->asm_d));
+
+    return Status::NORMAL_WORK;
+}
+
+Status::Statuses asm_common_push_arr_elem_val(BackData* data, size_t addr_offset, bool is_global) {
+    assert(data);
+
+    STATUS_CHECK(ASM_DISP.save_arr_elem_addr(&data->asm_d, addr_offset, is_global));
+
+    STATUS_CHECK(ASM_DISP.push_arr_elem_val_the_same(&data->asm_d));
+
+    return Status::NORMAL_WORK;
+}
+
 ssize_t asm_common_find_loop_scope_num(BackData* data) {
     assert(data);
 
@@ -320,8 +340,16 @@ ssize_t asm_common_find_loop_scope_num(BackData* data) {
 Status::Statuses asm_common_call_function(BackData* data, size_t func_num, size_t offset) {
     assert(data);
 
-    STATUS_CHECK(ASM_DISP.call_function(data->out_file, func_num, offset,
-                                              *(String*)data->vars[func_num]));
+    STATUS_CHECK(ASM_DISP.call_function(&data->asm_d, func_num, offset,
+                                        *(String*)data->vars[func_num]));
+
+    return Status::NORMAL_WORK;
+}
+
+Status::Statuses asm_common_call_main(BackData* data, size_t func_num, size_t offset) {
+    assert(data);
+
+    STATUS_CHECK(ASM_DISP.call_main(&data->asm_d, func_num, offset, *(String*)data->vars[func_num]));
 
     return Status::NORMAL_WORK;
 }
@@ -329,7 +357,7 @@ Status::Statuses asm_common_call_function(BackData* data, size_t func_num, size_
 Status::Statuses asm_common_begin_func_defenition(BackData* data, const size_t func_num) {
     assert(data);
 
-    STATUS_CHECK(ASM_DISP.begin_func_definition(data->out_file, func_num,
+    STATUS_CHECK(ASM_DISP.begin_func_definition(&data->asm_d, func_num,
                                                       *(String*)(data->vars[func_num])));
 
     return Status::NORMAL_WORK;
@@ -349,7 +377,7 @@ Status::Statuses asm_common_initialise_global_var(BackData* data, TreeNode* expr
 
     data->scopes.data[0].size += var->size;
 
-    STATUS_CHECK(ASM_DISP.pop_var_value(data->out_file, var->addr_offset, true));
+    STATUS_CHECK(ASM_DISP.pop_var_value(&data->asm_d, var->addr_offset, true));
 
     ASM_COMMENT("Global var initialisation end\n");
 
@@ -374,7 +402,7 @@ Status::Statuses asm_common_initialise_global_array(BackData* data, TreeNode* va
 
         STATUS_CHECK(asm_common_eval_global_expr(data, *L(values)));
 
-        STATUS_CHECK(ASM_DISP.pop_arr_elem_value_with_const_index(data->out_file,
+        STATUS_CHECK(ASM_DISP.pop_arr_elem_value_with_const_index(&data->asm_d,
                                                                         var->addr_offset, i++, true));
 
         values = *R(values);

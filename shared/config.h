@@ -16,4 +16,6 @@
 // 8
 #define ASM_TAB "        "
 
+const double ASM_EPSILON = 0.000001;
+
 #endif //< #ifndef CONFIG_H_

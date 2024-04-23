@@ -13,19 +13,23 @@
 #include "Stack/stack.h"
 #include "asm/arch/dispatcher.h"
 
+#include "asm/asm_objects.h"
+
 struct BackData {
     Tree tree = {};
     Vector vars = {};
 
     Stack scopes = {};
 
-    FILE* out_file = nullptr;
+    size_t max_local_frame_size = 0;
+
+    AsmData asm_d = {};
 
     FuncTable func_table = {};
 
     ArchDispatcher asm_disp = {};
 
-    inline bool ctor(const char* output_filename, Arches arch) {
+    inline bool ctor(const char* output_filename, const Arches arch) {
         if (TREE_CTOR(&tree, sizeof(TreeElem), &tree_elem_dtor, &tree_elem_verify,
                                                &tree_elem_str_val) != Tree::OK)
             return false;
@@ -39,7 +43,7 @@ struct BackData {
         if (!func_table.ctor())
             return false;
 
-        if (!file_open(&out_file, output_filename, "wb"))
+        if (!file_open(&asm_d.file, output_filename, "wb"))
             return false;
 
         if (asm_disp.fill_table(arch) != Status::NORMAL_WORK)
@@ -68,7 +72,7 @@ struct BackData {
 
         func_table.dtor();
 
-        fclose(out_file);
+        fclose(asm_d.file);
 
         return no_error;
     };

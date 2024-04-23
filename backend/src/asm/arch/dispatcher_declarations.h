@@ -4,15 +4,19 @@ FUNC_DEF(end)
 
 FUNC_DEF(begin_func_definition, const size_t func_num, String func_name)
 
-FUNC_DEF(end_func_definition)
+FUNC_DEF(end_func_definition, const size_t frame_size)
 
 FUNC_DEF(call_function, size_t func_num, size_t offset, String func_name)
 
+FUNC_DEF(call_main, size_t func_num, size_t offset, String func_name)
+
 FUNC_DEF(ret)
+
+FUNC_DEF(init_mem_for_global_vars, size_t size)
 
 FUNC_DEF(pop_var_value, size_t addr_offset, bool is_global)
 
-FUNC_DEF(pop_arr_elem_value, size_t addr_offset, bool is_global)
+FUNC_DEF(pop_func_arg_value, size_t frame_offset, size_t var_offset)
 
 FUNC_DEF(save_arr_elem_addr, size_t addr_offset, bool is_global)
 
@@ -23,8 +27,6 @@ FUNC_DEF(pop_arr_elem_value_with_const_index, size_t addr_offset, size_t index, 
 FUNC_DEF(push_const, double num)
 
 FUNC_DEF(push_var_val, size_t addr_offset, bool is_global)
-
-FUNC_DEF(push_arr_elem_val, size_t addr_offset, bool is_global)
 
 FUNC_DEF(push_arr_elem_val_the_same)
 
@@ -74,7 +76,7 @@ FUNC_DEF(fps, const int val)
 
 FUNC_DEF(video_show_frame)
 
-FUNC_DEF(math_operator, const OperNum math_oper_type)
+FUNC_DEF(math_operator, const OperNum oper)
 
 FUNC_DEF(get_returned_value)
 
@@ -85,7 +87,5 @@ FUNC_DEF(comment, const char* comment)
 FUNC_DEF(read_double)
 
 FUNC_DEF(write_returned_value)
-
-FUNC_DEF(push_immed_operand, double imm)
 
 FUNC_DEF(print_double)

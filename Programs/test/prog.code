@@ -74,6 +74,7 @@ ___while_3_begin:
         push rbx + 0
         add
         pop rcx
+
         push [rcx]
         push 5
         jb ___compare_1_true
@@ -92,6 +93,7 @@ ___compare_1_end:
         push rbx + 0
         add
         pop rcx
+
         push [rcx]
         out
 

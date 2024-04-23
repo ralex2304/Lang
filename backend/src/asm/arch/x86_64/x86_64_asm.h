@@ -1,5 +1,5 @@
-#ifndef SPU_ASM_H_
-#define SPU_ASM_H_
+#ifndef X86_64_ASM_H_
+#define X86_64_ASM_H_
 
 #include <assert.h>
 #include <stdlib.h>
@@ -17,10 +17,10 @@
 #include "../../asm_objects.h"
 
 #define FUNC_DEF(name_, ...) \
-            Status::Statuses asm_spu_##name_(AsmData* asm_d, ## __VA_ARGS__);
+            Status::Statuses asm_x86_64_##name_(AsmData* asm_d, ## __VA_ARGS__);
 
 #include "../dispatcher_declarations.h"
 
 #undef FUNC_DEF
 
-#endif //< #ifndef SPU_ASM_H_
+#endif //< #ifndef X86_64_ASM_H_

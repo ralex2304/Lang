@@ -91,7 +91,7 @@ inline bool dsl_is_double_equal(const double a, const double b) {
             ASM_MATH_OPERATOR(cmd_)
 
 #define ASM_SWAP_LAST_STK_VALS()    \
-            STATUS_CHECK(ASM_DISP.swap_last_stk_vals(data->out_file))
+            STATUS_CHECK(ASM_DISP.swap_last_stk_vals(&data->asm_d))
 
 #define VAR_DEFINITION_ASSIGNMENT(node_)            \
             do {                                    \
@@ -113,7 +113,7 @@ inline bool dsl_is_double_equal(const double a, const double b) {
             LOGIC_COMPARE_(NODE_DATA(node)->oper)
 
 #define LOGIC_COMPARE_(jump_)       \
-            STATUS_CHECK(ASM_DISP.logic_compare(data->out_file, jump_))
+            STATUS_CHECK(ASM_DISP.logic_compare(&data->asm_d, jump_))
 
 #define EVAL_SUBTREE_GET_VAL(node_)         \
             STATUS_CHECK(asm_command_traversal(data, node_, true))
@@ -167,28 +167,28 @@ inline bool dsl_is_double_equal(const double a, const double b) {
             STATUS_CHECK(asm_unary_math_(data, node, oper_, is_val_needed))
 
 #define ASM_MATH_OPERATOR(oper_)    \
-            STATUS_CHECK(ASM_DISP.math_operator(data->out_file, oper_));
+            STATUS_CHECK(ASM_DISP.math_operator(&data->asm_d, oper_));
 
 #define ASM_PUSH_IMMED_OPERAND(imm_)    \
-            STATUS_CHECK(ASM_DISP.push_immed_operand(data->out_file, imm_))
+            STATUS_CHECK(ASM_DISP.push_const(&data->asm_d, imm_))
 
 #define ASM_COMMENT(comment_)   \
-            STATUS_CHECK(ASM_DISP.comment(data->out_file, comment_))
+            STATUS_CHECK(ASM_DISP.comment(&data->asm_d, comment_))
 
 #define ASM_READ_DOUBLE()   \
-            STATUS_CHECK(ASM_DISP.read_double(data->out_file))
+            STATUS_CHECK(ASM_DISP.read_double(&data->asm_d))
 
 #define ASM_PRINT_DOUBLE()  \
-            STATUS_CHECK(ASM_DISP.print_double(data->out_file))
+            STATUS_CHECK(ASM_DISP.print_double(&data->asm_d))
 
 #define ASM_RET()   \
-            STATUS_CHECK(ASM_DISP.ret(data->out_file))
+            STATUS_CHECK(ASM_DISP.ret(&data->asm_d))
 
 #define ASM_WRITE_RETURNED_VALUE()  \
-            STATUS_CHECK(ASM_DISP.write_returned_value(data->out_file))
+            STATUS_CHECK(ASM_DISP.write_returned_value(&data->asm_d))
 
 #define ASM_NEGATIVE()  \
-            STATUS_CHECK(ASM_DISP.negative(data->out_file))
+            STATUS_CHECK(ASM_DISP.negative(&data->asm_d))
 
 #define DAMAGED_TREE(err_msg_)  \
             tree_is_damaged(&data->tree, err_msg_);
@@ -221,7 +221,7 @@ inline bool dsl_is_double_equal(const double a, const double b) {
             STATUS_CHECK(asm_make_set_fps_(data, value_node_))
 
 #define ASM_VIDEO_SHOW_FRAME()  \
-            STATUS_CHECK(ASM_DISP.video_show_frame(data->out_file));
+            STATUS_CHECK(ASM_DISP.video_show_frame(&data->asm_d));
 
 #define ASM_MAKE_IF(node_)  \
             STATUS_CHECK(asm_make_if_(data, node_))

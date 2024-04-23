@@ -20,15 +20,19 @@ Status::Statuses make_asm(BackData* data) {
     if (main_func == -1)
         return syntax_error(*DEBUG_INFO(data->tree.root), "main function not found");
 
-    STATUS_CHECK(ASM_DISP.start(data->out_file));
+    STATUS_CHECK(ASM_DISP.start(&data->asm_d));
 
     STATUS_CHECK(asm_common_initialise_global_scope(data));
 
-    STATUS_CHECK(asm_common_call_function(data, main_func, asm_common_count_addr_offset(&data->scopes)));
+    size_t global_vars_size = data->scopes.data[0].size;
 
-    STATUS_CHECK(ASM_DISP.end(data->out_file));
+    STATUS_CHECK(asm_common_call_main(data, main_func, global_vars_size));
+
+    STATUS_CHECK(ASM_DISP.end(&data->asm_d));
 
     STATUS_CHECK(asm_func_def_(data));
+
+    STATUS_CHECK(ASM_DISP.init_mem_for_global_vars(&data->asm_d, global_vars_size));
 
     return Status::NORMAL_WORK;
 }
@@ -57,13 +61,17 @@ static Status::Statuses asm_func_def_(BackData* data) {
 
         STATUS_CHECK(asm_add_func_args_var_table_(data, args_subtree));
 
+        data->max_local_frame_size = asm_common_count_addr_offset(&data->scopes);
+
         STATUS_CHECK(asm_common_begin_func_defenition(data, func_num));
 
         STATUS_CHECK(asm_func_def_make_body_(data, *R(def)));
 
         STATUS_CHECK(asm_common_pop_var_table(&data->scopes));
 
-        STATUS_CHECK(ASM_DISP.end_func_definition(data->out_file));
+        STATUS_CHECK(ASM_DISP.end_func_definition(&data->asm_d, data->max_local_frame_size));
+
+        data->max_local_frame_size = 0;
 
         cur_cmd = *R(cur_cmd);
     }

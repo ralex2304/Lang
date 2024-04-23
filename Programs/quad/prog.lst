@@ -1,0 +1,781 @@
+     1                                  ; Program start
+     2                                  
+     3                                  section .text
+     4                                  
+     5                                  extern printf
+     6                                  extern scanf
+     7                                  global main
+     8                                  
+     9                                  main:
+    10 00000000 C8000000                        enter 0, 0
+    11                                          ; func call: остров_в_океане
+    12 00000004 E807000000                      call ___func_0
+    13                                          ; func call end
+    14                                  
+    15 00000009 C9                              leave
+    16 0000000A B800000000                      mov rax, 0
+    17 0000000F C3                              ret
+    18                                  
+    19                                  ; =========================== Function definition =========================
+    20                                  ; func name: остров_в_океане
+    21                                  ___func_0:
+    22 00000010 C8180000                        enter 0x0018, 0; this place is patched in the end of function definition
+    23                                  
+    24 00000014 4883EC08                        sub rsp, 8
+    25 00000018 488D3C25[05000000]              lea rdi, [SCANF_DOUBLE_FMT]
+    26 00000020 488D3424                        lea rsi, [rsp]
+    27 00000024 E8(00000000)                    call scanf
+    28                                  
+    29                                          ; var assignment: А
+    30 00000029 8F45F8                          pop qword [rbp - 8 - 0]
+    31                                  
+    32 0000002C 4883EC08                        sub rsp, 8
+    33 00000030 488D3C25[05000000]              lea rdi, [SCANF_DOUBLE_FMT]
+    34 00000038 488D3424                        lea rsi, [rsp]
+    35 0000003C E8(00000000)                    call scanf
+    36                                  
+    37                                          ; var assignment: Б
+    38 00000041 8F45F0                          pop qword [rbp - 8 - 8]
+    39                                  
+    40 00000044 4883EC08                        sub rsp, 8
+    41 00000048 488D3C25[05000000]              lea rdi, [SCANF_DOUBLE_FMT]
+    42 00000050 488D3424                        lea rsi, [rsp]
+    43 00000054 E8(00000000)                    call scanf
+    44                                  
+    45                                          ; var assignment: В
+    46 00000059 8F45E8                          pop qword [rbp - 8 - 16]
+    47                                  
+    48 0000005C FF75F8                          push qword [rbp - 8 - 0]
+    49 0000005F 8F45D0                          pop qword [rbp - 8 - 16 - 24]
+    50                                  
+    51 00000062 FF75F0                          push qword [rbp - 8 - 8]
+    52 00000065 8F45C8                          pop qword [rbp - 8 - 16 - 32]
+    53                                  
+    54 00000068 FF75E8                          push qword [rbp - 8 - 16]
+    55 0000006B 8F45C0                          pop qword [rbp - 8 - 16 - 40]
+    56                                  
+    57                                          ; func call: квадратка
+    58 0000006E E816000000                      call ___func_4
+    59                                          ; func call end
+    60                                  
+    61 00000073 4883EC08                        sub rsp, 8
+    62 00000077 F20F110424                      movsd [rsp], xmm0
+    63                                  
+    64 0000007C F20F100424                      movsd xmm0, [rsp]
+    65 00000081 4883C408                        add rsp, 8
+    66 00000085 C9                              leave
+    67 00000086 C3                              ret
+    68                                  
+    69 00000087 C9                              leave
+    70 00000088 C3                              ret
+    71                                  ; ------------------------- Function definition end -----------------------
+    72                                  
+    73                                  
+    74                                  ; =========================== Function definition =========================
+    75                                  ; func name: квадратка
+    76                                  ___func_4:
+    77 00000089 C8200000                        enter 0x0020, 0; this place is patched in the end of function definition
+    78                                  
+    79 0000008D FF75F8                          push qword [rbp - 8 - 0]
+    80 00000090 4883EC08                        sub rsp, 8
+    81 00000094 BA00000000                      mov rdx, 0x0
+    82 00000099 48891424                        mov qword [rsp], rdx
+    83                                          ; operands comparison: op1 == op2
+    84 0000009D F20F101424                      movsd xmm2, [rsp]
+    85 000000A2 F20F104C2408                    movsd xmm1, [rsp + 8]
+    86 000000A8 4883C408                        add rsp, 8
+    87 000000AC F20F10D9                        movsd xmm3, xmm1
+    88 000000B0 F20F5CDA                        subsd xmm3, xmm2
+    89 000000B4 F20F111C24                      movsd [rsp], xmm3
+    90 000000B9 48BAFFFFFFFFFFFFFF-             mov rdx, -1 >> 1 ; 0x7FFFFFFFFFFFFFFF
+    90 000000C2 7F                 
+    91 000000C3 48211424                        and qword [rsp], rdx
+    92 000000C7 F20F101C24                      movsd xmm3, [rsp]
+    93 000000CC 4883EC08                        sub rsp, 8
+    94 000000D0 48BA8DEDB5A0F7C6B0-             mov rdx, 0x3eb0c6f7a0b5ed8d
+    94 000000D9 3E                 
+    95 000000DA 48891424                        mov qword [rsp], rdx
+    96 000000DE F20F102424                      movsd xmm4, [rsp]
+    97 000000E3 4883C408                        add rsp, 8
+    98                                          ; xmm1 - op1; xmm2 - op2; xmm3 - fabs(op1 - op2); xmm4 - EPSILON
+    99                                  
+   100 000000E7 660F2FDC                        comisd xmm3, xmm4 ; fabs(op1 - op2) {'<' | '>'} EPSILON
+   101 000000EB 7314                            jnc ___compare_1_false
+   102                                  
+   103 000000ED 4883EC08                        sub rsp, 8
+   104 000000F1 48BA000000000000F0-             mov rdx, 0x3ff0000000000000
+   104 000000FA 3F                 
+   105 000000FB 48891424                        mov qword [rsp], rdx
+   106 000000FF EB0D                            jmp ___compare_1_end
+   107                                  
+   108                                  ___compare_1_false:
+   109 00000101 4883EC08                        sub rsp, 8
+   110 00000105 BA00000000                      mov rdx, 0x0
+   111 0000010A 48891424                        mov qword [rsp], rdx
+   112                                  ___compare_1_end:
+   113                                  
+   114                                          ; if begin
+   115 0000010E 4883EC08                        sub rsp, 8
+   116 00000112 48BA8DEDB5A0F7C6B0-             mov rdx, 0x3eb0c6f7a0b5ed8d
+   116 0000011B 3E                 
+   117 0000011C 48891424                        mov qword [rsp], rdx
+   118 00000120 48BAFFFFFFFFFFFFFF-             mov rdx, -1 >> 1 ; 0x7FFFFFFFFFFFFFFF
+   118 00000129 7F                 
+   119 0000012A 4821542408                      and qword [rsp + 8], rdx
+   120 0000012F F20F104C2408                    movsd xmm1, [rsp + 8]
+   121 00000135 F20F101424                      movsd xmm2, [rsp]
+   122 0000013A 4883C410                        add rsp, 16
+   123 0000013E 660F2FCA                        comisd xmm1, xmm2
+   124 00000142 7225                            jc ___if_5_end
+   125 00000144 FF75F0                          push qword [rbp - 8 - 8]
+   126 00000147 8F45D0                          pop qword [rbp - 8 - 16 - 24]
+   127                                  
+   128 0000014A FF75E8                          push qword [rbp - 8 - 16]
+   129 0000014D 8F45C8                          pop qword [rbp - 8 - 16 - 32]
+   130                                  
+   131                                          ; func call: не_квадратка
+   132 00000150 E8FC040000                      call ___func_5
+   133                                          ; func call end
+   134                                  
+   135 00000155 4883EC08                        sub rsp, 8
+   136 00000159 F20F110424                      movsd [rsp], xmm0
+   137                                  
+   138 0000015E F20F100424                      movsd xmm0, [rsp]
+   139 00000163 4883C408                        add rsp, 8
+   140 00000167 C9                              leave
+   141 00000168 C3                              ret
+   142                                  
+   143                                  ___if_5_end:
+   144                                          ; if end
+   145                                  
+   146 00000169 FF75F0                          push qword [rbp - 8 - 8]
+   147 0000016C FF75F0                          push qword [rbp - 8 - 8]
+   148 0000016F F20F101424                      movsd xmm2, [rsp]
+   149 00000174 F20F104C2408                    movsd xmm1, [rsp + 8]
+   150 0000017A 4883C408                        add rsp, 8
+   151 0000017E F20F59CA                        mulsd xmm1, xmm2
+   152 00000182 F20F110C24                      movsd [rsp], xmm1
+   153                                  
+   154 00000187 4883EC08                        sub rsp, 8
+   155 0000018B 48BA00000000000010-             mov rdx, 0x4010000000000000
+   155 00000194 40                 
+   156 00000195 48891424                        mov qword [rsp], rdx
+   157 00000199 FF75F8                          push qword [rbp - 8 - 0]
+   158 0000019C FF75E8                          push qword [rbp - 8 - 16]
+   159 0000019F F20F101424                      movsd xmm2, [rsp]
+   160 000001A4 F20F104C2408                    movsd xmm1, [rsp + 8]
+   161 000001AA 4883C408                        add rsp, 8
+   162 000001AE F20F59CA                        mulsd xmm1, xmm2
+   163 000001B2 F20F110C24                      movsd [rsp], xmm1
+   164                                  
+   165 000001B7 F20F101424                      movsd xmm2, [rsp]
+   166 000001BC F20F104C2408                    movsd xmm1, [rsp + 8]
+   167 000001C2 4883C408                        add rsp, 8
+   168 000001C6 F20F59CA                        mulsd xmm1, xmm2
+   169 000001CA F20F110C24                      movsd [rsp], xmm1
+   170                                  
+   171 000001CF F20F101424                      movsd xmm2, [rsp]
+   172 000001D4 F20F104C2408                    movsd xmm1, [rsp + 8]
+   173 000001DA 4883C408                        add rsp, 8
+   174 000001DE F20F5CCA                        subsd xmm1, xmm2
+   175 000001E2 F20F110C24                      movsd [rsp], xmm1
+   176                                  
+   177                                          ; var assignment: дискр
+   178 000001E7 8F45E0                          pop qword [rbp - 8 - 24]
+   179                                  
+   180 000001EA FF75E0                          push qword [rbp - 8 - 24]
+   181 000001ED 4883EC08                        sub rsp, 8
+   182 000001F1 BA00000000                      mov rdx, 0x0
+   183 000001F6 48891424                        mov qword [rsp], rdx
+   184                                          ; operands comparison: op1 < op2
+   185 000001FA F20F101424                      movsd xmm2, [rsp]
+   186 000001FF F20F104C2408                    movsd xmm1, [rsp + 8]
+   187 00000205 4883C408                        add rsp, 8
+   188 00000209 F20F10D9                        movsd xmm3, xmm1
+   189 0000020D F20F5CDA                        subsd xmm3, xmm2
+   190 00000211 F20F111C24                      movsd [rsp], xmm3
+   191 00000216 48BAFFFFFFFFFFFFFF-             mov rdx, -1 >> 1 ; 0x7FFFFFFFFFFFFFFF
+   191 0000021F 7F                 
+   192 00000220 48211424                        and qword [rsp], rdx
+   193 00000224 F20F101C24                      movsd xmm3, [rsp]
+   194 00000229 4883EC08                        sub rsp, 8
+   195 0000022D 48BA8DEDB5A0F7C6B0-             mov rdx, 0x3eb0c6f7a0b5ed8d
+   195 00000236 3E                 
+   196 00000237 48891424                        mov qword [rsp], rdx
+   197 0000023B F20F102424                      movsd xmm4, [rsp]
+   198 00000240 4883C408                        add rsp, 8
+   199                                          ; xmm1 - op1; xmm2 - op2; xmm3 - fabs(op1 - op2); xmm4 - EPSILON
+   200                                  
+   201 00000244 660F2FDC                        comisd xmm3, xmm4 ; fabs(op1 - op2) {'<' | '>'} EPSILON
+   202 00000248 721A                            jc ___compare_2_false
+   203                                  
+   204 0000024A 660F2FCA                        comisd xmm1, xmm2 ; op1 {'<' | '>'} op2
+   205 0000024E 7314                            jnc ___compare_2_false
+   206                                  
+   207 00000250 4883EC08                        sub rsp, 8
+   208 00000254 48BA000000000000F0-             mov rdx, 0x3ff0000000000000
+   208 0000025D 3F                 
+   209 0000025E 48891424                        mov qword [rsp], rdx
+   210 00000262 EB0D                            jmp ___compare_2_end
+   211                                  
+   212                                  ___compare_2_false:
+   213 00000264 4883EC08                        sub rsp, 8
+   214 00000268 BA00000000                      mov rdx, 0x0
+   215 0000026D 48891424                        mov qword [rsp], rdx
+   216                                  ___compare_2_end:
+   217                                  
+   218                                          ; if begin
+   219 00000271 4883EC08                        sub rsp, 8
+   220 00000275 48BA8DEDB5A0F7C6B0-             mov rdx, 0x3eb0c6f7a0b5ed8d
+   220 0000027E 3E                 
+   221 0000027F 48891424                        mov qword [rsp], rdx
+   222 00000283 48BAFFFFFFFFFFFFFF-             mov rdx, -1 >> 1 ; 0x7FFFFFFFFFFFFFFF
+   222 0000028C 7F                 
+   223 0000028D 4821542408                      and qword [rsp + 8], rdx
+   224 00000292 F20F104C2408                    movsd xmm1, [rsp + 8]
+   225 00000298 F20F101424                      movsd xmm2, [rsp]
+   226 0000029D 4883C410                        add rsp, 16
+   227 000002A1 660F2FCA                        comisd xmm1, xmm2
+   228 000002A5 7257                            jc ___if_6_end
+   229 000002A7 4883EC08                        sub rsp, 8
+   230 000002AB BA00000000                      mov rdx, 0x0
+   231 000002B0 48891424                        mov qword [rsp], rdx
+   232                                          ; printf
+   233 000002B4 488D3C25[00000000]              lea rdi, [PRINTF_DOUBLE_FMT]
+   234 000002BC F20F100424                      movsd xmm0, [rsp]
+   235 000002C1 4883C408                        add rsp, 8
+   236                                  
+   237 000002C5 BA0F000000                      mov rdx, 0x0F
+   238 000002CA 4821E2                          and rdx, rsp
+   239 000002CD 4885D2                          test rdx, rdx
+   240 000002D0 740F                            je is_aligned_0
+   241                                  
+   242 000002D2 4883EC08                        sub rsp, 8
+   243 000002D6 E8(00000000)                    call printf
+   244 000002DB 4883C408                        add rsp, 8
+   245 000002DF EB05                            jmp is_aligned_end_0
+   246                                  
+   247                                  is_aligned_0:
+   248 000002E1 E8(00000000)                    call printf
+   249                                  is_aligned_end_0:
+   250                                  
+   251 000002E6 4883EC08                        sub rsp, 8
+   252 000002EA BA00000000                      mov rdx, 0x0
+   253 000002EF 48891424                        mov qword [rsp], rdx
+   254 000002F3 F20F100424                      movsd xmm0, [rsp]
+   255 000002F8 4883C408                        add rsp, 8
+   256 000002FC C9                              leave
+   257 000002FD C3                              ret
+   258                                  
+   259                                  ___if_6_end:
+   260                                          ; if end
+   261                                  
+   262 000002FE FF75E0                          push qword [rbp - 8 - 24]
+   263 00000301 4883EC08                        sub rsp, 8
+   264 00000305 BA00000000                      mov rdx, 0x0
+   265 0000030A 48891424                        mov qword [rsp], rdx
+   266                                          ; operands comparison: op1 == op2
+   267 0000030E F20F101424                      movsd xmm2, [rsp]
+   268 00000313 F20F104C2408                    movsd xmm1, [rsp + 8]
+   269 00000319 4883C408                        add rsp, 8
+   270 0000031D F20F10D9                        movsd xmm3, xmm1
+   271 00000321 F20F5CDA                        subsd xmm3, xmm2
+   272 00000325 F20F111C24                      movsd [rsp], xmm3
+   273 0000032A 48BAFFFFFFFFFFFFFF-             mov rdx, -1 >> 1 ; 0x7FFFFFFFFFFFFFFF
+   273 00000333 7F                 
+   274 00000334 48211424                        and qword [rsp], rdx
+   275 00000338 F20F101C24                      movsd xmm3, [rsp]
+   276 0000033D 4883EC08                        sub rsp, 8
+   277 00000341 48BA8DEDB5A0F7C6B0-             mov rdx, 0x3eb0c6f7a0b5ed8d
+   277 0000034A 3E                 
+   278 0000034B 48891424                        mov qword [rsp], rdx
+   279 0000034F F20F102424                      movsd xmm4, [rsp]
+   280 00000354 4883C408                        add rsp, 8
+   281                                          ; xmm1 - op1; xmm2 - op2; xmm3 - fabs(op1 - op2); xmm4 - EPSILON
+   282                                  
+   283 00000358 660F2FDC                        comisd xmm3, xmm4 ; fabs(op1 - op2) {'<' | '>'} EPSILON
+   284 0000035C 7314                            jnc ___compare_3_false
+   285                                  
+   286 0000035E 4883EC08                        sub rsp, 8
+   287 00000362 48BA000000000000F0-             mov rdx, 0x3ff0000000000000
+   287 0000036B 3F                 
+   288 0000036C 48891424                        mov qword [rsp], rdx
+   289 00000370 EB0D                            jmp ___compare_3_end
+   290                                  
+   291                                  ___compare_3_false:
+   292 00000372 4883EC08                        sub rsp, 8
+   293 00000376 BA00000000                      mov rdx, 0x0
+   294 0000037B 48891424                        mov qword [rsp], rdx
+   295                                  ___compare_3_end:
+   296                                  
+   297                                          ; if begin
+   298 0000037F 4883EC08                        sub rsp, 8
+   299 00000383 48BA8DEDB5A0F7C6B0-             mov rdx, 0x3eb0c6f7a0b5ed8d
+   299 0000038C 3E                 
+   300 0000038D 48891424                        mov qword [rsp], rdx
+   301 00000391 48BAFFFFFFFFFFFFFF-             mov rdx, -1 >> 1 ; 0x7FFFFFFFFFFFFFFF
+   301 0000039A 7F                 
+   302 0000039B 4821542408                      and qword [rsp + 8], rdx
+   303 000003A0 F20F104C2408                    movsd xmm1, [rsp + 8]
+   304 000003A6 F20F101424                      movsd xmm2, [rsp]
+   305 000003AB 4883C410                        add rsp, 16
+   306 000003AF 660F2FCA                        comisd xmm1, xmm2
+   307 000003B3 0F82E4000000                    jc ___if_7_end
+   308 000003B9 4883EC08                        sub rsp, 8
+   309 000003BD 48BA000000000000F0-             mov rdx, 0x3ff0000000000000
+   309 000003C6 3F                 
+   310 000003C7 48891424                        mov qword [rsp], rdx
+   311                                          ; printf
+   312 000003CB 488D3C25[00000000]              lea rdi, [PRINTF_DOUBLE_FMT]
+   313 000003D3 F20F100424                      movsd xmm0, [rsp]
+   314 000003D8 4883C408                        add rsp, 8
+   315                                  
+   316 000003DC BA0F000000                      mov rdx, 0x0F
+   317 000003E1 4821E2                          and rdx, rsp
+   318 000003E4 4885D2                          test rdx, rdx
+   319 000003E7 740F                            je is_aligned_1
+   320                                  
+   321 000003E9 4883EC08                        sub rsp, 8
+   322 000003ED E8(00000000)                    call printf
+   323 000003F2 4883C408                        add rsp, 8
+   324 000003F6 EB05                            jmp is_aligned_end_1
+   325                                  
+   326                                  is_aligned_1:
+   327 000003F8 E8(00000000)                    call printf
+   328                                  is_aligned_end_1:
+   329                                  
+   330 000003FD FF75F0                          push qword [rbp - 8 - 8]
+   331 00000400 48BA00000000000000-             mov rdx, 1 << 63
+   331 00000409 80                 
+   332 0000040A 48311424                        xor qword [rsp], rdx
+   333 0000040E 4883EC08                        sub rsp, 8
+   334 00000412 48BA00000000000000-             mov rdx, 0x4000000000000000
+   334 0000041B 40                 
+   335 0000041C 48891424                        mov qword [rsp], rdx
+   336 00000420 FF75F8                          push qword [rbp - 8 - 0]
+   337 00000423 F20F101424                      movsd xmm2, [rsp]
+   338 00000428 F20F104C2408                    movsd xmm1, [rsp + 8]
+   339 0000042E 4883C408                        add rsp, 8
+   340 00000432 F20F59CA                        mulsd xmm1, xmm2
+   341 00000436 F20F110C24                      movsd [rsp], xmm1
+   342                                  
+   343 0000043B F20F101424                      movsd xmm2, [rsp]
+   344 00000440 F20F104C2408                    movsd xmm1, [rsp + 8]
+   345 00000446 4883C408                        add rsp, 8
+   346 0000044A F20F5ECA                        divsd xmm1, xmm2
+   347 0000044E F20F110C24                      movsd [rsp], xmm1
+   348                                  
+   349                                          ; printf
+   350 00000453 488D3C25[00000000]              lea rdi, [PRINTF_DOUBLE_FMT]
+   351 0000045B F20F100424                      movsd xmm0, [rsp]
+   352 00000460 4883C408                        add rsp, 8
+   353                                  
+   354 00000464 BA0F000000                      mov rdx, 0x0F
+   355 00000469 4821E2                          and rdx, rsp
+   356 0000046C 4885D2                          test rdx, rdx
+   357 0000046F 740F                            je is_aligned_2
+   358                                  
+   359 00000471 4883EC08                        sub rsp, 8
+   360 00000475 E8(00000000)                    call printf
+   361 0000047A 4883C408                        add rsp, 8
+   362 0000047E EB05                            jmp is_aligned_end_2
+   363                                  
+   364                                  is_aligned_2:
+   365 00000480 E8(00000000)                    call printf
+   366                                  is_aligned_end_2:
+   367                                  
+   368 00000485 4883EC08                        sub rsp, 8
+   369 00000489 BA00000000                      mov rdx, 0x0
+   370 0000048E 48891424                        mov qword [rsp], rdx
+   371 00000492 F20F100424                      movsd xmm0, [rsp]
+   372 00000497 4883C408                        add rsp, 8
+   373 0000049B C9                              leave
+   374 0000049C C3                              ret
+   375                                  
+   376                                  ___if_7_end:
+   377                                          ; if end
+   378                                  
+   379 0000049D FF75E0                          push qword [rbp - 8 - 24]
+   380 000004A0 F20F510C24                      sqrtsd xmm1 , [rsp]
+   381 000004A5 F20F110C24                      movsd [rsp], xmm1
+   382                                          ; var assignment: дискр
+   383 000004AA 8F45E0                          pop qword [rbp - 8 - 24]
+   384                                  
+   385 000004AD 4883EC08                        sub rsp, 8
+   386 000004B1 48BA00000000000000-             mov rdx, 0x4000000000000000
+   386 000004BA 40                 
+   387 000004BB 48891424                        mov qword [rsp], rdx
+   388                                          ; printf
+   389 000004BF 488D3C25[00000000]              lea rdi, [PRINTF_DOUBLE_FMT]
+   390 000004C7 F20F100424                      movsd xmm0, [rsp]
+   391 000004CC 4883C408                        add rsp, 8
+   392                                  
+   393 000004D0 BA0F000000                      mov rdx, 0x0F
+   394 000004D5 4821E2                          and rdx, rsp
+   395 000004D8 4885D2                          test rdx, rdx
+   396 000004DB 740F                            je is_aligned_3
+   397                                  
+   398 000004DD 4883EC08                        sub rsp, 8
+   399 000004E1 E8(00000000)                    call printf
+   400 000004E6 4883C408                        add rsp, 8
+   401 000004EA EB05                            jmp is_aligned_end_3
+   402                                  
+   403                                  is_aligned_3:
+   404 000004EC E8(00000000)                    call printf
+   405                                  is_aligned_end_3:
+   406                                  
+   407 000004F1 FF75F0                          push qword [rbp - 8 - 8]
+   408 000004F4 48BA00000000000000-             mov rdx, 1 << 63
+   408 000004FD 80                 
+   409 000004FE 48311424                        xor qword [rsp], rdx
+   410 00000502 FF75E0                          push qword [rbp - 8 - 24]
+   411 00000505 F20F101424                      movsd xmm2, [rsp]
+   412 0000050A F20F104C2408                    movsd xmm1, [rsp + 8]
+   413 00000510 4883C408                        add rsp, 8
+   414 00000514 F20F5CCA                        subsd xmm1, xmm2
+   415 00000518 F20F110C24                      movsd [rsp], xmm1
+   416                                  
+   417 0000051D 4883EC08                        sub rsp, 8
+   418 00000521 48BA00000000000000-             mov rdx, 0x4000000000000000
+   418 0000052A 40                 
+   419 0000052B 48891424                        mov qword [rsp], rdx
+   420 0000052F FF75F8                          push qword [rbp - 8 - 0]
+   421 00000532 F20F101424                      movsd xmm2, [rsp]
+   422 00000537 F20F104C2408                    movsd xmm1, [rsp + 8]
+   423 0000053D 4883C408                        add rsp, 8
+   424 00000541 F20F59CA                        mulsd xmm1, xmm2
+   425 00000545 F20F110C24                      movsd [rsp], xmm1
+   426                                  
+   427 0000054A F20F101424                      movsd xmm2, [rsp]
+   428 0000054F F20F104C2408                    movsd xmm1, [rsp + 8]
+   429 00000555 4883C408                        add rsp, 8
+   430 00000559 F20F5ECA                        divsd xmm1, xmm2
+   431 0000055D F20F110C24                      movsd [rsp], xmm1
+   432                                  
+   433                                          ; printf
+   434 00000562 488D3C25[00000000]              lea rdi, [PRINTF_DOUBLE_FMT]
+   435 0000056A F20F100424                      movsd xmm0, [rsp]
+   436 0000056F 4883C408                        add rsp, 8
+   437                                  
+   438 00000573 BA0F000000                      mov rdx, 0x0F
+   439 00000578 4821E2                          and rdx, rsp
+   440 0000057B 4885D2                          test rdx, rdx
+   441 0000057E 740F                            je is_aligned_4
+   442                                  
+   443 00000580 4883EC08                        sub rsp, 8
+   444 00000584 E8(00000000)                    call printf
+   445 00000589 4883C408                        add rsp, 8
+   446 0000058D EB05                            jmp is_aligned_end_4
+   447                                  
+   448                                  is_aligned_4:
+   449 0000058F E8(00000000)                    call printf
+   450                                  is_aligned_end_4:
+   451                                  
+   452 00000594 FF75F0                          push qword [rbp - 8 - 8]
+   453 00000597 48BA00000000000000-             mov rdx, 1 << 63
+   453 000005A0 80                 
+   454 000005A1 48311424                        xor qword [rsp], rdx
+   455 000005A5 FF75E0                          push qword [rbp - 8 - 24]
+   456 000005A8 F20F101424                      movsd xmm2, [rsp]
+   457 000005AD F20F104C2408                    movsd xmm1, [rsp + 8]
+   458 000005B3 4883C408                        add rsp, 8
+   459 000005B7 F20F58CA                        addsd xmm1, xmm2
+   460 000005BB F20F110C24                      movsd [rsp], xmm1
+   461                                  
+   462 000005C0 4883EC08                        sub rsp, 8
+   463 000005C4 48BA00000000000000-             mov rdx, 0x4000000000000000
+   463 000005CD 40                 
+   464 000005CE 48891424                        mov qword [rsp], rdx
+   465 000005D2 FF75F8                          push qword [rbp - 8 - 0]
+   466 000005D5 F20F101424                      movsd xmm2, [rsp]
+   467 000005DA F20F104C2408                    movsd xmm1, [rsp + 8]
+   468 000005E0 4883C408                        add rsp, 8
+   469 000005E4 F20F59CA                        mulsd xmm1, xmm2
+   470 000005E8 F20F110C24                      movsd [rsp], xmm1
+   471                                  
+   472 000005ED F20F101424                      movsd xmm2, [rsp]
+   473 000005F2 F20F104C2408                    movsd xmm1, [rsp + 8]
+   474 000005F8 4883C408                        add rsp, 8
+   475 000005FC F20F5ECA                        divsd xmm1, xmm2
+   476 00000600 F20F110C24                      movsd [rsp], xmm1
+   477                                  
+   478                                          ; printf
+   479 00000605 488D3C25[00000000]              lea rdi, [PRINTF_DOUBLE_FMT]
+   480 0000060D F20F100424                      movsd xmm0, [rsp]
+   481 00000612 4883C408                        add rsp, 8
+   482                                  
+   483 00000616 BA0F000000                      mov rdx, 0x0F
+   484 0000061B 4821E2                          and rdx, rsp
+   485 0000061E 4885D2                          test rdx, rdx
+   486 00000621 740F                            je is_aligned_5
+   487                                  
+   488 00000623 4883EC08                        sub rsp, 8
+   489 00000627 E8(00000000)                    call printf
+   490 0000062C 4883C408                        add rsp, 8
+   491 00000630 EB05                            jmp is_aligned_end_5
+   492                                  
+   493                                  is_aligned_5:
+   494 00000632 E8(00000000)                    call printf
+   495                                  is_aligned_end_5:
+   496                                  
+   497 00000637 4883EC08                        sub rsp, 8
+   498 0000063B BA00000000                      mov rdx, 0x0
+   499 00000640 48891424                        mov qword [rsp], rdx
+   500 00000644 F20F100424                      movsd xmm0, [rsp]
+   501 00000649 4883C408                        add rsp, 8
+   502 0000064D C9                              leave
+   503 0000064E C3                              ret
+   504                                  
+   505 0000064F C9                              leave
+   506 00000650 C3                              ret
+   507                                  ; ------------------------- Function definition end -----------------------
+   508                                  
+   509                                  
+   510                                  ; =========================== Function definition =========================
+   511                                  ; func name: не_квадратка
+   512                                  ___func_5:
+   513 00000651 C8100000                        enter 0x0010, 0; this place is patched in the end of function definition
+   514                                  
+   515 00000655 FF75F8                          push qword [rbp - 8 - 0]
+   516 00000658 4883EC08                        sub rsp, 8
+   517 0000065C BA00000000                      mov rdx, 0x0
+   518 00000661 48891424                        mov qword [rsp], rdx
+   519                                          ; operands comparison: op1 == op2
+   520 00000665 F20F101424                      movsd xmm2, [rsp]
+   521 0000066A F20F104C2408                    movsd xmm1, [rsp + 8]
+   522 00000670 4883C408                        add rsp, 8
+   523 00000674 F20F10D9                        movsd xmm3, xmm1
+   524 00000678 F20F5CDA                        subsd xmm3, xmm2
+   525 0000067C F20F111C24                      movsd [rsp], xmm3
+   526 00000681 48BAFFFFFFFFFFFFFF-             mov rdx, -1 >> 1 ; 0x7FFFFFFFFFFFFFFF
+   526 0000068A 7F                 
+   527 0000068B 48211424                        and qword [rsp], rdx
+   528 0000068F F20F101C24                      movsd xmm3, [rsp]
+   529 00000694 4883EC08                        sub rsp, 8
+   530 00000698 48BA8DEDB5A0F7C6B0-             mov rdx, 0x3eb0c6f7a0b5ed8d
+   530 000006A1 3E                 
+   531 000006A2 48891424                        mov qword [rsp], rdx
+   532 000006A6 F20F102424                      movsd xmm4, [rsp]
+   533 000006AB 4883C408                        add rsp, 8
+   534                                          ; xmm1 - op1; xmm2 - op2; xmm3 - fabs(op1 - op2); xmm4 - EPSILON
+   535                                  
+   536 000006AF 660F2FDC                        comisd xmm3, xmm4 ; fabs(op1 - op2) {'<' | '>'} EPSILON
+   537 000006B3 7314                            jnc ___compare_4_false
+   538                                  
+   539 000006B5 4883EC08                        sub rsp, 8
+   540 000006B9 48BA000000000000F0-             mov rdx, 0x3ff0000000000000
+   540 000006C2 3F                 
+   541 000006C3 48891424                        mov qword [rsp], rdx
+   542 000006C7 EB0D                            jmp ___compare_4_end
+   543                                  
+   544                                  ___compare_4_false:
+   545 000006C9 4883EC08                        sub rsp, 8
+   546 000006CD BA00000000                      mov rdx, 0x0
+   547 000006D2 48891424                        mov qword [rsp], rdx
+   548                                  ___compare_4_end:
+   549                                  
+   550                                          ; if begin
+   551 000006D6 4883EC08                        sub rsp, 8
+   552 000006DA 48BA8DEDB5A0F7C6B0-             mov rdx, 0x3eb0c6f7a0b5ed8d
+   552 000006E3 3E                 
+   553 000006E4 48891424                        mov qword [rsp], rdx
+   554 000006E8 48BAFFFFFFFFFFFFFF-             mov rdx, -1 >> 1 ; 0x7FFFFFFFFFFFFFFF
+   554 000006F1 7F                 
+   555 000006F2 4821542408                      and qword [rsp + 8], rdx
+   556 000006F7 F20F104C2408                    movsd xmm1, [rsp + 8]
+   557 000006FD F20F101424                      movsd xmm2, [rsp]
+   558 00000702 4883C410                        add rsp, 16
+   559 00000706 660F2FCA                        comisd xmm1, xmm2
+   560 0000070A 0F826A010000                    jc ___if_10_end
+   561 00000710 FF75F0                          push qword [rbp - 8 - 8]
+   562 00000713 4883EC08                        sub rsp, 8
+   563 00000717 BA00000000                      mov rdx, 0x0
+   564 0000071C 48891424                        mov qword [rsp], rdx
+   565                                          ; operands comparison: op1 == op2
+   566 00000720 F20F101424                      movsd xmm2, [rsp]
+   567 00000725 F20F104C2408                    movsd xmm1, [rsp + 8]
+   568 0000072B 4883C408                        add rsp, 8
+   569 0000072F F20F10D9                        movsd xmm3, xmm1
+   570 00000733 F20F5CDA                        subsd xmm3, xmm2
+   571 00000737 F20F111C24                      movsd [rsp], xmm3
+   572 0000073C 48BAFFFFFFFFFFFFFF-             mov rdx, -1 >> 1 ; 0x7FFFFFFFFFFFFFFF
+   572 00000745 7F                 
+   573 00000746 48211424                        and qword [rsp], rdx
+   574 0000074A F20F101C24                      movsd xmm3, [rsp]
+   575 0000074F 4883EC08                        sub rsp, 8
+   576 00000753 48BA8DEDB5A0F7C6B0-             mov rdx, 0x3eb0c6f7a0b5ed8d
+   576 0000075C 3E                 
+   577 0000075D 48891424                        mov qword [rsp], rdx
+   578 00000761 F20F102424                      movsd xmm4, [rsp]
+   579 00000766 4883C408                        add rsp, 8
+   580                                          ; xmm1 - op1; xmm2 - op2; xmm3 - fabs(op1 - op2); xmm4 - EPSILON
+   581                                  
+   582 0000076A 660F2FDC                        comisd xmm3, xmm4 ; fabs(op1 - op2) {'<' | '>'} EPSILON
+   583 0000076E 7314                            jnc ___compare_5_false
+   584                                  
+   585 00000770 4883EC08                        sub rsp, 8
+   586 00000774 48BA000000000000F0-             mov rdx, 0x3ff0000000000000
+   586 0000077D 3F                 
+   587 0000077E 48891424                        mov qword [rsp], rdx
+   588 00000782 EB0D                            jmp ___compare_5_end
+   589                                  
+   590                                  ___compare_5_false:
+   591 00000784 4883EC08                        sub rsp, 8
+   592 00000788 BA00000000                      mov rdx, 0x0
+   593 0000078D 48891424                        mov qword [rsp], rdx
+   594                                  ___compare_5_end:
+   595                                  
+   596                                          ; if begin
+   597 00000791 4883EC08                        sub rsp, 8
+   598 00000795 48BA8DEDB5A0F7C6B0-             mov rdx, 0x3eb0c6f7a0b5ed8d
+   598 0000079E 3E                 
+   599 0000079F 48891424                        mov qword [rsp], rdx
+   600 000007A3 48BAFFFFFFFFFFFFFF-             mov rdx, -1 >> 1 ; 0x7FFFFFFFFFFFFFFF
+   600 000007AC 7F                 
+   601 000007AD 4821542408                      and qword [rsp + 8], rdx
+   602 000007B2 F20F104C2408                    movsd xmm1, [rsp + 8]
+   603 000007B8 F20F101424                      movsd xmm2, [rsp]
+   604 000007BD 4883C410                        add rsp, 16
+   605 000007C1 660F2FCA                        comisd xmm1, xmm2
+   606 000007C5 725C                            jc ___if_11_end
+   607 000007C7 4883EC08                        sub rsp, 8
+   608 000007CB 48BA000000000000F0-             mov rdx, 0xbff0000000000000
+   608 000007D4 BF                 
+   609 000007D5 48891424                        mov qword [rsp], rdx
+   610                                          ; printf
+   611 000007D9 488D3C25[00000000]              lea rdi, [PRINTF_DOUBLE_FMT]
+   612 000007E1 F20F100424                      movsd xmm0, [rsp]
+   613 000007E6 4883C408                        add rsp, 8
+   614                                  
+   615 000007EA BA0F000000                      mov rdx, 0x0F
+   616 000007EF 4821E2                          and rdx, rsp
+   617 000007F2 4885D2                          test rdx, rdx
+   618 000007F5 740F                            je is_aligned_6
+   619                                  
+   620 000007F7 4883EC08                        sub rsp, 8
+   621 000007FB E8(00000000)                    call printf
+   622 00000800 4883C408                        add rsp, 8
+   623 00000804 EB05                            jmp is_aligned_end_6
+   624                                  
+   625                                  is_aligned_6:
+   626 00000806 E8(00000000)                    call printf
+   627                                  is_aligned_end_6:
+   628                                  
+   629 0000080B 4883EC08                        sub rsp, 8
+   630 0000080F BA00000000                      mov rdx, 0x0
+   631 00000814 48891424                        mov qword [rsp], rdx
+   632 00000818 F20F100424                      movsd xmm0, [rsp]
+   633 0000081D 4883C408                        add rsp, 8
+   634 00000821 C9                              leave
+   635 00000822 C3                              ret
+   636                                  
+   637                                  ___if_11_end:
+   638                                          ; if end
+   639                                  
+   640 00000823 4883EC08                        sub rsp, 8
+   641 00000827 BA00000000                      mov rdx, 0x0
+   642 0000082C 48891424                        mov qword [rsp], rdx
+   643                                          ; printf
+   644 00000830 488D3C25[00000000]              lea rdi, [PRINTF_DOUBLE_FMT]
+   645 00000838 F20F100424                      movsd xmm0, [rsp]
+   646 0000083D 4883C408                        add rsp, 8
+   647                                  
+   648 00000841 BA0F000000                      mov rdx, 0x0F
+   649 00000846 4821E2                          and rdx, rsp
+   650 00000849 4885D2                          test rdx, rdx
+   651 0000084C 740F                            je is_aligned_7
+   652                                  
+   653 0000084E 4883EC08                        sub rsp, 8
+   654 00000852 E8(00000000)                    call printf
+   655 00000857 4883C408                        add rsp, 8
+   656 0000085B EB05                            jmp is_aligned_end_7
+   657                                  
+   658                                  is_aligned_7:
+   659 0000085D E8(00000000)                    call printf
+   660                                  is_aligned_end_7:
+   661                                  
+   662 00000862 4883EC08                        sub rsp, 8
+   663 00000866 BA00000000                      mov rdx, 0x0
+   664 0000086B 48891424                        mov qword [rsp], rdx
+   665 0000086F F20F100424                      movsd xmm0, [rsp]
+   666 00000874 4883C408                        add rsp, 8
+   667 00000878 C9                              leave
+   668 00000879 C3                              ret
+   669                                  
+   670                                  ___if_10_end:
+   671                                          ; if end
+   672                                  
+   673 0000087A 4883EC08                        sub rsp, 8
+   674 0000087E 48BA000000000000F0-             mov rdx, 0x3ff0000000000000
+   674 00000887 3F                 
+   675 00000888 48891424                        mov qword [rsp], rdx
+   676                                          ; printf
+   677 0000088C 488D3C25[00000000]              lea rdi, [PRINTF_DOUBLE_FMT]
+   678 00000894 F20F100424                      movsd xmm0, [rsp]
+   679 00000899 4883C408                        add rsp, 8
+   680                                  
+   681 0000089D BA0F000000                      mov rdx, 0x0F
+   682 000008A2 4821E2                          and rdx, rsp
+   683 000008A5 4885D2                          test rdx, rdx
+   684 000008A8 740F                            je is_aligned_8
+   685                                  
+   686 000008AA 4883EC08                        sub rsp, 8
+   687 000008AE E8(00000000)                    call printf
+   688 000008B3 4883C408                        add rsp, 8
+   689 000008B7 EB05                            jmp is_aligned_end_8
+   690                                  
+   691                                  is_aligned_8:
+   692 000008B9 E8(00000000)                    call printf
+   693                                  is_aligned_end_8:
+   694                                  
+   695 000008BE FF75F0                          push qword [rbp - 8 - 8]
+   696 000008C1 48BA00000000000000-             mov rdx, 1 << 63
+   696 000008CA 80                 
+   697 000008CB 48311424                        xor qword [rsp], rdx
+   698 000008CF FF75F8                          push qword [rbp - 8 - 0]
+   699 000008D2 F20F101424                      movsd xmm2, [rsp]
+   700 000008D7 F20F104C2408                    movsd xmm1, [rsp + 8]
+   701 000008DD 4883C408                        add rsp, 8
+   702 000008E1 F20F5ECA                        divsd xmm1, xmm2
+   703 000008E5 F20F110C24                      movsd [rsp], xmm1
+   704                                  
+   705                                          ; printf
+   706 000008EA 488D3C25[00000000]              lea rdi, [PRINTF_DOUBLE_FMT]
+   707 000008F2 F20F100424                      movsd xmm0, [rsp]
+   708 000008F7 4883C408                        add rsp, 8
+   709                                  
+   710 000008FB BA0F000000                      mov rdx, 0x0F
+   711 00000900 4821E2                          and rdx, rsp
+   712 00000903 4885D2                          test rdx, rdx
+   713 00000906 740F                            je is_aligned_9
+   714                                  
+   715 00000908 4883EC08                        sub rsp, 8
+   716 0000090C E8(00000000)                    call printf
+   717 00000911 4883C408                        add rsp, 8
+   718 00000915 EB05                            jmp is_aligned_end_9
+   719                                  
+   720                                  is_aligned_9:
+   721 00000917 E8(00000000)                    call printf
+   722                                  is_aligned_end_9:
+   723                                  
+   724 0000091C 4883EC08                        sub rsp, 8
+   725 00000920 BA00000000                      mov rdx, 0x0
+   726 00000925 48891424                        mov qword [rsp], rdx
+   727 00000929 F20F100424                      movsd xmm0, [rsp]
+   728 0000092E 4883C408                        add rsp, 8
+   729 00000932 C9                              leave
+   730 00000933 C3                              ret
+   731                                  
+   732 00000934 C9                              leave
+   733 00000935 C3                              ret
+   734                                  ; ------------------------- Function definition end -----------------------
+   735                                  
+   736                                  
+   737                                  section .data
+   738                                  
+   739                                  GLOBAL_SECTION: times 0 dq 0
+   740                                  
+   741                                  section .rodata
+   742                                  
+   743 00000000 256C670A00              PRINTF_DOUBLE_FMT: db '%', 'l', 'g', 0x0a, 0
+   744 00000005 256C6600                SCANF_DOUBLE_FMT:  db '%', 'l', 'f', 0

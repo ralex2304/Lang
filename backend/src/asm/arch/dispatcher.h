@@ -14,19 +14,14 @@
 #include "file/file.h"
 #include "error_printer/error_printer.h"
 
-enum class Arches {
-    NONE    = -1,
-    SPU     =  0,
-  //X86     =  1,
-  //X86_BIN =  2,
-};
+#include "../asm_objects.h"
 
 #define FUNC_DEF(name_, ...) \
-            Status::Statuses (*name_)(FILE* file, ## __VA_ARGS__) = nullptr;
+            Status::Statuses (*name_)(AsmData* asm_d, ## __VA_ARGS__) = nullptr;
 
 struct ArchDispatcher {
 
-    Status::Statuses fill_table(Arches arch);
+    Status::Statuses fill_table(const Arches arch);
 
 #include "dispatcher_declarations.h"
 

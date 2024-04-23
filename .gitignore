@@ -16,3 +16,4 @@
 /tex/*
 *.code-workspace
 /*/build
+/Programs/*/*.o

@@ -72,7 +72,7 @@ Status::Statuses asm_command_traversal(BackData* data, TreeNode* node, bool is_v
 
     if (TYPE_IS_NUM(node)) {
         if (is_val_needed)
-            STATUS_CHECK(ASM_DISP.push_const(data->out_file, NODE_DATA(node)->num));
+            STATUS_CHECK(ASM_DISP.push_const(&data->asm_d, NODE_DATA(node)->num));
 
         return Status::NORMAL_WORK;
     }
@@ -123,7 +123,7 @@ static Status::Statuses asm_command_traversal_var_(BackData* data, TreeNode* nod
         return SYNTAX_ERROR("Expected numeric var");
 
     if (is_val_needed)
-        STATUS_CHECK(ASM_DISP.push_var_val(data->out_file, var->addr_offset, is_global));
+        STATUS_CHECK(ASM_DISP.push_var_val(&data->asm_d, var->addr_offset, is_global));
 
     return Status::NORMAL_WORK;
 }
@@ -148,6 +148,9 @@ static Status::Statuses asm_add_num_var_(BackData* data, TreeNode* node, bool is
         return Status::MEMORY_EXCEED;
 
     LAST_VAR_TABLE.size += new_var.size;
+
+    data->max_local_frame_size = MAX(data->max_local_frame_size,
+                                     asm_common_count_addr_offset(&data->scopes));
 
     return Status::NORMAL_WORK;
 }
@@ -180,7 +183,10 @@ static Status::Statuses asm_add_array_(BackData* data, TreeNode* node, bool is_c
     if (!LAST_VAR_TABLE.vars.push_back(&new_var))
         return Status::MEMORY_EXCEED;
 
-    LAST_VAR_TABLE.size = new_var.size;
+    LAST_VAR_TABLE.size += new_var.size;
+
+    data->max_local_frame_size = MAX(data->max_local_frame_size,
+                                     asm_common_count_addr_offset(&data->scopes));
 
     return Status::NORMAL_WORK;
 }
@@ -212,15 +218,16 @@ static Status::Statuses asm_eval_func_args_(BackData* data, TreeNode* cur_sep, s
     assert(data);
     assert(debug_info);
 
+    size_t var_offset = 0;
+
     while (cur_sep && NODE_IS_OPER(cur_sep, OperNum::VAR_SEPARATOR)) {
         arg_cnt--;
 
         EVAL_SUBTREE_GET_VAL(cur_sep->left);
 
-        STATUS_CHECK(ASM_DISP.pop_var_value(data->out_file, addr_offset, false));
+        STATUS_CHECK(ASM_DISP.pop_func_arg_value(&data->asm_d, addr_offset, var_offset++));
 
         cur_sep = cur_sep->right;
-        addr_offset++;
     }
 
     if (arg_cnt < 0)
@@ -251,9 +258,9 @@ static Status::Statuses asm_provide_func_call_(BackData* data, TreeNode* node, b
     STATUS_CHECK(asm_common_call_function(data, func_num, offset));
 
     if (is_val_needed)
-        STATUS_CHECK(ASM_DISP.get_returned_value(data->out_file));
+        STATUS_CHECK(ASM_DISP.get_returned_value(&data->asm_d));
 
-    STATUS_CHECK(ASM_DISP.insert_empty_line(data->out_file));
+    STATUS_CHECK(ASM_DISP.insert_empty_line(&data->asm_d));
 
     return Status::NORMAL_WORK;
 }
@@ -274,7 +281,7 @@ static Status::Statuses asm_get_arr_elem_val_(BackData* data, TreeNode* node, bo
     if (is_val_needed) {
         EVAL_SUBTREE_GET_VAL(*R(node));
 
-        STATUS_CHECK(ASM_DISP.push_arr_elem_val(data->out_file, var->addr_offset, is_global));
+        STATUS_CHECK(asm_common_push_arr_elem_val(data, var->addr_offset, is_global));
     }
 
     return Status::NORMAL_WORK;
@@ -302,9 +309,8 @@ static Status::Statuses asm_array_definition_assignment_(BackData* data, TreeNod
 
         EVAL_SUBTREE_GET_VAL(*L(cur_separator));
 
-        STATUS_CHECK(ASM_DISP.pop_arr_elem_value_with_const_index(data->out_file,
-                                                                        var->addr_offset,
-                                                                        i++, is_global));
+        STATUS_CHECK(ASM_DISP.pop_arr_elem_value_with_const_index(&data->asm_d, var->addr_offset,
+                                                                  i++, is_global));
 
         cur_separator = *R(cur_separator);
     }
@@ -321,7 +327,7 @@ static Status::Statuses asm_binary_math_(BackData* data, TreeNode* node,
     EVAL_SUBTREE(*R(node), is_val_needed);
 
     if (is_val_needed)
-        STATUS_CHECK(ASM_DISP.math_operator(data->out_file, math_op));
+        STATUS_CHECK(ASM_DISP.math_operator(&data->asm_d, math_op));
 
     return Status::NORMAL_WORK;
 }
@@ -336,7 +342,7 @@ static Status::Statuses asm_unary_math_(BackData* data, TreeNode* node,
     EVAL_SUBTREE(*R(node), is_val_needed);
 
     if (is_val_needed)
-        STATUS_CHECK(ASM_DISP.math_operator(data->out_file, math_op));
+        STATUS_CHECK(ASM_DISP.math_operator(&data->asm_d, math_op));
 
     return Status::NORMAL_WORK;
 }
@@ -347,11 +353,11 @@ static Status::Statuses asm_make_if_(BackData* data, TreeNode* node) {
     size_t scope_num = 0;
     ENTER_SCOPE(&scope_num);
 
-    STATUS_CHECK(ASM_DISP.if_begin(data->out_file, scope_num));
+    STATUS_CHECK(ASM_DISP.if_begin(&data->asm_d, scope_num));
 
     EVAL_SUBTREE_GET_VAL(node);
 
-    STATUS_CHECK(ASM_DISP.if_end(data->out_file, scope_num));
+    STATUS_CHECK(ASM_DISP.if_end(&data->asm_d, scope_num));
 
     EXIT_SCOPE();
 
@@ -369,7 +375,7 @@ static Status::Statuses asm_make_do_if_(BackData* data, TreeNode* node) {
 
     EXIT_SCOPE();
 
-    STATUS_CHECK(ASM_DISP.do_if_check_clause(data->out_file, scope_num));
+    STATUS_CHECK(ASM_DISP.do_if_check_clause(&data->asm_d, scope_num));
 
     return Status::NORMAL_WORK;
 }
@@ -381,18 +387,18 @@ static Status::Statuses asm_make_if_else_(BackData* data, TreeNode* node) {
     size_t scope_num = 0;
     ENTER_SCOPE(&scope_num);
 
-    STATUS_CHECK(ASM_DISP.if_else_begin(data->out_file, scope_num));
+    STATUS_CHECK(ASM_DISP.if_else_begin(&data->asm_d, scope_num));
 
     EVAL_SUBTREE_GET_VAL(*L(node));
 
-    STATUS_CHECK(ASM_DISP.if_else_middle(data->out_file, scope_num));
+    STATUS_CHECK(ASM_DISP.if_else_middle(&data->asm_d, scope_num));
 
     EXIT_SCOPE();
     ENTER_SCOPE(nullptr);
 
     EVAL_SUBTREE_GET_VAL(*R(node));
 
-    STATUS_CHECK(ASM_DISP.if_else_end(data->out_file, scope_num));
+    STATUS_CHECK(ASM_DISP.if_else_end(&data->asm_d, scope_num));
 
     EXIT_SCOPE();
 
@@ -406,15 +412,15 @@ static Status::Statuses asm_make_while_(BackData* data, TreeNode* parent_node) {
     size_t scope_num = 0;
     ENTER_LOOP_SCOPE(&scope_num);
 
-    STATUS_CHECK(ASM_DISP.while_begin(data->out_file, scope_num));
+    STATUS_CHECK(ASM_DISP.while_begin(&data->asm_d, scope_num));
 
     EVAL_SUBTREE_GET_VAL(*L(parent_node));
 
-    STATUS_CHECK(ASM_DISP.while_check_clause(data->out_file, scope_num));
+    STATUS_CHECK(ASM_DISP.while_check_clause(&data->asm_d, scope_num));
 
     EVAL_SUBTREE_NO_VAL(*R(parent_node));
 
-    STATUS_CHECK(ASM_DISP.while_end(data->out_file, scope_num));
+    STATUS_CHECK(ASM_DISP.while_end(&data->asm_d, scope_num));
 
     EXIT_SCOPE();
 
@@ -428,7 +434,7 @@ static Status::Statuses asm_make_do_while_(BackData* data, TreeNode* node) {
     size_t scope_num = 0;
     ENTER_LOOP_SCOPE(&scope_num);
 
-    STATUS_CHECK(ASM_DISP.while_begin(data->out_file, scope_num));
+    STATUS_CHECK(ASM_DISP.while_begin(&data->asm_d, scope_num));
 
     EVAL_SUBTREE_NO_VAL(*R(node));
 
@@ -436,9 +442,9 @@ static Status::Statuses asm_make_do_while_(BackData* data, TreeNode* node) {
 
     EVAL_SUBTREE_GET_VAL(*L(node));
 
-    STATUS_CHECK(ASM_DISP.while_check_clause(data->out_file, scope_num));
+    STATUS_CHECK(ASM_DISP.while_check_clause(&data->asm_d, scope_num));
 
-    STATUS_CHECK(ASM_DISP.while_end(data->out_file, scope_num));
+    STATUS_CHECK(ASM_DISP.while_end(&data->asm_d, scope_num));
 
     return Status::NORMAL_WORK;
 }
@@ -450,22 +456,22 @@ static Status::Statuses asm_make_while_else_(BackData* data, TreeNode* parent_no
     size_t scope_num = 0;
     ENTER_LOOP_SCOPE(&scope_num);
 
-    STATUS_CHECK(ASM_DISP.while_begin(data->out_file, scope_num));
+    STATUS_CHECK(ASM_DISP.while_begin(&data->asm_d, scope_num));
 
     EVAL_SUBTREE_GET_VAL(*L(parent_node));
 
-    STATUS_CHECK(ASM_DISP.while_else_check_clause(data->out_file, scope_num));
+    STATUS_CHECK(ASM_DISP.while_else_check_clause(&data->asm_d, scope_num));
 
     EVAL_SUBTREE_NO_VAL(*L(*R(parent_node)));
 
     EXIT_SCOPE();
     ENTER_SCOPE(nullptr);
 
-    STATUS_CHECK(ASM_DISP.while_else_else(data->out_file, scope_num));
+    STATUS_CHECK(ASM_DISP.while_else_else(&data->asm_d, scope_num));
 
     EVAL_SUBTREE_NO_VAL(*R(*R(parent_node)));
 
-    STATUS_CHECK(ASM_DISP.while_end(data->out_file, scope_num));
+    STATUS_CHECK(ASM_DISP.while_end(&data->asm_d, scope_num));
 
     EXIT_SCOPE();
 
@@ -479,7 +485,7 @@ static Status::Statuses asm_make_set_fps_(BackData* data, TreeNode* val_node) {
     if (!TYPE_IS_NUM(val_node))
         return DAMAGED_TREE("Set fps must have const argument");
 
-    STATUS_CHECK(ASM_DISP.fps(data->out_file, (int)(NODE_DATA(val_node)->num)));
+    STATUS_CHECK(ASM_DISP.fps(&data->asm_d, (int)(NODE_DATA(val_node)->num)));
 
     return Status::NORMAL_WORK;
 }
@@ -492,7 +498,7 @@ static Status::Statuses asm_make_continue_(BackData* data, TreeNode* node) {
     if (scope_num < 0)
         return SYNTAX_ERROR("\"continue\" must be inside loop");
 
-    STATUS_CHECK(ASM_DISP.Continue(data->out_file, scope_num));
+    STATUS_CHECK(ASM_DISP.Continue(&data->asm_d, scope_num));
 
     return Status::NORMAL_WORK;
 }
@@ -505,7 +511,7 @@ static Status::Statuses asm_make_break_(BackData* data, TreeNode* node) {
     if (scope_num < 0)
         return SYNTAX_ERROR("\"break\" must be inside loop");
 
-    STATUS_CHECK(ASM_DISP.Break(data->out_file, scope_num));
+    STATUS_CHECK(ASM_DISP.Break(&data->asm_d, scope_num));
 
     return Status::NORMAL_WORK;
 }
@@ -531,9 +537,9 @@ static Status::Statuses asm_make_prefix_oper_(BackData* data, TreeNode* node,
 
         if (is_val_needed) {
             if (is_array_elem || var->type == VarType::ARRAY)
-                STATUS_CHECK(ASM_DISP.push_arr_elem_val_the_same(data->out_file));
+                STATUS_CHECK(ASM_DISP.push_arr_elem_val_the_same(&data->asm_d));
             else
-                STATUS_CHECK(ASM_DISP.push_var_val(data->out_file, var->addr_offset, is_global));
+                STATUS_CHECK(ASM_DISP.push_var_val(&data->asm_d, var->addr_offset, is_global));
         }
 
         return Status::NORMAL_WORK;
@@ -564,11 +570,11 @@ static Status::Statuses asm_make_prefix_oper_eval_(BackData* data, TreeNode* nod
 
     if (is_array_elem) {
         EVAL_SUBTREE_GET_VAL(*R(*L(node)));
-        STATUS_CHECK(ASM_DISP.prepost_oper_arr_elem(data->out_file, var->addr_offset, is_global, oper));
+        STATUS_CHECK(ASM_DISP.prepost_oper_arr_elem(&data->asm_d, var->addr_offset, is_global, oper));
     } else if (var->type == VarType::ARRAY)
-        STATUS_CHECK(ASM_DISP.prepost_oper_arr_elem_the_same(data->out_file, oper));
+        STATUS_CHECK(ASM_DISP.prepost_oper_arr_elem_the_same(&data->asm_d, oper));
     else
-        STATUS_CHECK(ASM_DISP.prepost_oper_var(data->out_file, var->addr_offset, is_global, oper));
+        STATUS_CHECK(ASM_DISP.prepost_oper_var(&data->asm_d, var->addr_offset, is_global, oper));
 
     return Status::NORMAL_WORK;
 }
@@ -643,22 +649,22 @@ static Status::Statuses asm_make_postfix_oper_eval_(BackData* data, TreeNode* no
             return syntax_error(*DEBUG_INFO(var_node), "array var expected");
 
         EVAL_SUBTREE_GET_VAL(*R(*L(node)));
-        STATUS_CHECK(ASM_DISP.save_arr_elem_addr(data->out_file, var->addr_offset, is_global));
+        STATUS_CHECK(ASM_DISP.save_arr_elem_addr(&data->asm_d, var->addr_offset, is_global));
     }
 
     if (is_val_needed) {
         if (is_array_elem || var->type == VarType::ARRAY)
-            STATUS_CHECK(ASM_DISP.push_arr_elem_val_the_same(data->out_file));
+            STATUS_CHECK(ASM_DISP.push_arr_elem_val_the_same(&data->asm_d));
         else
-            STATUS_CHECK(ASM_DISP.push_var_val(data->out_file, var->addr_offset, is_global));
+            STATUS_CHECK(ASM_DISP.push_var_val(&data->asm_d, var->addr_offset, is_global));
 
         is_val_needed = false;
     }
 
     if (is_array_elem || var->type == VarType::ARRAY)
-        STATUS_CHECK(ASM_DISP.prepost_oper_arr_elem_the_same(data->out_file, oper));
+        STATUS_CHECK(ASM_DISP.prepost_oper_arr_elem_the_same(&data->asm_d, oper));
     else
-        STATUS_CHECK(ASM_DISP.prepost_oper_var(data->out_file, var->addr_offset, is_global, oper));
+        STATUS_CHECK(ASM_DISP.prepost_oper_var(&data->asm_d, var->addr_offset, is_global, oper));
 
     return Status::NORMAL_WORK;
 }

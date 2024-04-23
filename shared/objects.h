@@ -25,6 +25,12 @@ struct DebugInfo {
     size_t line_position = 0;
 };
 
+enum class Arches {
+    NONE   = -1,
+    SPU    =  0,
+    X86_64 =  1,
+};
+
 enum class TreeElemType {
     NONE = 0,
     OPER = 1,

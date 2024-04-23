@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include "statuses.h"
+#include "objects.h"
 
 /**
  * @brief Specifies int main() returns
@@ -26,6 +27,8 @@ struct ArgsVars {
     const char* listing_filename = nullptr;
 
     bool debug_mode = false;
+
+    Arches arch = Arches::NONE;
 };
 
 /**
