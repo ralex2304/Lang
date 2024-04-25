@@ -1,5 +1,14 @@
 #include "simplification.h"
 
+#include <assert.h>
+
+#include "objects.h"
+#include "utils/statuses.h"
+#include "eval.h"
+#include "config.h"
+#include TREE_INCLUDE
+#include "TreeAddon/TreeAddon.h" // IWYU pragma: keep
+
 #include "dsl.h"
 #include "../midend_dsl.h"
 

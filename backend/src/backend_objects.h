@@ -1,7 +1,6 @@
 #ifndef BACKEND_OBKECTS_H_
 #define BACKEND_OBKECTS_H_
 
-#include <assert.h>
 #include <stdlib.h>
 
 #include "objects.h"

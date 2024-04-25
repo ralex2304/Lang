@@ -1,9 +1,6 @@
 #ifndef STATUSES_H_
 #define STATUSES_H_
 
-#include <stdio.h>
-#include <assert.h>
-
 /**
  * @brief Specifies functions status
  */

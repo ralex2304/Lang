@@ -375,7 +375,7 @@ inline int stk_resize_up(Stack* stk) {
         new_cap *= 2;
 
     if (new_cap != stk->capacity)
-        return res | stk_resize(stk, new_cap);
+        return res | stk_resize(stk, (size_t)new_cap);
 
     return res;
 }
@@ -395,7 +395,7 @@ inline int stk_resize_down(Stack* stk) {
         new_cap /= 2;
 
     if (new_cap != stk->capacity)
-        return res | stk_resize(stk, new_cap);
+        return res | stk_resize(stk, (size_t)new_cap);
 
     return res;
 }

@@ -9,7 +9,7 @@
 
 constexpr size_t MAX_SYNONYMS_NUM = 3;
 
-const char* const MAIN_FUNC_NAMES[MAX_SYNONYMS_NUM] = {"main", "министерство", "остров_в_океане"};
+const char* const MAIN_FUNC_NAMES[MAX_SYNONYMS_NUM] = {"main", "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ", "пїЅпїЅпїЅпїЅпїЅпїЅ_пїЅ_пїЅпїЅпїЅпїЅпїЅпїЅ"};
 
 struct String {
     const char* s = nullptr;
@@ -132,8 +132,8 @@ inline ssize_t find_var_num_by_name(Vector* vars, const char* name) {
     size_t name_len = strlen(name);
 
     for (ssize_t i = 0; i < vars->size(); i++) {
-        const char* var = ((String*)((*vars)[i]))->s;
-        size_t var_len  = ((String*)((*vars)[i]))->len;
+        const char* var = ((String*)((*vars)[(size_t)i]))->s;
+        size_t var_len  = ((String*)((*vars)[(size_t)i]))->len;
 
         if (var_len == name_len && strncmp(var, name, var_len) == 0)
             return i;

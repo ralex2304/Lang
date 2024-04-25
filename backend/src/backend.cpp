@@ -1,5 +1,10 @@
 #include "backend.h"
 
+#include <assert.h>
+
+#include "tree_reader/tree_reader.h"
+#include "backend_objects.h"
+#include "asm/asm.h"
 
 #define LOCAL_DTOR_()   FREE(text); \
                         data.dtor()

@@ -1,6 +1,12 @@
 #include "spu_asm.h"
 
-#include "dsl.h"
+#include <assert.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+
+#include "TreeAddon/TreeAddon.h" // IWYU pragma: keep
+#include "error_printer/error_printer.h"
 
 /*
 register usage:

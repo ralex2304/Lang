@@ -49,7 +49,7 @@ int stk_ctor(Stack* stk, const size_t init_capacity) {
         return res;
     }
 
-    stk->capacity = init_capacity;
+    stk->capacity = (ssize_t)init_capacity;
     stk->size = 0;
 
 #ifdef CANARY_PROTECT
@@ -59,7 +59,7 @@ int stk_ctor(Stack* stk, const size_t init_capacity) {
     *right_data_canary_ptr(stk) = CANARY_VAL;
 #endif //< #ifdef CANARY_PROTECT
 
-    STK_FILL_POISON(stk, 0, stk->capacity);
+    STK_FILL_POISON(stk, 0, (size_t)stk->capacity);
 
 #ifdef HASH_PROTECT
     stk->data_hash   =   stk_data_hash_calc(stk);
@@ -80,7 +80,7 @@ int stk_dtor(Stack* stk) {
     int res = STK_VERIFY(stk);
     STK_OK(stk, res);
 
-    STK_FILL_POISON(stk, 0, stk->capacity);
+    STK_FILL_POISON(stk, 0, (size_t)stk->capacity);
 
 #ifdef CANARY_PROTECT
     free((Canary_t*)stk->data - 1);
@@ -115,8 +115,8 @@ int stk_resize(Stack* stk, size_t new_size) {
 
     stk->data = (Elem_t*)recalloc((void*)((Canary_t*)stk->data ON_CANARY_PROTECT(- 1)),
              // We need to clear right canary and free space before it -> + 1
-                         stk->capacity * sizeof(Elem_t) ON_CANARY_PROTECT(+ 1 * sizeof(CANARY_VAL)),
-                         calc_stk_data_size(new_size));
+                (size_t)stk->capacity * sizeof(Elem_t) ON_CANARY_PROTECT(+ 1 * sizeof(CANARY_VAL)),
+                        calc_stk_data_size(new_size));
 
     if (!stk->data) {
         stk->data = tmp;
@@ -127,9 +127,9 @@ int stk_resize(Stack* stk, size_t new_size) {
 
     ON_CANARY_PROTECT(stk->data = (Elem_t*)((Canary_t*)stk->data + 1));
 
-    STK_FILL_POISON(stk, stk->capacity, (ssize_t)new_size);
+    STK_FILL_POISON(stk, (size_t)stk->capacity, new_size);
 
-    stk->capacity = new_size;
+    stk->capacity = (ssize_t)new_size;
 
     ON_CANARY_PROTECT(*right_data_canary_ptr(stk) = CANARY_VAL);
 

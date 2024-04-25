@@ -1,9 +1,6 @@
 #ifndef PTR_VALID_H_
 #define PTR_VALID_H_
 
-#include <assert.h>
-#include <stdio.h>
-
 #ifdef LINUX_MANUAL_PTR_VALIDATION
 
 #include <stdio.h>
@@ -23,8 +20,6 @@
 #if defined(unix) || defined(__APPLE__)
 
 #include <unistd.h>
-#include <stdlib.h>
-#include <errno.h>
 
 #endif // #ifdef unix || __APPLE__
 

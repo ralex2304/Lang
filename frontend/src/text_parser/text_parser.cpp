@@ -1,5 +1,12 @@
 #include "text_parser.h"
 
+#include <assert.h>
+#include <math.h>
+
+#include "utils/vector.h"
+#include "TreeAddon/TreeAddon.h"
+#include "error_printer/error_printer.h" // IWYU pragma: keep
+
 #include "text_parser_dsl.h"
 
 static Status::Statuses CH_Def_var_(ParseData* data, size_t* const pos, TreeNode** dest,
@@ -25,7 +32,7 @@ Status::Statuses parse_text(ParseData* data) {
     assert(result);
 
     data->tree.root = result;
-    data->tree.size = size;
+    data->tree.size = (ssize_t)size;
 
     return Status::NORMAL_WORK;
 }
@@ -154,10 +161,10 @@ Status::Statuses TextParser::CH_DefVar(ParseData* data, size_t* const pos, TreeN
     if (array_size_expr != nullptr)
         STATUS_CHECK(CH_Def_array_(data, pos, dest, size, var_num, array_size_expr,
                                     &var_debug_info,
-                                    &DEBUG_INFO(ND_TOKEN(-1))));
+                                    &DEBUG_INFO(ND_TOKEN((size_t)-1))));
     else
         STATUS_CHECK(CH_Def_var_(data, pos, dest, size, var_num, &var_debug_info,
-                                    &DEBUG_INFO(ND_TOKEN(-1))));
+                                    &DEBUG_INFO(ND_TOKEN((size_t)-1))));
 
     if (parent != nullptr)
         (*dest)->parent = parent;

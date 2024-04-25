@@ -1,5 +1,9 @@
 #include "args_parser.h"
 
+#include <stdio.h>
+#include <assert.h>
+#include <string.h>
+
 Status::Statuses args_parse(int argc, char* argv[], ArgsVars* args_vars,
                             const Argument args_dict[], const int args_dict_len) {
     assert(argv);

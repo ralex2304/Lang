@@ -1,5 +1,9 @@
 #include "ptr_valid.h"
 
+#include <assert.h>
+#include <stdlib.h> // IWYU pragma: export
+#include <stdio.h>
+
 #ifdef LINUX_MANUAL_PTR_VALIDATION
 
 bool is_ptr_valid(const void* p) {
@@ -58,6 +62,7 @@ bool is_ptr_valid(const void* p) {
 
 #if defined(unix) || defined(__APPLE__)
 
+#include <errno.h>
 
 bool is_ptr_valid(const void* p) {
     char filename[] = "/tmp/kurwa_ptr.XXXXXX";

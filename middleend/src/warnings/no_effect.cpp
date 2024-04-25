@@ -1,7 +1,12 @@
 #include "no_effect.h"
 
+#include <assert.h>
+
 #include "dsl.h"
-#include "../midend_dsl.h"
+
+#include "config.h"
+#include TREE_INCLUDE
+#include "error_printer/error_printer.h"
 
 static Status::Statuses detect_no_effect_traversal_(MidData* data, TreeNode** node, bool val_is_needed,
                                                     bool* warn);

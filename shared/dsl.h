@@ -1,7 +1,6 @@
 #ifndef LANG_DSL_H_
 #define LANG_DSL_H_
 
-#include "objects.h"
 #include "config.h"
 #include TREE_INCLUDE
 

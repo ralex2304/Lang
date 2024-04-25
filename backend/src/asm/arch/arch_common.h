@@ -1,19 +1,14 @@
 #ifndef ARCH_COMMON_H_
 #define ARCH_COMMON_H_
 
-#include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
 
 #include "utils/statuses.h"
-#include "objects.h"
 #include "../../backend_objects.h"
 #include "../../Stack/stack.h"
 #include "config.h"
 #include TREE_INCLUDE
-#include "TreeAddon/TreeAddon.h"
-#include "file/file.h"
-#include "error_printer/error_printer.h"
 
 
 Status::Statuses asm_common_initialise_global_scope(BackData* data);

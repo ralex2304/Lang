@@ -1,5 +1,8 @@
 #include "statuses.h"
 
+#include <stdio.h>
+#include <assert.h>
+
 #define STATUS_CASE_(status, text)  case status:                                \
                                         fprintf(stderr, "Error. " text "\n");   \
                                         break

@@ -1,5 +1,12 @@
 #include "tree_writer.h"
 
+#include <assert.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+#include "objects.h"
+#include "file/file.h"
+
 static Status::Statuses write_tree_(Tree* tree, FILE* file);
 
 static Status::Statuses write_tree_print_debug_data_(FILE* file, DebugInfo* info);
@@ -38,7 +45,7 @@ static Status::Statuses write_vars_(Vector* vars, FILE* file) {
     assert(vars);
     assert(file);
 
-    for (ssize_t i = 0; i < vars->size(); i++) {
+    for (size_t i = 0; i < (size_t)vars->size(); i++) {
         String* str = (String*)((*vars)[i]);
 
         PRINT_("%.*s\n", (int)str->len, str->s);

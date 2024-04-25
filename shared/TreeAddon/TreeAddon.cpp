@@ -1,6 +1,12 @@
 #include "TreeAddon.h"
 
+#include <assert.h>
+
 #include "dsl.h"
+
+#include "log/log.h"
+#include "utils/html.h"
+#include "objects.h"
 
 extern LogFileData log_file;
 
@@ -101,7 +107,7 @@ Status::Statuses tree_copy_subtree(TreeNode* src, TreeNode** dest, size_t* size,
                                               is_simple != nullptr ? is_simple
                                                                    : &placeholder));
 
-    *size = copy.size;
+    *size = (size_t)copy.size;
     *dest = copy.root;
 
     copy.size = 0;

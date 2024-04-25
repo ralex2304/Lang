@@ -14,7 +14,12 @@ int stk_log_printf(LogFileData* log_file, const char* format, ...) {
     va_list arg_list = {};
     va_start(arg_list, format);
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wformat-nonliteral"
+
     int ret = vfprintf(log_file->file, format, arg_list);
+
+#pragma clang diagnostic pop
 
     if (file_is_opened_here)
         if (!stk_log_close_file(log_file))

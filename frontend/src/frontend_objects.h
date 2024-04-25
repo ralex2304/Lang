@@ -2,7 +2,6 @@
 #define FRONTEND_OBJECTS_H_
 
 #include <stdlib.h>
-#include <ctype.h>
 
 #include "utils/macros.h"
 #include "objects.h"

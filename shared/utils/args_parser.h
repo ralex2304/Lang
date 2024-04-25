@@ -1,10 +1,6 @@
 #ifndef ARGS_PARSER_H_
 #define ARGS_PARSER_H_
 
-#include <stdio.h>
-#include <assert.h>
-#include <string.h>
-
 #include "statuses.h"
 #include "objects.h"
 

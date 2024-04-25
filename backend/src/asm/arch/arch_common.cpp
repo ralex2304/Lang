@@ -1,6 +1,12 @@
 #include "arch_common.h"
 
+#include <assert.h>
+
 #include "dsl.h"
+
+#include "objects.h"
+#include "TreeAddon/TreeAddon.h"
+#include "error_printer/error_printer.h"
 
 static Status::Statuses asm_declare_global_var_or_func_(BackData* data, ScopeData* var_table,
                                                         TreeNode* def);
@@ -127,7 +133,7 @@ static Status::Statuses asm_declare_global_array_(BackData* data, TreeNode* def,
         return syntax_error(*DEBUG_INFO(*R(*L(def))), "array size must be at least 1 "
                                                       "instead of %zd", arr_size);
 
-    new_var->size = arr_size;
+    new_var->size = (size_t)arr_size;
 
     STATUS_CHECK(asm_common_initialise_global_array(data, *R(def), new_var));
 
@@ -331,7 +337,7 @@ ssize_t asm_common_find_loop_scope_num(BackData* data) {
     for (ssize_t i = data->scopes.size - 1; i > 0; i--) {
 
         if (data->scopes.data[i].type == ScopeType::LOOP)
-            return data->scopes.data[i].scope_num;
+            return (ssize_t)data->scopes.data[i].scope_num;
     }
 
     return -1;

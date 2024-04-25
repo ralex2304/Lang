@@ -1,5 +1,15 @@
 #include "tokenizer.h"
 
+#include <cstddef>
+#include <assert.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+#include <math.h>
+#include "../frontend_objects.h"
+#include "error_printer/error_printer.h"
+
 struct TextData {
     const char* str = nullptr;
     size_t pos = 0;
@@ -175,13 +185,15 @@ static Status::Statuses tokenizer_skip_multiline_comment_(TextData* text, bool* 
     return Status::NORMAL_WORK;
 }
 
+#define GET_TOKEN_(i_)    ((Token*)((*tokens)[(size_t)i_]))
+
 static Status::Statuses add_cmd_separator_(TextData* text, Vector* tokens, Vector* vars) {
     assert(text);
     assert(tokens);
     assert(vars);
 
-    if (tokens->size() && !(((Token*)((*tokens)[tokens->size() - 1]))->type == TokenType::TERM &&
-        ((Token*)((*tokens)[tokens->size() - 1]))->data.term == TerminalNum::CMD_SEPARATOR)) {
+    if (tokens->size() && !(GET_TOKEN_(tokens->size() - 1)->type      == TokenType::TERM &&
+                            GET_TOKEN_(tokens->size() - 1)->data.term == TerminalNum::CMD_SEPARATOR)) {
 
         Token new_token = {.type = TokenType::TERM, .data = {.term = TerminalNum::CMD_SEPARATOR},
                            .debug_info = DEBUG_INFO_(*text)};
@@ -243,9 +255,9 @@ static Status::Statuses tokenizer_add_var_(TextData* text, Vector* tokens, Vecto
 
     for (ssize_t i = 0; i < vars->size(); i++) {
 
-        String* str = (String*)((*vars)[i]);
+        String* str = (String*)((*vars)[(size_t)i]);
         if (str->len == token_len && strncmp(text->str + text->pos, str->s, token_len) == 0) {
-            var_num = i;
+            var_num = (size_t)i;
             *is_found = true;
             break;
         }
@@ -256,7 +268,7 @@ static Status::Statuses tokenizer_add_var_(TextData* text, Vector* tokens, Vecto
         if (!vars->push_back(&new_var))
             return Status::MEMORY_EXCEED;
 
-        var_num = vars->size() - 1;
+        var_num = (size_t)vars->size() - 1;
     }
 
     Token new_token = {.type = TokenType::VAR, .data = {.var = var_num},

@@ -1,14 +1,10 @@
 #ifndef MIDEND_OBJECTS_H_
 #define MIDEND_OBJECTS_H_
 
-#include <assert.h>
-
 #include "objects.h"
 #include "utils/vector.h"
-#include "utils/statuses.h"
 #include "config.h"
 #include TREE_INCLUDE
-
 
 struct MidData {
     Tree tree = {};

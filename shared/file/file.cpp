@@ -1,5 +1,9 @@
 #include "file.h"
 
+#include <stdlib.h>
+#include <assert.h>
+#include <stdarg.h>
+
 Status::Statuses file_open_read_close(const char* filename, char** buf, long* size) {
 
     FILE* file = nullptr;
@@ -15,7 +19,7 @@ Status::Statuses file_open_read_close(const char* filename, char** buf, long* si
     if (size != nullptr)
         *size = file_len;
 
-    *buf = (char*)calloc(file_len + 1, sizeof(char));
+    *buf = (char*)calloc((size_t)file_len + 1, sizeof(char));
     if (*buf == nullptr) {
         printf("Memory alloc error\n");
         file_close(file);
@@ -65,7 +69,7 @@ bool file_read(FILE* file, char* buf, long file_len) {
     assert(file);
     assert(buf);
 
-    size_t readed = fread(buf, sizeof(char), file_len, file);
+    size_t readed = fread(buf, sizeof(char), (size_t)file_len, file);
     if (readed != (size_t)file_len || ferror(file)) {
         perror("File read error");
         return false;

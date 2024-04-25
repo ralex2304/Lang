@@ -1,5 +1,12 @@
 #include "dead_opt.h"
 
+#include <assert.h>
+
+#include "config.h"
+#include TREE_INCLUDE
+#include "TreeAddon/TreeAddon.h" // IWYU pragma: keep
+#include "error_printer/error_printer.h"
+
 #include "dsl.h"
 #include "../midend_dsl.h"
 

@@ -15,8 +15,8 @@ struct Vector {
             if (data_ == nullptr)
                 return false;
 
-            elem_size_ = elem_size;
-            capacity_ = init_cap;
+            elem_size_ = (ssize_t)elem_size;
+            capacity_ = (ssize_t)init_cap;
             size_ = 0;
             return true;
         };
@@ -31,9 +31,9 @@ struct Vector {
         inline bool push_back(void* new_elem) {
             assert(new_elem);
             if (size_ >= capacity_)
-                if (!resize(capacity_ * 2)) return false;
+                if (!resize((size_t)capacity_ * 2)) return false;
 
-            memcpy((char*)data_ + elem_size_ * (size_++), new_elem, elem_size_);
+            memcpy((char*)data_ + elem_size_ * (size_++), new_elem, (size_t)elem_size_);
             return true;
         }
 
@@ -41,13 +41,13 @@ struct Vector {
             assert(new_cap > 0);
 
             void* tmp = data_;
-            data_ = recalloc(data_, capacity_ * elem_size_, new_cap * elem_size_);
+            data_ = recalloc(data_, (size_t)capacity_ * (size_t)elem_size_, new_cap * (size_t)elem_size_);
             if (data_ == nullptr) {
                 data_ = tmp;
                 return false;
             }
 
-            capacity_ = new_cap;
+            capacity_ = (ssize_t)new_cap;
             return true;
         }
 
@@ -59,7 +59,7 @@ struct Vector {
             if ((ssize_t)i >= size_)
                 return nullptr;
 
-            return (char*)data_ + elem_size_ * i;
+            return (char*)data_ + (size_t)elem_size_ * i;
         }
 
     private:

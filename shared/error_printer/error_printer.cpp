@@ -1,5 +1,15 @@
 #include "error_printer.h"
 
+#include <assert.h>
+#include <stdio.h>
+#include <stdarg.h>
+#include <string.h>
+#include <ctype.h>
+
+#include "utils/console.h"
+#include "file/file.h"
+#include "utils/macros.h"
+
 static Status::Statuses print_message_(DebugInfo info, const char* color, const char* msg_type,
                                        const char* format, va_list* arg_list);
 
@@ -70,11 +80,16 @@ static Status::Statuses print_message_(DebugInfo info, const char* color, const 
     PRINTF_(CONSOLE_STYLE(STYLE_BOLD, "%s:%zu:%zu %s%s: "),
                         info.filename, info.line + 1, info.symbol + 1, color, msg_type);
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wformat-nonliteral"
+
     if (vfprintf(stderr, format, *arg_list) <= 0) {
         FREE(src_text);
         return Status::OUTPUT_ERROR;
     }
     PRINTF_("\n");
+
+#pragma clang diagnostic pop
 
     PRINTF_("%5zu | ", info.line + 1);
 
@@ -115,10 +130,15 @@ static Status::Statuses print_message_without_src_(DebugInfo* info, const char* 
     PRINTF_(CONSOLE_STYLE(STYLE_BOLD, "%s:%zu:%zu %s%s: "),
                        info->filename, info->line + 1, info->symbol + 1, color, msg_type);
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wformat-nonliteral"
+
     if (vfprintf(stderr, format, *arg_list) <= 0) {
         return Status::OUTPUT_ERROR;
     }
     PRINTF_("\n");
+
+#pragma clang diagnostic pop
 
     return Status::NORMAL_WORK;
 }

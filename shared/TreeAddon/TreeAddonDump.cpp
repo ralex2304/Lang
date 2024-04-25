@@ -1,7 +1,7 @@
 #include "TreeAddonDump.h"
 
-#include "utils/html.h"
-#include "utils/ptr_valid.h"
+#include "objects.h"
+#include "utils/text/text_lib.h"
 
 // They are inside tree lib
 #include "log/log.h"

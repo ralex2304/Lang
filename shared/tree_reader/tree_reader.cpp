@@ -1,5 +1,12 @@
 #include "tree_reader.h"
 
+#include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "file/file.h"
+#include "objects.h"
+
 static Status::Statuses read_tree_traversal_(Tree* tree, char* text, size_t* const pos,
                                              TreeNode** node, TreeNode* parent);
 
@@ -50,7 +57,7 @@ static Status::Statuses read_vars_(Vector* vars, char* text, size_t* const pos) 
         if (!vars->push_back(&var))
             return Status::MEMORY_EXCEED;
 
-        *pos += line_end - var.s + 1;
+        *pos += (size_t)(line_end - var.s + 1);
     }
 
     return Status::NORMAL_WORK;
@@ -148,7 +155,7 @@ static Status::Statuses read_elem_value_(char* text, size_t* const pos, TreeElem
         default:
             ERR_("Unknown type \"%d\"\n", (int)elem->type);
     }
-    *pos += len;
+    *pos += (size_t)len;
 
     return Status::NORMAL_WORK;
 }
@@ -165,7 +172,7 @@ static Status::Statuses read_elem_type_(char* text, size_t* const pos, TreeElem*
     assert(len > 0);
 
     elem->type = (TreeElemType)type;
-    *pos += len;
+    *pos += (size_t)len;
 
     return Status::NORMAL_WORK;
 }
@@ -186,7 +193,7 @@ static Status::Statuses read_debug_info_(char* text, size_t* const pos, TreeElem
     *filename_end = '\0';
     elem->debug_info.filename = text + *pos;
 
-    *pos += filename_end - text - *pos + 1;
+    *pos += (size_t)(filename_end - text) - *pos + 1;
 
     int len = -1;
     if (sscanf(text + *pos, ", %zu, %zu, %zu %n", &elem->debug_info.line, &elem->debug_info.symbol,
@@ -194,7 +201,7 @@ static Status::Statuses read_debug_info_(char* text, size_t* const pos, TreeElem
         ERR_("Expected debug info\n");
     assert(len > 0);
 
-    *pos += len;
+    *pos += (size_t)len;
 
     if (strncmp("}, ", text + *pos, 3) != 0)
         ERR_("Expected \"}, \" instead of \"%.10s\"\n", text + *pos);

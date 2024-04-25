@@ -2,6 +2,16 @@
 
 #include "dsl.h"
 
+#include "objects.h"
+#include "config.h"
+#include TREE_INCLUDE
+#include "TreeAddon/TreeAddon.h" // IWYU pragma: keep
+#include "error_printer/error_printer.h"
+
+#include "arch/arch_common.h"
+#include "../Stack/stack.h"
+#include "../scopes.h"
+
 static Status::Statuses asm_command_traversal_var_(BackData* data, TreeNode* node, bool is_val_needed);
 
 static Status::Statuses asm_add_num_var_(BackData* data, TreeNode* node, bool is_const);
@@ -250,7 +260,7 @@ static Status::Statuses asm_provide_func_call_(BackData* data, TreeNode* node, b
 
     size_t offset = asm_common_count_addr_offset(&data->scopes);
 
-    EVAL_FUNC_ARGS(*R(node), offset, func->arg_num);
+    EVAL_FUNC_ARGS(*R(node), offset, (ssize_t)func->arg_num);
 
     if (!TYPE_IS_VAR(*L(node)))
         return DAMAGED_TREE("incorrect var arguments list in function call");
@@ -498,7 +508,7 @@ static Status::Statuses asm_make_continue_(BackData* data, TreeNode* node) {
     if (scope_num < 0)
         return SYNTAX_ERROR("\"continue\" must be inside loop");
 
-    STATUS_CHECK(ASM_DISP.Continue(&data->asm_d, scope_num));
+    STATUS_CHECK(ASM_DISP.Continue(&data->asm_d, (size_t)scope_num));
 
     return Status::NORMAL_WORK;
 }
@@ -511,7 +521,7 @@ static Status::Statuses asm_make_break_(BackData* data, TreeNode* node) {
     if (scope_num < 0)
         return SYNTAX_ERROR("\"break\" must be inside loop");
 
-    STATUS_CHECK(ASM_DISP.Break(&data->asm_d, scope_num));
+    STATUS_CHECK(ASM_DISP.Break(&data->asm_d, (size_t)scope_num));
 
     return Status::NORMAL_WORK;
 }

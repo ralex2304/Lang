@@ -1,5 +1,16 @@
 #include "midend.h"
 
+#include <assert.h>
+
+#include "tree_reader/tree_reader.h"
+#include "tree_writer/tree_writer.h"
+#include "TreeAddon/TreeAddonDump.h"
+#include "midend_objects.h"
+#include "diff_math/simplification.h"
+#include "diff_math/differentiation.h"
+#include "warnings/no_effect.h"
+#include "optimisation/dead_opt.h"
+
 #define LOCAL_DTOR_()   FREE(text); \
                         data.dtor()
 

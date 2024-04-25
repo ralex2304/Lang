@@ -1,6 +1,12 @@
 #include "x86_64_asm.h"
 
-#include "dsl.h"
+#include <assert.h>
+#include <math.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+#include "TreeAddon/TreeAddon.h" // IWYU pragma: keep
+#include "error_printer/error_printer.h"
 
 /*
 register usage:
@@ -249,11 +255,11 @@ Status::Statuses asm_x86_64_push_const(AsmData* asm_d, double num) {
     assert(asm_d);
     assert(isfinite(num));
 
-    char double_buf[sizeof(double)] = {};
-    memcpy(double_buf, &num, sizeof(double));
+    unsigned long double_buf = {};
+    memcpy(&double_buf, &num, sizeof(double));
 
     PRINTF_("sub rsp, 8\n");
-    PRINTF_("mov rdx, 0x%lx\n", *((unsigned long*)double_buf));
+    PRINTF_("mov rdx, 0x%lx\n", double_buf);
     PRINTF_("mov qword [rsp], rdx\n");
 
     return Status::NORMAL_WORK;

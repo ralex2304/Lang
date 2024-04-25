@@ -4,9 +4,7 @@
 #include <assert.h>
 #include <stdlib.h>
 
-#include "objects.h"
 #include "utils/vector.h"
-#include "utils/statuses.h"
 
 enum class VarType {
     NONE  = 0,
@@ -65,8 +63,8 @@ struct ScopeData {
 
     inline Var* find_var(size_t var_num) {
         for (ssize_t i = 0; i < vars.size(); i++)
-            if (((Var*)vars[i])->var_num == var_num)
-                return (Var*)vars[i];
+            if (((Var*)vars[(size_t)i])->var_num == var_num)
+                return (Var*)vars[(size_t)i];
 
         return nullptr;
     };
@@ -97,8 +95,8 @@ struct FuncTable {
 
     inline Func* find_func(size_t func_num) {
         for (ssize_t i = 0; i < funcs.size(); i++)
-            if (((Func*)funcs[i])->func_num == func_num)
-                return (Func*)funcs[i];
+            if (((Func*)funcs[(size_t)i])->func_num == func_num)
+                return (Func*)funcs[(size_t)i];
 
         return nullptr;
     };

@@ -2,9 +2,6 @@
 #define FILE_H_
 
 #include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <stdarg.h>
 
 #include "utils/statuses.h"
 

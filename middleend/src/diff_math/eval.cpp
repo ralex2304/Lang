@@ -1,7 +1,6 @@
 #include "eval.h"
 
 #include "dsl.h"
-#include "../midend_dsl.h"
 
 static Status::Statuses diff_eval_oper_(MidData* data, TreeNode** node, double* result);
 

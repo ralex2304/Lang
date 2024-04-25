@@ -2,6 +2,17 @@
 
 #include "dsl.h"
 
+#include "objects.h"
+#include "../Stack/stack.h"
+#include "config.h"
+#include TREE_INCLUDE
+#include "TreeAddon/TreeAddon.h" // IWYU pragma: keep
+#include "arch/arch_common.h"
+#include "error_printer/error_printer.h"
+#include "arch/dispatcher.h"
+#include "traversal.h" // IWYU pragma: keep
+
+
 static Status::Statuses asm_func_def_(BackData* data);
 
 static Status::Statuses asm_add_func_args_var_table_(BackData* data, TreeNode* cur_arg);
@@ -26,7 +37,7 @@ Status::Statuses make_asm(BackData* data) {
 
     size_t global_vars_size = data->scopes.data[0].size;
 
-    STATUS_CHECK(asm_common_call_main(data, main_func, global_vars_size));
+    STATUS_CHECK(asm_common_call_main(data, (size_t)main_func, global_vars_size));
 
     STATUS_CHECK(ASM_DISP.end(&data->asm_d));
 

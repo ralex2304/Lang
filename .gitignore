@@ -17,3 +17,5 @@
 *.code-workspace
 /*/build
 /Programs/*/*.o
+/compile_commands.json
+/.cache

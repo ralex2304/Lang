@@ -1,5 +1,12 @@
 #include "frontend.h"
 
+#include <assert.h>
+
+#include "file/file.h"
+#include "frontend_objects.h"
+#include "tokenizer/tokenizer.h"
+#include "text_parser/text_parser.h"
+#include "tree_writer/tree_writer.h"
 
 #define LOCAL_DTOR_()   FREE(text);     \
                         data.dtor()

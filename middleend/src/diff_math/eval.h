@@ -1,8 +1,6 @@
 #ifndef DIFF_MATH_EVAL_H_
 #define DIFF_MATH_EVAL_H_
 
-#include <assert.h>
-
 #include "utils/statuses.h"
 #include "objects.h"
 #include "../midend_objects.h"

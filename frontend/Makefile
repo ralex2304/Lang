@@ -1,13 +1,14 @@
 .PHONY: all clean
 
-CC = g++
+CC = clang++
 CFLAGS = -fdiagnostics-color=always -Wshadow -Winit-self -Wredundant-decls -Wcast-align -Wundef			 \
 		 -Wfloat-equal -Winline -Wunreachable-code -Wmissing-declarations -Wmissing-include-dirs 		 \
 		 -Wswitch-enum -Wswitch-default -Weffc++ -Wmain -Wextra -Wall -g -pipe -fexceptions -Wcast-qual	 \
 		 -Wconversion -Wctor-dtor-privacy -Wempty-body -Wformat-security -Wformat=2 -Wignored-qualifiers \
 		 -Wlogical-op -Wno-missing-field-initializers -Wnon-virtual-dtor -Woverloaded-virtual 			 \
 		 -Wpointer-arith -Wsign-promo -Wstack-usage=8192 -Wstrict-aliasing -Wstrict-null-sentinel 		 \
-		 -Wtype-limits -Wwrite-strings -Werror=vla -D_DEBUG -D_EJUDGE_CLIENT_SIDE
+		 -Wtype-limits -Wwrite-strings -Werror=vla -D_DEBUG -D_EJUDGE_CLIENT_SIDE						 \
+		 -Wno-invalid-source-encoding -Og -Wno-unknown-warning-option
 
 CFLAGS_SANITIZER = -fsanitize=address,alignment,bool,bounds,enum,float-cast-overflow,$\
 				   float-divide-by-zero,integer-divide-by-zero,leak,nonnull-attribute,null,$\
@@ -50,7 +51,7 @@ LIBS = $(LIB_FILES:%=$(LIB_DIR)/%)
 all: $(TARGET)
 
 $(TARGET): $(OBJECTS)
-	@$(CC) $(CFLAGS) $(IFLAGS) -I$(LIB_DIR) $(if $(sanitizer), $(CFLAGS_SANITIZER)) $^ -o $@ $(LIBS)
+	@$(CC) $(if $(sanitizer), $(CFLAGS_SANITIZER)) $(CFLAGS) $(IFLAGS) -I$(LIB_DIR) $^ -o $@ $(LIBS)
 
 $(OWN_BUILD_DIR):
 	@mkdir ./$@
@@ -61,7 +62,7 @@ $(MAKE_DIRS): | $(OWN_BUILD_DIR)
 -include $(DEPENDS)
 
 $(OWN_BUILD_DIR)/%.o: %.cpp | $(OWN_BUILD_DIR) $(MAKE_DIRS)
-	@$(CC) $(CFLAGS) $(IFLAGS) -I$(LIB_DIR) $(if $(sanitizer), $(CFLAGS_SANITIZER)) -MMD -MP -c $< -o $@
+	@$(CC) $(if $(sanitizer), $(CFLAGS_SANITIZER)) $(CFLAGS) $(IFLAGS) -I$(LIB_DIR) -MMD -MP -c $< -o $@
 
 .PHONY: doxygen dox
 

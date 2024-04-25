@@ -1,12 +1,6 @@
 #ifndef MIDEND_DSL_H_
 #define MIDEND_DSL_H_
 
-#include "midend_objects.h"
-#include "config.h"
-#include TREE_INCLUDE
-
-#include <math.h>
-
 #include "dsl.h"
 
 #define VdU(node_) L(node_)

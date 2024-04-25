@@ -1,17 +1,12 @@
 #ifndef TEXT_PARSER_H_
 #define TEXT_PARSER_H_
 
-#include <assert.h>
 #include <stdlib.h>
-#include <math.h>
 
 #include "utils/statuses.h"
 #include "config.h"
 #include TREE_INCLUDE
-#include "TreeAddon/TreeAddon.h"
 #include "../frontend_objects.h"
-#include "utils/vector.h"
-#include "error_printer/error_printer.h"
 
 Status::Statuses parse_text(ParseData* data);
 
