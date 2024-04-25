@@ -84,7 +84,7 @@ FUNC_DEF(insert_empty_line)
 
 FUNC_DEF(comment, const char* comment)
 
-FUNC_DEF(read_double)
+FUNC_DEF(read_double, const bool is_val_needed)
 
 FUNC_DEF(write_returned_value)
 

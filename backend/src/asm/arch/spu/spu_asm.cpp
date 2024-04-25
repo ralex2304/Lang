@@ -569,8 +569,14 @@ Status::Statuses asm_spu_comment(AsmData* asm_d, const char* comment) {
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_spu_read_double(AsmData* asm_d) {
+Status::Statuses asm_spu_read_double(AsmData* asm_d, const bool is_val_needed) {
+
     PRINTF_("in\n");
+
+    if (is_val_needed)
+        return Status::NORMAL_WORK;
+
+    PRINTF_("pop rax ; val is not needed\n");
 
     return Status::NORMAL_WORK;
 }

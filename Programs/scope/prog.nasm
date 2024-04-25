@@ -4,17 +4,18 @@ section .text
 
 extern printf
 extern scanf
-global main
+global _start
 
-main:
+_start:
         enter 0, 0
         ; func call: остров_в_океане
         call ___func_0
         ; func call end
 
         leave
-        mov rax, 0
-        ret
+        mov rax, 0x3c
+        cvttsd2si rdi, xmm0
+        syscall
 
 ; =========================== Function definition =========================
 ; func name: остров_в_океане
@@ -29,24 +30,9 @@ ___func_0:
 
         ; scope begin
         push qword [rbp - 8 - 0]
-        ; printf
-        lea rdi, [PRINTF_DOUBLE_FMT]
         movsd xmm0, [rsp]
         add rsp, 8
-
-        mov rdx, 0x0F
-        and rdx, rsp
-        test rdx, rdx
-        je is_aligned_0
-
-        sub rsp, 8
-        call printf
-        add rsp, 8
-        jmp is_aligned_end_0
-
-is_aligned_0:
-        call printf
-is_aligned_end_0:
+        call doubleio_out
 
         sub rsp, 8
         mov rdx, 0x4024000000000000
@@ -55,24 +41,9 @@ is_aligned_end_0:
         pop qword [rbp - 8 - 8]
 
         push qword [rbp - 8 - 8]
-        ; printf
-        lea rdi, [PRINTF_DOUBLE_FMT]
         movsd xmm0, [rsp]
         add rsp, 8
-
-        mov rdx, 0x0F
-        and rdx, rsp
-        test rdx, rdx
-        je is_aligned_1
-
-        sub rsp, 8
-        call printf
-        add rsp, 8
-        jmp is_aligned_end_1
-
-is_aligned_1:
-        call printf
-is_aligned_end_1:
+        call doubleio_out
 
         sub rsp, 8
         mov rdx, 0x4024000000000000
@@ -94,45 +65,15 @@ is_aligned_end_1:
         pop qword [rbp - 8 - 8]
 
         push qword [rbp - 8 - 8]
-        ; printf
-        lea rdi, [PRINTF_DOUBLE_FMT]
         movsd xmm0, [rsp]
         add rsp, 8
-
-        mov rdx, 0x0F
-        and rdx, rsp
-        test rdx, rdx
-        je is_aligned_2
-
-        sub rsp, 8
-        call printf
-        add rsp, 8
-        jmp is_aligned_end_2
-
-is_aligned_2:
-        call printf
-is_aligned_end_2:
+        call doubleio_out
 
         ; scope end
         push qword [rbp - 8 - 0]
-        ; printf
-        lea rdi, [PRINTF_DOUBLE_FMT]
         movsd xmm0, [rsp]
         add rsp, 8
-
-        mov rdx, 0x0F
-        and rdx, rsp
-        test rdx, rdx
-        je is_aligned_3
-
-        sub rsp, 8
-        call printf
-        add rsp, 8
-        jmp is_aligned_end_3
-
-is_aligned_3:
-        call printf
-is_aligned_end_3:
+        call doubleio_out
 
         sub rsp, 8
         mov rdx, 0x0
@@ -146,6 +87,8 @@ is_aligned_end_3:
         ret
 ; ------------------------- Function definition end -----------------------
 
+
+        %include "doubleiolib.nasm"
 
 section .data
 

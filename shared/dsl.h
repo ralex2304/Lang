@@ -176,7 +176,7 @@ inline bool dsl_is_double_equal(const double a, const double b) {
             STATUS_CHECK(ASM_DISP.comment(&data->asm_d, comment_))
 
 #define ASM_READ_DOUBLE()   \
-            STATUS_CHECK(ASM_DISP.read_double(&data->asm_d))
+            STATUS_CHECK(ASM_DISP.read_double(&data->asm_d, is_val_needed))
 
 #define ASM_PRINT_DOUBLE()  \
             STATUS_CHECK(ASM_DISP.print_double(&data->asm_d))

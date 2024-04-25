@@ -23,8 +23,9 @@ backend:
 	@LANG=ru_RU.CP1251 luit ./backend/./main -i $(PROG_PATH)/prog.treopt -o $(PROG_PATH)/prog.nasm -a x86_64
 
 asm:
-	@nasm -f elf64 -g -F dwarf -l $(PROG_PATH)/prog.lst $(PROG_PATH)/prog.nasm -o $(PROG_PATH)/prog.o
-	@g++ $(CFLAGS_SANITIZER) -g -F dwarf -no-pie -o $(PROG_PATH)/prog $(PROG_PATH)/prog.o
+	@nasm -f elf64 -g -F dwarf -l $(PROG_PATH)/prog.lst -I Programs/ $(PROG_PATH)/prog.nasm -o $(PROG_PATH)/prog.o
+	@ld -g -no-pie -o $(PROG_PATH)/prog $(PROG_PATH)/prog.o
+#@g++ $(CFLAGS_SANITIZER) -g -F dwarf -no-pie -o $(PROG_PATH)/prog $(PROG_PATH)/prog.o
 	@./$(PROG_PATH)/prog
 
 

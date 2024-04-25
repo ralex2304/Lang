@@ -4,40 +4,27 @@ section .text
 
 extern printf
 extern scanf
-global main
+global _start
 
-main:
+_start:
         enter 0, 0
         ; func call: остров_в_океане
         call ___func_0
         ; func call end
 
         leave
-        mov rax, 0
-        ret
+        mov rax, 0x3c
+        cvttsd2si rdi, xmm0
+        syscall
 
 ; =========================== Function definition =========================
 ; func name: остров_в_океане
 ___func_0:
         enter 0x0000, 0; this place is patched in the end of function definition
 
+        call doubleio_in
         sub rsp, 8
-        lea rdi, [SCANF_DOUBLE_FMT]
-        lea rsi, [rsp]
-        ; scanf
-        mov rdx, 0x0F
-        and rdx, rsp
-        test rdx, rdx
-        je is_aligned_s_0
-
-        sub rsp, 8
-        call scanf
-        add rsp, 8
-        jmp is_aligned_s_end_0
-
-is_aligned_s_0:
-        call scanf
-is_aligned_s_end_0:
+        movsd [rsp], xmm0
 
         pop qword [rsp - 8 - 16 - 0]
 
@@ -48,24 +35,9 @@ is_aligned_s_end_0:
         sub rsp, 8
         movsd [rsp], xmm0
 
-        ; printf
-        lea rdi, [PRINTF_DOUBLE_FMT]
         movsd xmm0, [rsp]
         add rsp, 8
-
-        mov rdx, 0x0F
-        and rdx, rsp
-        test rdx, rdx
-        je is_aligned_0
-
-        sub rsp, 8
-        call printf
-        add rsp, 8
-        jmp is_aligned_end_0
-
-is_aligned_0:
-        call printf
-is_aligned_end_0:
+        call doubleio_out
 
         sub rsp, 8
         mov rdx, 0x0
@@ -180,6 +152,8 @@ ___if_5_end:
         ret
 ; ------------------------- Function definition end -----------------------
 
+
+        %include "doubleiolib.nasm"
 
 section .data
 

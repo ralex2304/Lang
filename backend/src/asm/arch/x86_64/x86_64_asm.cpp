@@ -51,8 +51,8 @@ Status::Statuses asm_x86_64_start(AsmData* asm_d) {
     PRINTF_NO_TAB_("extern printf\n");
     PRINTF_NO_TAB_("extern scanf\n");
 
-    PRINTF_NO_TAB_("global main\n\n");
-    PRINTF_NO_TAB_("main:\n");
+    PRINTF_NO_TAB_("global _start\n\n");
+    PRINTF_NO_TAB_("_start:\n");
 
     PRINTF_("enter 0, 0\n");
 
@@ -64,12 +64,9 @@ Status::Statuses asm_x86_64_end(AsmData* asm_d) {
 
     PRINTF_("leave\n");
 
-    /*PRINTF_("mov rax, 0x3c\n");
-    PRINTF_("xor rdi, rdi\n");
-    PRINTF_("syscall\n\n");*/
-
-    PRINTF_("mov rax, 0\n");
-    PRINTF_("ret\n\n");
+    PRINTF_("mov rax, 0x3c\n");
+    PRINTF_("cvttsd2si rdi, xmm0\n");
+    PRINTF_("syscall\n\n");
 
     return Status::NORMAL_WORK;
 }
@@ -137,6 +134,8 @@ static Status::Statuses patch_local_frame_size_(AsmData* asm_d, const size_t fra
 
 Status::Statuses asm_x86_64_init_mem_for_global_vars(AsmData* asm_d, size_t size) {
     assert(asm_d);
+
+    PRINTF_("%%include \"doubleiolib.nasm\"\n\n");
 
     PRINTF_NO_TAB_("section .data\n\n");
 
@@ -729,32 +728,17 @@ Status::Statuses asm_x86_64_comment(AsmData* asm_d, const char* comment) {
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_x86_64_read_double(AsmData* asm_d) {
+Status::Statuses asm_x86_64_read_double(AsmData* asm_d, const bool is_val_needed) {
+
+    PRINTF_("call doubleio_in\n");
+
+    if (!is_val_needed) {
+        PRINTF_("; val is not needed\n\n");
+        return Status::NORMAL_WORK;
+    }
 
     PRINTF_("sub rsp, 8\n");
-    PRINTF_("lea rdi, [SCANF_DOUBLE_FMT]\n");
-    PRINTF_("lea rsi, [rsp]\n");
-
-    static size_t counter = 0;
-
-    PRINTF_("; scanf\n");
-
-    PRINTF_("mov rdx, 0x0F\n");
-    PRINTF_("and rdx, rsp\n");
-    PRINTF_("test rdx, rdx\n");
-    PRINTF_("je is_aligned_s_%zu\n\n", counter);
-
-    PRINTF_("sub rsp, 8\n");
-
-    PRINTF_("call scanf\n");
-
-    PRINTF_("add rsp, 8\n");
-
-    PRINTF_("jmp is_aligned_s_end_%zu\n\n", counter);
-    PRINTF_NO_TAB_("is_aligned_s_%zu:\n", counter);
-    PRINTF_("call scanf\n");
-
-    PRINTF_NO_TAB_("is_aligned_s_end_%zu:\n\n", counter++);
+    PRINTF_("movsd [rsp], xmm0\n\n");
 
     return Status::NORMAL_WORK;
 }
@@ -768,32 +752,11 @@ Status::Statuses asm_x86_64_write_returned_value(AsmData* asm_d) {
 }
 
 Status::Statuses asm_x86_64_print_double(AsmData* asm_d) {
+    assert(asm_d);
 
-    static size_t counter = 0;
-
-    PRINTF_("; printf\n");
-
-    PRINTF_("lea rdi, [PRINTF_DOUBLE_FMT]\n");
     PRINTF_("movsd xmm0, [rsp]\n");
-    PRINTF_("add rsp, 8\n\n");
-
-
-    PRINTF_("mov rdx, 0x0F\n");
-    PRINTF_("and rdx, rsp\n");
-    PRINTF_("test rdx, rdx\n");
-    PRINTF_("je is_aligned_%zu\n\n", counter);
-
-    PRINTF_("sub rsp, 8\n");
-
-    PRINTF_("call printf\n");
-
     PRINTF_("add rsp, 8\n");
-
-    PRINTF_("jmp is_aligned_end_%zu\n\n", counter);
-    PRINTF_NO_TAB_("is_aligned_%zu:\n", counter);
-    PRINTF_("call printf\n");
-
-    PRINTF_NO_TAB_("is_aligned_end_%zu:\n\n", counter++);
+    PRINTF_("call doubleio_out\n\n");
 
     return Status::NORMAL_WORK;
 }

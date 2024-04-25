@@ -4,55 +4,53 @@ section .text
 
 extern printf
 extern scanf
-global main
+global _start
 
-main:
+_start:
         enter 0, 0
         ; func call: остров_в_океане
         call ___func_0
         ; func call end
 
         leave
-        mov rax, 0
-        ret
+        mov rax, 0x3c
+        cvttsd2si rdi, xmm0
+        syscall
 
 ; =========================== Function definition =========================
 ; func name: остров_в_океане
 ___func_0:
         enter 0x0018, 0; this place is patched in the end of function definition
 
+        call doubleio_in
         sub rsp, 8
-        lea rdi, [SCANF_DOUBLE_FMT]
-        lea rsi, [rsp]
-        call scanf
+        movsd [rsp], xmm0
 
         ; var assignment: А
         pop qword [rbp - 8 - 0]
 
+        call doubleio_in
         sub rsp, 8
-        lea rdi, [SCANF_DOUBLE_FMT]
-        lea rsi, [rsp]
-        call scanf
+        movsd [rsp], xmm0
 
         ; var assignment: Б
         pop qword [rbp - 8 - 8]
 
+        call doubleio_in
         sub rsp, 8
-        lea rdi, [SCANF_DOUBLE_FMT]
-        lea rsi, [rsp]
-        call scanf
+        movsd [rsp], xmm0
 
         ; var assignment: В
         pop qword [rbp - 8 - 16]
 
         push qword [rbp - 8 - 0]
-        pop qword [rbp - 8 - 16 - 24]
+        pop qword [rsp - 8 - 16 - 0]
 
         push qword [rbp - 8 - 8]
-        pop qword [rbp - 8 - 16 - 32]
+        pop qword [rsp - 8 - 16 - 8]
 
         push qword [rbp - 8 - 16]
-        pop qword [rbp - 8 - 16 - 40]
+        pop qword [rsp - 8 - 16 - 16]
 
         ; func call: квадратка
         call ___func_4
@@ -123,10 +121,10 @@ ___compare_1_end:
         comisd xmm1, xmm2
         jc ___if_5_end
         push qword [rbp - 8 - 8]
-        pop qword [rbp - 8 - 16 - 24]
+        pop qword [rsp - 8 - 16 - 0]
 
         push qword [rbp - 8 - 16]
-        pop qword [rbp - 8 - 16 - 32]
+        pop qword [rsp - 8 - 16 - 8]
 
         ; func call: не_квадратка
         call ___func_5
@@ -229,24 +227,9 @@ ___compare_2_end:
         sub rsp, 8
         mov rdx, 0x0
         mov qword [rsp], rdx
-        ; printf
-        lea rdi, [PRINTF_DOUBLE_FMT]
         movsd xmm0, [rsp]
         add rsp, 8
-
-        mov rdx, 0x0F
-        and rdx, rsp
-        test rdx, rdx
-        je is_aligned_0
-
-        sub rsp, 8
-        call printf
-        add rsp, 8
-        jmp is_aligned_end_0
-
-is_aligned_0:
-        call printf
-is_aligned_end_0:
+        call doubleio_out
 
         sub rsp, 8
         mov rdx, 0x0
@@ -308,24 +291,9 @@ ___compare_3_end:
         sub rsp, 8
         mov rdx, 0x3ff0000000000000
         mov qword [rsp], rdx
-        ; printf
-        lea rdi, [PRINTF_DOUBLE_FMT]
         movsd xmm0, [rsp]
         add rsp, 8
-
-        mov rdx, 0x0F
-        and rdx, rsp
-        test rdx, rdx
-        je is_aligned_1
-
-        sub rsp, 8
-        call printf
-        add rsp, 8
-        jmp is_aligned_end_1
-
-is_aligned_1:
-        call printf
-is_aligned_end_1:
+        call doubleio_out
 
         push qword [rbp - 8 - 8]
         mov rdx, 1 << 63
@@ -346,24 +314,9 @@ is_aligned_end_1:
         divsd xmm1, xmm2
         movsd [rsp], xmm1
 
-        ; printf
-        lea rdi, [PRINTF_DOUBLE_FMT]
         movsd xmm0, [rsp]
         add rsp, 8
-
-        mov rdx, 0x0F
-        and rdx, rsp
-        test rdx, rdx
-        je is_aligned_2
-
-        sub rsp, 8
-        call printf
-        add rsp, 8
-        jmp is_aligned_end_2
-
-is_aligned_2:
-        call printf
-is_aligned_end_2:
+        call doubleio_out
 
         sub rsp, 8
         mov rdx, 0x0
@@ -385,24 +338,9 @@ ___if_7_end:
         sub rsp, 8
         mov rdx, 0x4000000000000000
         mov qword [rsp], rdx
-        ; printf
-        lea rdi, [PRINTF_DOUBLE_FMT]
         movsd xmm0, [rsp]
         add rsp, 8
-
-        mov rdx, 0x0F
-        and rdx, rsp
-        test rdx, rdx
-        je is_aligned_3
-
-        sub rsp, 8
-        call printf
-        add rsp, 8
-        jmp is_aligned_end_3
-
-is_aligned_3:
-        call printf
-is_aligned_end_3:
+        call doubleio_out
 
         push qword [rbp - 8 - 8]
         mov rdx, 1 << 63
@@ -430,24 +368,9 @@ is_aligned_end_3:
         divsd xmm1, xmm2
         movsd [rsp], xmm1
 
-        ; printf
-        lea rdi, [PRINTF_DOUBLE_FMT]
         movsd xmm0, [rsp]
         add rsp, 8
-
-        mov rdx, 0x0F
-        and rdx, rsp
-        test rdx, rdx
-        je is_aligned_4
-
-        sub rsp, 8
-        call printf
-        add rsp, 8
-        jmp is_aligned_end_4
-
-is_aligned_4:
-        call printf
-is_aligned_end_4:
+        call doubleio_out
 
         push qword [rbp - 8 - 8]
         mov rdx, 1 << 63
@@ -475,24 +398,9 @@ is_aligned_end_4:
         divsd xmm1, xmm2
         movsd [rsp], xmm1
 
-        ; printf
-        lea rdi, [PRINTF_DOUBLE_FMT]
         movsd xmm0, [rsp]
         add rsp, 8
-
-        mov rdx, 0x0F
-        and rdx, rsp
-        test rdx, rdx
-        je is_aligned_5
-
-        sub rsp, 8
-        call printf
-        add rsp, 8
-        jmp is_aligned_end_5
-
-is_aligned_5:
-        call printf
-is_aligned_end_5:
+        call doubleio_out
 
         sub rsp, 8
         mov rdx, 0x0
@@ -607,24 +515,9 @@ ___compare_5_end:
         sub rsp, 8
         mov rdx, 0xbff0000000000000
         mov qword [rsp], rdx
-        ; printf
-        lea rdi, [PRINTF_DOUBLE_FMT]
         movsd xmm0, [rsp]
         add rsp, 8
-
-        mov rdx, 0x0F
-        and rdx, rsp
-        test rdx, rdx
-        je is_aligned_6
-
-        sub rsp, 8
-        call printf
-        add rsp, 8
-        jmp is_aligned_end_6
-
-is_aligned_6:
-        call printf
-is_aligned_end_6:
+        call doubleio_out
 
         sub rsp, 8
         mov rdx, 0x0
@@ -640,24 +533,9 @@ ___if_11_end:
         sub rsp, 8
         mov rdx, 0x0
         mov qword [rsp], rdx
-        ; printf
-        lea rdi, [PRINTF_DOUBLE_FMT]
         movsd xmm0, [rsp]
         add rsp, 8
-
-        mov rdx, 0x0F
-        and rdx, rsp
-        test rdx, rdx
-        je is_aligned_7
-
-        sub rsp, 8
-        call printf
-        add rsp, 8
-        jmp is_aligned_end_7
-
-is_aligned_7:
-        call printf
-is_aligned_end_7:
+        call doubleio_out
 
         sub rsp, 8
         mov rdx, 0x0
@@ -673,24 +551,9 @@ ___if_10_end:
         sub rsp, 8
         mov rdx, 0x3ff0000000000000
         mov qword [rsp], rdx
-        ; printf
-        lea rdi, [PRINTF_DOUBLE_FMT]
         movsd xmm0, [rsp]
         add rsp, 8
-
-        mov rdx, 0x0F
-        and rdx, rsp
-        test rdx, rdx
-        je is_aligned_8
-
-        sub rsp, 8
-        call printf
-        add rsp, 8
-        jmp is_aligned_end_8
-
-is_aligned_8:
-        call printf
-is_aligned_end_8:
+        call doubleio_out
 
         push qword [rbp - 8 - 8]
         mov rdx, 1 << 63
@@ -702,24 +565,9 @@ is_aligned_end_8:
         divsd xmm1, xmm2
         movsd [rsp], xmm1
 
-        ; printf
-        lea rdi, [PRINTF_DOUBLE_FMT]
         movsd xmm0, [rsp]
         add rsp, 8
-
-        mov rdx, 0x0F
-        and rdx, rsp
-        test rdx, rdx
-        je is_aligned_9
-
-        sub rsp, 8
-        call printf
-        add rsp, 8
-        jmp is_aligned_end_9
-
-is_aligned_9:
-        call printf
-is_aligned_end_9:
+        call doubleio_out
 
         sub rsp, 8
         mov rdx, 0x0
@@ -733,6 +581,8 @@ is_aligned_end_9:
         ret
 ; ------------------------- Function definition end -----------------------
 
+
+        %include "doubleiolib.nasm"
 
 section .data
 
