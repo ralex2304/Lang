@@ -215,16 +215,18 @@ Status::Statuses asm_x86_64_pop_func_arg_value(AsmData* asm_d, size_t frame_offs
 Status::Statuses asm_x86_64_save_arr_elem_addr(AsmData* asm_d, size_t addr_offset, bool is_global) {
     assert(asm_d);
 
-    if (is_global)
-        PRINTF_("lea rcx, GLOBAL_SECTION[%zu]\n", addr_offset * 8);
-    else
-        PRINTF_("lea rcx, [rbp - 8 - %zu]\n", addr_offset * 8);
-
     PRINTF_("cvtsd2si rdx, [rsp]\n");
     PRINTF_("add rsp, 8\n");
 
     PRINTF_("shl rdx, 3\n");
-    PRINTF_("sub rcx, rdx \n");
+
+    if (is_global) {
+        PRINTF_("lea rcx, GLOBAL_SECTION[%zu]\n", addr_offset * 8);
+        PRINTF_("add rcx, rdx \n");
+    } else {
+        PRINTF_("lea rcx, [rbp - 8 - %zu]\n", addr_offset * 8);
+        PRINTF_("sub rcx, rdx \n");
+    }
 
     return Status::NORMAL_WORK;
 }
