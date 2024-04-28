@@ -2,13 +2,13 @@ FUNC_DEF(start)
 
 FUNC_DEF(end)
 
-FUNC_DEF(begin_func_definition, const size_t func_num, String func_name)
+FUNC_DEF(write_to_file)
+
+FUNC_DEF(begin_func_definition, Func* func, String func_name)
 
 FUNC_DEF(end_func_definition, const size_t frame_size)
 
-FUNC_DEF(call_function, size_t func_num, size_t offset, String func_name)
-
-FUNC_DEF(call_main, size_t func_num, size_t offset, String func_name)
+FUNC_DEF(call_function, Func* func, size_t offset, String func_name)
 
 FUNC_DEF(ret)
 
@@ -40,37 +40,31 @@ FUNC_DEF(arr_elem_assignment_header, const char* var_name)
 
 FUNC_DEF(swap_last_stk_vals)
 
-FUNC_DEF(if_begin, size_t cnt)
+FUNC_DEF(if_begin, AsmScopeData* scope)
 
-FUNC_DEF(if_end, size_t cnt)
+FUNC_DEF(if_end, AsmScopeData* scope)
 
-FUNC_DEF(if_else_begin, size_t cnt)
+FUNC_DEF(if_else_begin, AsmScopeData* scope)
 
-FUNC_DEF(if_else_middle, size_t cnt)
+FUNC_DEF(if_else_middle, AsmScopeData* scope)
 
-FUNC_DEF(if_else_end, size_t cnt)
+FUNC_DEF(if_else_end, AsmScopeData* scope)
 
-FUNC_DEF(do_if_check_clause, size_t cnt)
+FUNC_DEF(do_if_check_clause, AsmScopeData* scope)
 
-FUNC_DEF(while_begin, size_t cnt)
+FUNC_DEF(while_begin, AsmScopeData* scope)
 
-FUNC_DEF(while_check_clause, size_t cnt)
+FUNC_DEF(while_check_clause, AsmScopeData* scope)
 
-FUNC_DEF(while_end, size_t cnt)
+FUNC_DEF(while_end, AsmScopeData* scope)
 
-FUNC_DEF(while_else_check_clause, size_t cnt)
+FUNC_DEF(while_else_check_clause, AsmScopeData* scope)
 
-FUNC_DEF(while_else_else, size_t cnt)
+FUNC_DEF(while_else_else, AsmScopeData* scope)
 
-FUNC_DEF(Continue, size_t cnt)
+FUNC_DEF(Continue, AsmScopeData* scope)
 
-FUNC_DEF(Break, size_t cnt)
-
-FUNC_DEF(prepost_oper_var, const size_t addr_offset, const bool is_global, const OperNum oper)
-
-FUNC_DEF(prepost_oper_arr_elem, const size_t addr_offset, const bool is_global, const OperNum oper)
-
-FUNC_DEF(prepost_oper_arr_elem_the_same, const OperNum oper)
+FUNC_DEF(Break, AsmScopeData* scope)
 
 FUNC_DEF(fps, const int val)
 

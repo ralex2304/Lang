@@ -16,7 +16,8 @@ struct Status {
         INPUT_ERROR       =  5,  //< Input reading error
         TREE_ERROR        =  8,  //< Tree error
         STACK_ERROR       =  9,  //< Stack error
-        SYNTAX_ERROR      =  10, //< Syntax error
+        LIST_ERROR        =  10, //< List error
+        SYNTAX_ERROR      =  11, //< Syntax error
     };
 
     /**

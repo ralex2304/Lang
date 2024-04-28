@@ -9,7 +9,7 @@
 
 constexpr size_t MAX_SYNONYMS_NUM = 3;
 
-const char* const MAIN_FUNC_NAMES[MAX_SYNONYMS_NUM] = {"main", "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ", "пїЅпїЅпїЅпїЅпїЅпїЅ_пїЅ_пїЅпїЅпїЅпїЅпїЅпїЅ"};
+const char* const MAIN_FUNC_NAMES[MAX_SYNONYMS_NUM] = {"main", "министерство", "остров_в_океане"};
 
 struct String {
     const char* s = nullptr;
@@ -28,7 +28,7 @@ struct DebugInfo {
 enum class Arches {
     NONE   = -1,
     SPU    =  0,
-    X86_64 =  1,
+    IR     =  1,
 };
 
 enum class TreeElemType {
@@ -39,11 +39,11 @@ enum class TreeElemType {
 };
 
 enum OperType {
-    NONE   = -1,
-    LEAF   =  0,
-    UNARY  =  1,
-    BINARY =  2,
-    LIST   =  3, //< must have left child. Right is optional, but if defined, must be the same
+    OP_NONE = -1,
+    LEAF    =  0,
+    UNARY   =  1,
+    BINARY  =  2,
+    LIST    =  3, //< must have left child. Right is optional, but if defined, must be the same
 };
 
 enum OperMathType {

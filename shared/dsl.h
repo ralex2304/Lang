@@ -203,6 +203,13 @@ inline bool dsl_is_double_equal(const double a, const double b) {
 #define EXIT_SCOPE()    \
             STATUS_CHECK(asm_common_pop_var_table(&data->scopes))
 
+#define SCOPE_RESET_VARS()                                              \
+            if (!data->scopes.data[data->scopes.size - 1].reset_vars()) \
+                return Status::MEMORY_EXCEED
+
+#define SCOPE_SET_TYPE(type_)    \
+            data->scopes.data[data->scopes.size - 1].type = type_
+
 #define EVAL_FUNC_ARGS(node_, offset_, arg_count_)                                \
             STATUS_CHECK(asm_eval_func_args_(data, node_, offset_, arg_count_,    \
                                              DEBUG_INFO(node_)))

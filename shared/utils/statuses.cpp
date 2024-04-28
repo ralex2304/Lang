@@ -20,6 +20,7 @@ Status::Statuses Status::raise(const Statuses status) {
         STATUS_CASE_(INPUT_ERROR,       "Input error");
         STATUS_CASE_(TREE_ERROR,        "Operation with Tree failed");
         STATUS_CASE_(STACK_ERROR,       "Operation with Stack failed");
+        STATUS_CASE_(LIST_ERROR,        "Operation with List failed");
         STATUS_CASE_(SYNTAX_ERROR,      "Syntax error found");
 
         case OK_EXIT:

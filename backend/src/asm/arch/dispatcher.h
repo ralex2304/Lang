@@ -4,7 +4,7 @@
 #include "utils/statuses.h"
 #include "objects.h"
 #include "../asm_objects.h"
-
+#include "../../scopes.h"
 
 #define FUNC_DEF(name_, ...) \
             Status::Statuses (*name_)(AsmData* asm_d, ## __VA_ARGS__) = nullptr;

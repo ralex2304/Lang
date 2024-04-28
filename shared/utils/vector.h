@@ -28,7 +28,7 @@ struct Vector {
             elem_size_ = UNITIALISED_VAL_;
         }
 
-        inline bool push_back(void* new_elem) {
+        inline bool push_back(const void* new_elem) {
             assert(new_elem);
             if (size_ >= capacity_)
                 if (!resize((size_t)capacity_ * 2)) return false;

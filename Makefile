@@ -9,7 +9,7 @@ CFLAGS_SANITIZER = -fsanitize=address,alignment,bool,bounds,enum,float-cast-over
 
 .PHONY: main frontend middleend backend asm build_front build_middle build_back clean_front clean_middle clean_back
 
-main: build frontend middleend backend asm
+main: build frontend middleend backend
 
 PROG_PATH = Programs/$(prog)
 
@@ -20,7 +20,7 @@ middleend:
 	@LANG=ru_RU.CP1251 luit ./middleend/./main -i $(PROG_PATH)/prog.tre -o $(PROG_PATH)/prog.treopt
 
 backend:
-	@LANG=ru_RU.CP1251 luit ./backend/./main -i $(PROG_PATH)/prog.treopt -o $(PROG_PATH)/prog.nasm -a x86_64
+	@LANG=ru_RU.CP1251 luit ./backend/./main -i $(PROG_PATH)/prog.treopt -o $(PROG_PATH)/prog.ir -a ir
 
 asm:
 	@nasm -f elf64 -g -F dwarf -l $(PROG_PATH)/prog.lst -I Programs/ $(PROG_PATH)/prog.nasm -o $(PROG_PATH)/prog.o

@@ -15,7 +15,7 @@ const Argument ARGS_DICT[] = {
 
     {"-o", read_output_filename, "#   -o - specify output file name after this\n"}, //< Output filename
 
-    {"-a", read_arch,            "#   -a - specify arch after this: \"spu\", \"x86_64\"\n"}
+    {"-a", read_arch,            "#   -a - specify arch after this: \"spu\", \"ir\"\n"}
 };
 
 const int ARGS_DICT_LEN = sizeof(ARGS_DICT) / sizeof(ARGS_DICT[0]);                 //< args_dict array len

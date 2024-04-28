@@ -4,6 +4,7 @@
 #include "utils/statuses.h"     // IWYU pragma: keep
 #include "objects.h"            // IWYU pragma: keep
 #include "../../asm_objects.h"  // IWYU pragma: keep
+#include "../../../scopes.h"    // IWYU pragma: keep
 
 
 #define FUNC_DEF(name_, ...) \

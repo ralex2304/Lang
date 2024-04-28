@@ -23,27 +23,31 @@ static Status::Statuses asm_func_def_make_body_(BackData* data, TreeNode* root_c
 Status::Statuses make_asm(BackData* data) {
     assert(data);
 
-    ssize_t main_func = -1;
-    for (size_t i = 0; i < MAX_SYNONYMS_NUM && main_func == -1; i++)
+    ssize_t main_func_num = -1;
+    for (size_t i = 0; i < MAX_SYNONYMS_NUM && main_func_num == -1; i++)
         if (MAIN_FUNC_NAMES[i] != nullptr)
-            main_func = find_var_num_by_name(&data->vars, MAIN_FUNC_NAMES[i]);
+            main_func_num = find_var_num_by_name(&data->vars, MAIN_FUNC_NAMES[i]);
 
-    if (main_func == -1)
+    if (main_func_num == -1)
         return syntax_error(*DEBUG_INFO(data->tree.root), "main function not found");
 
     STATUS_CHECK(ASM_DISP.start(&data->asm_d));
 
     STATUS_CHECK(asm_common_initialise_global_scope(data));
 
+    Func* main_func = FIND_FUNC((size_t)main_func_num);
+
     size_t global_vars_size = data->scopes.data[0].size;
 
-    STATUS_CHECK(asm_common_call_main(data, (size_t)main_func, global_vars_size));
+    STATUS_CHECK(asm_common_call_function(data, main_func, global_vars_size));
 
     STATUS_CHECK(ASM_DISP.end(&data->asm_d));
 
     STATUS_CHECK(asm_func_def_(data));
 
     STATUS_CHECK(ASM_DISP.init_mem_for_global_vars(&data->asm_d, global_vars_size));
+
+    STATUS_CHECK(ASM_DISP.write_to_file(&data->asm_d));
 
     return Status::NORMAL_WORK;
 }
@@ -74,7 +78,7 @@ static Status::Statuses asm_func_def_(BackData* data) {
 
         data->max_local_frame_size = asm_common_count_addr_offset(&data->scopes);
 
-        STATUS_CHECK(asm_common_begin_func_defenition(data, func_num));
+        STATUS_CHECK(asm_common_begin_func_defenition(data, data->func_table.find_func(func_num)));
 
         STATUS_CHECK(asm_func_def_make_body_(data, *R(def)));
 

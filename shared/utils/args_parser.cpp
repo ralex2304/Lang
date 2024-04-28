@@ -53,7 +53,7 @@ ArgsMode print_help(const Argument args_dict[], const int args_dict_len,
     assert(argv);
     assert(args_vars);
 
-    printf("# SunBoyLang compiler: frontend, middleend, backend\n"
+    printf("# Lang compiler: frontend, middleend, backend\n"
            "# Console args:\n");
 
     for (int i = 0; i < args_dict_len; i++)

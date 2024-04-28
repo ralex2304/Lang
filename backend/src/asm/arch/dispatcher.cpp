@@ -2,7 +2,7 @@
 
 static Status::Statuses spu_fill_table_(ArchDispatcher* disp);
 
-static Status::Statuses x86_64_fill_table_(ArchDispatcher* disp);
+static Status::Statuses ir_fill_table_(ArchDispatcher* disp);
 
 Status::Statuses ArchDispatcher::fill_table(const Arches arch) {
 
@@ -10,8 +10,8 @@ Status::Statuses ArchDispatcher::fill_table(const Arches arch) {
         case Arches::SPU:
             STATUS_CHECK(spu_fill_table_(this));
             break;
-        case Arches::X86_64:
-            STATUS_CHECK(x86_64_fill_table_(this));
+        case Arches::IR:
+            STATUS_CHECK(ir_fill_table_(this));
             break;
 
         case Arches::NONE:
@@ -38,13 +38,13 @@ static Status::Statuses spu_fill_table_(ArchDispatcher* disp) {
     return Status::NORMAL_WORK;
 }
 
-#include "x86_64/x86_64_asm.h"
+#include "ir/ir_asm.h"
 
-static Status::Statuses x86_64_fill_table_(ArchDispatcher* disp) {
+static Status::Statuses ir_fill_table_(ArchDispatcher* disp) {
     assert(disp);
 
 #define FUNC_DEF(name_, ...)    \
-            disp->name_ = asm_x86_64_##name_;
+            disp->name_ = asm_ir_##name_;
 
 #include "dispatcher_declarations.h"
 

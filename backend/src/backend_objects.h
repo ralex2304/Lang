@@ -42,7 +42,7 @@ struct BackData {
         if (!func_table.ctor())
             return false;
 
-        if (!file_open(&asm_d.file, output_filename, "wb"))
+        if (!asm_d.ctor(output_filename))
             return false;
 
         if (asm_disp.fill_table(arch) != Status::NORMAL_WORK)
@@ -54,24 +54,22 @@ struct BackData {
     inline bool dtor() {
         bool no_error = true;
 
-        if (tree_dtor(&tree) != Tree::OK)
-            no_error = false;
+        no_error &= tree_dtor(&tree) == Tree::OK;
 
         vars.dtor();
 
         Elem_t tmp = {};
         while (scopes.size > 0) {
-            no_error = no_error && (stk_pop(&scopes, &tmp) == Stack::OK);
+            no_error &= stk_pop(&scopes, &tmp) == Stack::OK;
 
             tmp.dtor();
         }
 
-        if (stk_dtor(&scopes))
-            no_error = false;
+        no_error &= stk_dtor(&scopes) == Stack::OK;
 
         func_table.dtor();
 
-        fclose(asm_d.file);
+        no_error &= asm_d.dtor();
 
         return no_error;
     };

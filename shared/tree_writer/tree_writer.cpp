@@ -4,12 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "objects.h"
-#include "file/file.h"
-
 static Status::Statuses write_tree_(Tree* tree, FILE* file);
-
-static Status::Statuses write_tree_print_debug_data_(FILE* file, DebugInfo* info);
 
 static Status::Statuses write_tree_traversal_(Tree* tree, FILE* file, TreeNode* node);
 
@@ -77,7 +72,7 @@ static Status::Statuses write_tree_traversal_(Tree* tree, FILE* file, TreeNode* 
 
     PRINT_("(");
 
-    STATUS_CHECK(write_tree_print_debug_data_(file, &((TreeElem*)(node->elem))->debug_info));
+    STATUS_CHECK(write_debug_data(file, &((TreeElem*)(node->elem))->debug_info));
 
     PRINT_(", %d, ", (int)(((TreeElem*)(node->elem))->type));
 
@@ -111,7 +106,7 @@ static Status::Statuses write_tree_traversal_(Tree* tree, FILE* file, TreeNode* 
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses write_tree_print_debug_data_(FILE* file, DebugInfo* info) {
+Status::Statuses write_debug_data(FILE* file, const DebugInfo* info) {
     assert(file);
     assert(info);
 

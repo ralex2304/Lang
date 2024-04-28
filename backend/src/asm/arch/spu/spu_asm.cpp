@@ -62,7 +62,17 @@ Status::Statuses asm_spu_end(AsmData* asm_d) {
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_spu_begin_func_definition(AsmData* asm_d, const size_t func_num, String func_name) {
+Status::Statuses asm_spu_write_to_file(AsmData* asm_d) {
+    assert(asm_d);
+
+    (void) asm_d;
+
+    // Do nothing. All information has been already written
+
+    return Status::NORMAL_WORK;
+}
+
+Status::Statuses asm_spu_begin_func_definition(AsmData* asm_d, Func* func, String func_name) {
     assert(asm_d);
     assert(func_name.s);
 
@@ -70,7 +80,7 @@ Status::Statuses asm_spu_begin_func_definition(AsmData* asm_d, const size_t func
 
     PRINTF_NO_TAB_("; func name: %.*s\n", PRINTF_STRING_(func_name));
 
-    PRINTF_NO_TAB_("___func_%zu:\n", func_num);
+    PRINTF_NO_TAB_("___func_%zu:\n", func->func_num);
 
     return Status::NORMAL_WORK;
 }
@@ -87,8 +97,9 @@ Status::Statuses asm_spu_end_func_definition(AsmData* asm_d, const size_t frame_
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_spu_call_function(AsmData* asm_d, size_t func_num, size_t offset, String func_name) {
+Status::Statuses asm_spu_call_function(AsmData* asm_d, Func* func, size_t offset, String func_name) {
     assert(asm_d);
+    assert(func);
     assert(func_name.s);
 
     PRINTF_("; func call: %.*s\n", PRINTF_STRING_(func_name));
@@ -96,19 +107,10 @@ Status::Statuses asm_spu_call_function(AsmData* asm_d, size_t func_num, size_t o
     PRINTF_("push rbx\n");
     PRINTF_("push rbx + %zu\n", offset);
     PRINTF_("pop rbx\n");
-    PRINTF_("call ___func_%zu\n", func_num);
+    PRINTF_("call ___func_%zu\n", func->func_num);
     PRINTF_("pop rbx\n");
 
     PRINTF_("; func call end\n\n");
-
-    return Status::NORMAL_WORK;
-}
-
-Status::Statuses asm_spu_call_main(AsmData* asm_d, size_t func_num, size_t offset, String func_name) {
-    assert(asm_d);
-    assert(func_name.s);
-
-    STATUS_CHECK(asm_spu_call_function(asm_d, func_num, offset, func_name));
 
     return Status::NORMAL_WORK;
 }
@@ -284,139 +286,151 @@ Status::Statuses asm_spu_swap_last_stk_vals(AsmData* asm_d) {
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_spu_if_begin(AsmData* asm_d, size_t cnt) {
+Status::Statuses asm_spu_if_begin(AsmData* asm_d, AsmScopeData* scope) {
     assert(asm_d);
+    assert(scope);
 
     PRINTF_("; if begin\n");
 
     PRINTF_("push 0\n");
-    PRINTF_("je ___if_%zu_end\n", cnt);
+    PRINTF_("je ___if_%zu_end\n", scope->scope_num);
 
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_spu_if_end(AsmData* asm_d, size_t cnt) {
+Status::Statuses asm_spu_if_end(AsmData* asm_d, AsmScopeData* scope) {
     assert(asm_d);
+    assert(scope);
 
-    PRINTF_NO_TAB_("___if_%zu_end:\n", cnt);
+    PRINTF_NO_TAB_("___if_%zu_end:\n", scope->scope_num);
 
     PRINTF_("; if end\n\n");
 
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_spu_if_else_begin(AsmData* asm_d, size_t cnt) {
+Status::Statuses asm_spu_if_else_begin(AsmData* asm_d, AsmScopeData* scope) {
     assert(asm_d);
+    assert(scope);
 
     PRINTF_("; if-else begin\n");
 
     PRINTF_("push 0\n");
-    PRINTF_("je ___if_%zu_else\n", cnt);
+    PRINTF_("je ___if_%zu_else\n", scope->scope_num);
 
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_spu_if_else_middle(AsmData* asm_d, size_t cnt) {
+Status::Statuses asm_spu_if_else_middle(AsmData* asm_d, AsmScopeData* scope) {
     assert(asm_d);
+    assert(scope);
 
-    PRINTF_("jmp ___if_%zu_end\n", cnt);
+    PRINTF_("jmp ___if_%zu_end\n", scope->scope_num);
 
 
     PRINTF_("; if-else else\n");
 
-    PRINTF_NO_TAB_("___if_%zu_else:\n", cnt);
+    PRINTF_NO_TAB_("___if_%zu_else:\n", scope->scope_num);
 
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_spu_if_else_end(AsmData* asm_d, size_t cnt) {
-    return asm_spu_if_end(asm_d, cnt);
+Status::Statuses asm_spu_if_else_end(AsmData* asm_d, AsmScopeData* scope) {
+    return asm_spu_if_end(asm_d, scope);
 }
 
-Status::Statuses asm_spu_do_if_check_clause(AsmData* asm_d, size_t cnt) {
+Status::Statuses asm_spu_do_if_check_clause(AsmData* asm_d, AsmScopeData* scope) {
     assert(asm_d);
+    assert(scope);
 
     PRINTF_("; do-if clause check\n");
 
     PRINTF_("push 0\n");
-    PRINTF_("jne ___do_if_%zu_end\n", cnt);
+    PRINTF_("jne ___do_if_%zu_end\n", scope->scope_num);
 
     PRINTF_("pop [-1] ; <= seg fault\n");
     PRINTF_("hlt\n");
 
-    PRINTF_NO_TAB_("___do_if_%zu_end:\n\n", cnt);
+    PRINTF_NO_TAB_("___do_if_%zu_end:\n\n", scope->scope_num);
 
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_spu_while_begin(AsmData* asm_d, size_t cnt) {
+Status::Statuses asm_spu_while_begin(AsmData* asm_d, AsmScopeData* scope) {
     assert(asm_d);
+    assert(scope);
 
     PRINTF_("; while begin\n");
 
-    PRINTF_NO_TAB_("___while_%zu_begin:\n", cnt);
+    PRINTF_NO_TAB_("___while_%zu_begin:\n", scope->scope_num);
 
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_spu_while_check_clause(AsmData* asm_d, size_t cnt) {
+Status::Statuses asm_spu_while_check_clause(AsmData* asm_d, AsmScopeData* scope) {
     assert(asm_d);
+    assert(scope);
 
     PRINTF_("; while clause check\n");
 
     PRINTF_("push 0\n");
-    PRINTF_("je ___while_%zu_end\n\n", cnt);
+    PRINTF_("je ___while_%zu_end\n\n", scope->scope_num);
 
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_spu_while_end(AsmData* asm_d, size_t cnt) {
+Status::Statuses asm_spu_while_end(AsmData* asm_d, AsmScopeData* scope) {
     assert(asm_d);
+    assert(scope);
 
-    PRINTF_("jmp ___while_%zu_begin\n\n", cnt);
+    PRINTF_("jmp ___while_%zu_begin\n\n", scope->scope_num);
 
-    PRINTF_NO_TAB_("___while_%zu_end:\n", cnt);
+    PRINTF_NO_TAB_("___while_%zu_end:\n", scope->scope_num);
 
     PRINTF_("; while end\n\n");
 
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_spu_while_else_check_clause(AsmData* asm_d, size_t cnt) {
+Status::Statuses asm_spu_while_else_check_clause(AsmData* asm_d, AsmScopeData* scope) {
     assert(asm_d);
+    assert(scope);
 
     PRINTF_("; while-else clause check\n");
 
     PRINTF_("push 0\n");
-    PRINTF_("je ___while_%zu_else\n\n", cnt);
+    PRINTF_("je ___while_%zu_else\n\n", scope->scope_num);
 
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_spu_while_else_else(AsmData* asm_d, size_t cnt) {
+Status::Statuses asm_spu_while_else_else(AsmData* asm_d, AsmScopeData* scope) {
     assert(asm_d);
+    assert(scope);
 
     PRINTF_("; while-else else\n");
 
-    PRINTF_NO_TAB_("___while_%zu_else:\n", cnt);
+    PRINTF_NO_TAB_("___while_%zu_else:\n", scope->scope_num);
 
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_spu_Continue(AsmData* asm_d, size_t cnt) {
+Status::Statuses asm_spu_Continue(AsmData* asm_d, AsmScopeData* scope) {
     assert(asm_d);
+    assert(scope);
 
     PRINTF_("; continue\n");
-    PRINTF_("jmp ___while_%zu_begin\n\n", cnt);
+    PRINTF_("jmp ___while_%zu_begin\n\n", scope->scope_num);
 
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_spu_Break(AsmData* asm_d, size_t cnt) {
+Status::Statuses asm_spu_Break(AsmData* asm_d, AsmScopeData* scope) {
     assert(asm_d);
+    assert(scope);
 
     PRINTF_("; break\n");
-    PRINTF_("jmp ___while_%zu_end\n\n", cnt);
+    PRINTF_("jmp ___while_%zu_end\n\n", scope->scope_num);
 
     return Status::NORMAL_WORK;
 }
@@ -470,58 +484,6 @@ static const char* math_oper_str_(const OperNum math_op) {
     return nullptr;
 }
 #undef CASE_
-
-Status::Statuses asm_spu_prepost_oper_var(AsmData* asm_d, const size_t addr_offset, const bool is_global,
-                                      const OperNum oper) {
-    assert(asm_d);
-    assert(oper);
-
-    PRINTF_("; prepost oper\n");
-
-    STATUS_CHECK(asm_spu_push_var_val(asm_d, addr_offset, is_global));
-
-    PRINTF_("push 1\n");
-    STATUS_CHECK(asm_spu_math_operator(asm_d, oper));
-
-    STATUS_CHECK(asm_spu_pop_var_value(asm_d, addr_offset, is_global));
-
-    return Status::NORMAL_WORK;
-}
-
-Status::Statuses asm_spu_prepost_oper_arr_elem(AsmData* asm_d, const size_t addr_offset, const bool is_global,
-                                           const OperNum oper) {
-    assert(asm_d);
-    assert(oper);
-
-    PRINTF_("; prepost oper with arr elem\n");
-
-    STATUS_CHECK(asm_spu_save_arr_elem_addr(asm_d, addr_offset, is_global));
-
-    STATUS_CHECK(asm_spu_push_arr_elem_val_the_same(asm_d));
-
-    PRINTF_("push 1\n");
-    STATUS_CHECK(asm_spu_math_operator(asm_d, oper));
-
-    STATUS_CHECK(asm_spu_pop_arr_elem_value_the_same(asm_d));
-
-    return Status::NORMAL_WORK;
-}
-
-Status::Statuses asm_spu_prepost_oper_arr_elem_the_same(AsmData* asm_d, const OperNum oper) {
-    assert(asm_d);
-    assert(oper);
-
-    PRINTF_("; prepost oper with arr elem\n");
-
-    STATUS_CHECK(asm_spu_push_arr_elem_val_the_same(asm_d));
-
-    PRINTF_("push 1\n");
-    STATUS_CHECK(asm_spu_math_operator(asm_d, oper));
-
-    STATUS_CHECK(asm_spu_pop_arr_elem_value_the_same(asm_d));
-
-    return Status::NORMAL_WORK;
-}
 
 Status::Statuses asm_spu_fps(AsmData* asm_d, const int val) {
     assert(asm_d);

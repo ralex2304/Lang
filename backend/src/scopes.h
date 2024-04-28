@@ -6,6 +6,8 @@
 
 #include "utils/vector.h"
 
+#include "asm/asm_objects.h"
+
 enum class VarType {
     NONE  = 0,
     NUM   = 1,
@@ -33,7 +35,8 @@ struct ScopeData {
     bool is_initialised = false;
 
     ScopeType type = ScopeType::NONE;
-    size_t scope_num = 0;
+
+    AsmScopeData asm_scope_data = {};
 
     Vector vars = {};
 
@@ -41,11 +44,14 @@ struct ScopeData {
 
     inline bool ctor(ScopeType type_) {
         static size_t counter = 0;
-        scope_num = counter++;
+        asm_scope_data.scope_num = counter++;
 
         assert(type_ != ScopeType::NONE);
 
         if (!vars.ctor(sizeof(Var)))
+            return false;
+
+        if (!asm_scope_data.ctor())
             return false;
 
         type = type_;
@@ -56,9 +62,19 @@ struct ScopeData {
 
     inline void dtor() {
         vars.dtor();
+        asm_scope_data.dtor();
         is_initialised = false;
         type = ScopeType::NONE;
-        scope_num = 0;
+        asm_scope_data.scope_num = 0;
+    };
+
+    inline bool reset_vars() {
+        vars.dtor();
+
+        if (!vars.ctor(sizeof(Var)))
+            return false;
+
+        return true;
     };
 
     inline Var* find_var(size_t var_num) {
@@ -73,6 +89,28 @@ struct ScopeData {
 struct Func {
     size_t func_num = 0;
     size_t arg_num = 0;
+
+    ssize_t addr = -1;
+
+    Vector addr_fixups = {};
+
+    bool ctor() {
+        return addr_fixups.ctor(sizeof(size_t));
+    };
+
+    void dtor() {
+        addr_fixups.dtor();
+    };
+
+    bool set_addr_or_add_to_fixups(size_t* func_addr, const size_t fixup_addr) {
+        assert(func_addr);
+        *func_addr = (size_t)addr;
+
+        if (addr < 0)
+            return addr_fixups.push_back(&fixup_addr);
+
+        return true;
+    };
 };
 
 struct FuncTable {
@@ -84,11 +122,18 @@ struct FuncTable {
         if (!funcs.ctor(sizeof(Func)))
             return false;
 
+        for (ssize_t i = 0; i < funcs.size(); i++)
+            if (!((Func*)funcs[(size_t)i])->ctor())
+                return false;
+
         is_initialised = true;
         return true;
     };
 
     inline void dtor() {
+        for (ssize_t i = 0; i < funcs.size(); i++)
+            ((Func*)funcs[(size_t)i])->dtor();
+
         funcs.dtor();
         is_initialised = false;
     }

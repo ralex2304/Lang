@@ -47,8 +47,8 @@ ArgsMode read_arch(const Argument args_dict[], const int args_dict_len,
 
     if (strcmp(argv[*arg_i], "spu") == 0)
         args_vars->arch = Arches::SPU;
-    else if (strcmp(argv[*arg_i], "x86_64") == 0)
-        args_vars->arch = Arches::X86_64;
+    else if (strcmp(argv[*arg_i], "ir") == 0)
+        args_vars->arch = Arches::IR;
     else {
         fprintf(stderr, "Unknown arch name specified. See -h for supported arhitectures list\n");
         return ArgsMode::ERROR;

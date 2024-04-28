@@ -56,6 +56,8 @@ static Status::Statuses asm_declare_global_var_or_func_(BackData* data, ScopeDat
     assert(var_table);
     assert(def);
 
+    data->asm_d.debug_info = *DEBUG_INFO(def);
+
     Var new_var = {.is_const = false, .addr_offset = var_table->size};
 
     if (NODE_IS_OPER(def, OperNum::CONST_VAR_DEF)) {
@@ -152,13 +154,15 @@ static Status::Statuses asm_declare_global_func_(BackData* data, TreeNode* def) 
     }
 
     Func new_func = {.func_num = ELEM(*L(*L(def)))->data.var,
-                        .arg_num = asm_common_count_args(*R(*L(def)))};
+                     .arg_num = asm_common_count_args(*R(*L(def)))};
 
     if (data->func_table.find_func(new_func.func_num) != nullptr)
         return syntax_error(*DEBUG_INFO(def), "Function has been already declared");
 
-    if (!data->func_table.funcs.push_back(&new_func))
+    if (!new_func.ctor() || !data->func_table.funcs.push_back(&new_func)) {
+        new_func.dtor();
         return Status::MEMORY_EXCEED;
+    }
 
     return Status::NORMAL_WORK;
 }
@@ -186,6 +190,8 @@ Status::Statuses asm_common_eval_global_expr(BackData* data, TreeNode* expr) {
 
     if (*R(expr) != nullptr)
         STATUS_CHECK(asm_common_eval_global_expr(data, *R(expr)));
+
+    data->asm_d.debug_info = *DEBUG_INFO(expr);
 
     if (TYPE_IS_NUM(expr)) {
         STATUS_CHECK(ASM_DISP.push_const(&data->asm_d, ELEM(expr)->data.num));
@@ -280,7 +286,7 @@ Status::Statuses asm_common_assign_arr_elem_same(BackData* data) {
     return Status::NORMAL_WORK;
 }
 
-ScopeData* asm_common_create_scope(Stack* scopes, size_t* scope_num, bool is_loop) {
+ScopeData* asm_common_create_scope(Stack* scopes, AsmScopeData** asm_scope_data, bool is_loop) {
     assert(scopes);
 
     if (stk_push(scopes, {.is_initialised = true}) != Stack::OK)
@@ -291,8 +297,8 @@ ScopeData* asm_common_create_scope(Stack* scopes, size_t* scope_num, bool is_loo
     if (!new_scope->ctor(is_loop ? ScopeType::LOOP : ScopeType::NEUTRAL))
         return nullptr;
 
-    if (scope_num != nullptr)
-        *scope_num = new_scope->scope_num;
+    if (asm_scope_data != nullptr)
+        *asm_scope_data = &new_scope->asm_scope_data;
 
     return new_scope;
 }
@@ -331,40 +337,33 @@ Status::Statuses asm_common_push_arr_elem_val(BackData* data, size_t addr_offset
     return Status::NORMAL_WORK;
 }
 
-ssize_t asm_common_find_loop_scope_num(BackData* data) {
+AsmScopeData* asm_common_find_loop_scope_num(BackData* data) {
     assert(data);
 
     for (ssize_t i = data->scopes.size - 1; i > 0; i--) {
 
         if (data->scopes.data[i].type == ScopeType::LOOP)
-            return (ssize_t)data->scopes.data[i].scope_num;
+            return &data->scopes.data[i].asm_scope_data;
     }
 
-    return -1;
+    return nullptr;
 };
 
-Status::Statuses asm_common_call_function(BackData* data, size_t func_num, size_t offset) {
+Status::Statuses asm_common_call_function(BackData* data, Func* func, size_t offset) {
     assert(data);
+    assert(func);
 
-    STATUS_CHECK(ASM_DISP.call_function(&data->asm_d, func_num, offset,
-                                        *(String*)data->vars[func_num]));
+    STATUS_CHECK(ASM_DISP.call_function(&data->asm_d, func, offset,
+                                        *(String*)data->vars[func->func_num]));
 
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_common_call_main(BackData* data, size_t func_num, size_t offset) {
+Status::Statuses asm_common_begin_func_defenition(BackData* data, Func* func) {
     assert(data);
 
-    STATUS_CHECK(ASM_DISP.call_main(&data->asm_d, func_num, offset, *(String*)data->vars[func_num]));
-
-    return Status::NORMAL_WORK;
-}
-
-Status::Statuses asm_common_begin_func_defenition(BackData* data, const size_t func_num) {
-    assert(data);
-
-    STATUS_CHECK(ASM_DISP.begin_func_definition(&data->asm_d, func_num,
-                                                      *(String*)(data->vars[func_num])));
+    STATUS_CHECK(ASM_DISP.begin_func_definition(&data->asm_d, func,
+                                                *(String*)(data->vars[func->func_num])));
 
     return Status::NORMAL_WORK;
 }
@@ -438,4 +437,56 @@ Var* asm_common_search_var(Stack* scopes, size_t var_num, bool* is_global) {
         *is_global = true;
 
     return scopes->data[0].find_var(var_num);
+}
+
+Status::Statuses asm_common_prepost_oper_var(BackData* data, const size_t addr_offset,
+                                             const bool is_global, const OperNum oper) {
+    assert(data);
+    assert(oper);
+
+    ASM_COMMENT("prepost oper");
+
+    STATUS_CHECK(ASM_DISP.push_var_val(&data->asm_d, addr_offset, is_global));
+
+    STATUS_CHECK(ASM_DISP.push_const(&data->asm_d, 1));
+    STATUS_CHECK(ASM_DISP.math_operator(&data->asm_d, oper));
+
+    STATUS_CHECK(ASM_DISP.pop_var_value(&data->asm_d, addr_offset, is_global));
+
+    return Status::NORMAL_WORK;
+}
+
+Status::Statuses asm_common_prepost_oper_arr_elem(BackData* data, const size_t addr_offset,
+                                                  const bool is_global, const OperNum oper) {
+    assert(data);
+    assert(oper);
+
+    ASM_COMMENT("prepost oper with arr elem");
+
+    STATUS_CHECK(ASM_DISP.save_arr_elem_addr(&data->asm_d, addr_offset, is_global));
+
+    STATUS_CHECK(ASM_DISP.push_arr_elem_val_the_same(&data->asm_d));
+
+    STATUS_CHECK(ASM_DISP.push_const(&data->asm_d, 1));
+    STATUS_CHECK(ASM_DISP.math_operator(&data->asm_d, oper));
+
+    STATUS_CHECK(ASM_DISP.pop_arr_elem_value_the_same(&data->asm_d));
+
+    return Status::NORMAL_WORK;
+}
+
+Status::Statuses asm_common_prepost_oper_arr_elem_the_same(BackData* data, const OperNum oper) {
+    assert(data);
+    assert(oper);
+
+    ASM_COMMENT("prepost oper with arr elem");
+
+    STATUS_CHECK(ASM_DISP.push_arr_elem_val_the_same(&data->asm_d));
+
+    STATUS_CHECK(ASM_DISP.push_const(&data->asm_d, 1));
+    STATUS_CHECK(ASM_DISP.math_operator(&data->asm_d, oper));
+
+    STATUS_CHECK(ASM_DISP.pop_arr_elem_value_the_same(&data->asm_d));
+
+    return Status::NORMAL_WORK;
 }
