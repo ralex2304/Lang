@@ -8,6 +8,6 @@
 #include "file/file.h"
 #include "../../../../List/list.h"
 
-Status::Statuses write_ir(List* ir, FILE* file);
+Status::Statuses write_ir(List* ir, const char* filename);
 
 #endif //< #ifndef IR_WRITER_H_

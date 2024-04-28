@@ -1,5 +1,7 @@
 #include "list.h"
 
+#include <limits.h>
+
 #include "list_log/list_log.h"
 #include "utils/html.h"
 #include "utils/ptr_valid.h"
@@ -48,6 +50,11 @@ inline bool log_ir_val(IRVal* val) {
             log_ir_val(val_);   \
             LOG_(" | ")
 
+#define CASE_(type_, val_)              \
+            case IRNodeType::type_:     \
+                LOG_("%d", (int)val_);  \
+                break
+
 void list_dump(const List* list, const VarCodeData call_data) {
     assert(list);
 
@@ -79,7 +86,7 @@ void list_dump(const List* list, const VarCodeData call_data) {
     }
 
     LOG_("        ""  i | prev | next | elem       | src[0]           | src[1]           |"
-                                                   " dest[0]          | dest[1]\n");
+                                                   " dest[0]          | dest[1]          | subtype\n");
 
     for (ssize_t i = 0; i < list->capacity; i++) {
         LOG_("        ""%3zd | %4zd | %4zd | type = %3d | ",
@@ -89,6 +96,18 @@ void list_dump(const List* list, const VarCodeData call_data) {
         LOG_VAL_(list->arr[i].elem.src + 1);
         LOG_VAL_(list->arr[i].elem.dest + 0);
         LOG_VAL_(list->arr[i].elem.dest + 1);
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wswitch-enum"
+        switch (list->arr[i].elem.type) {
+            CASE_(STORE_CMP_RES, list->arr[i].elem.subtype.cmp);
+            CASE_(JUMP,          list->arr[i].elem.subtype.jmp);
+            CASE_(MATH_OPER,     list->arr[i].elem.subtype.math);
+
+            default:
+                break;
+        }
+#pragma GCC diagnostic pop
 
         LOG_("\n");
     }
@@ -119,6 +138,7 @@ void list_dump(const List* list, const VarCodeData call_data) {
 
     LOG_("<img src=\"../../%s\">\n", img_filename);
 }
+#undef CASE_
 #undef LOG_
 #undef LOG_VAL_
 
@@ -160,6 +180,11 @@ inline bool print_ir_val(FILE* file, const char* name, IRVal* val) {
             FPRINTF_("<tr><td colspan=\"2\">elem.");            \
             if (!print_ir_val(file, name_, val_)) return false; \
             FPRINTF_("</td></tr>\n")
+
+#define CASE_(type_, val_)                                                                  \
+        case IRNodeType::type_:                                                             \
+                FPRINTF_("<tr><td colspan=\"2\">elem.subtype = %d</td></tr>\n", (int)val_); \
+                break
 
 bool list_dump_dot(const List* list, char* img_filename) {
     #define BACKGROUND_COLOR "\"#1f1f1f\""
@@ -206,6 +231,18 @@ bool list_dump_dot(const List* list, char* img_filename) {
             PRINT_VAL_("dest[0]", list->arr[phys_i].elem.dest + 0);
             PRINT_VAL_("dest[1]", list->arr[phys_i].elem.dest + 1);
         }
+
+        #pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wswitch-enum"
+        switch (list->arr[phys_i].elem.type) {
+            CASE_(STORE_CMP_RES, list->arr[phys_i].elem.subtype.cmp);
+            CASE_(JUMP,          list->arr[phys_i].elem.subtype.jmp);
+            CASE_(MATH_OPER,     list->arr[phys_i].elem.subtype.math);
+
+            default:
+                break;
+        }
+#pragma GCC diagnostic pop
 
         FPRINTF_("<tr><td>prev = %zd </td><td>next = %zd</td></tr></table>>", list->arr[phys_i].prev, list->arr[phys_i].next);
 
@@ -278,6 +315,7 @@ bool list_dump_dot(const List* list, char* img_filename) {
 
     return true;
 }
+#undef CASE_
 #undef FPRINTF_
 #undef PRINT_VAL_
 

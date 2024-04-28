@@ -53,7 +53,10 @@ Status::Statuses asm_ir_end(AsmData* asm_d) {
 Status::Statuses asm_ir_write_to_file(AsmData* asm_d) {
     assert(asm_d);
 
-    STATUS_CHECK(write_ir(&asm_d->ir, asm_d->file));
+    assert(asm_d->file == nullptr);
+    STATUS_CHECK(write_ir(&asm_d->ir, asm_d->filename));
+
+    asm_d->file = nullptr;
 
     return Status::NORMAL_WORK;
 }

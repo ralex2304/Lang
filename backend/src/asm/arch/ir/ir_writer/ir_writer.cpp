@@ -1,12 +1,14 @@
 #include "ir_writer.h"
 
-#include "tree_writer/tree_writer.h"
+static Status::Statuses write_ir_process_(List* ir, FILE* file);
 
 static Status::Statuses write_ir_node_(FILE* file, const IRNode* node, const ssize_t next);
 
 static Status::Statuses write_ir_val_(FILE* file, const IRVal* val);
 
 static Status::Statuses write_ir_subtype_(FILE* file, const IRNodeType type, const IRNode* node);
+
+static Status::Statuses write_debug_data_(FILE* file, const DebugInfo* info);
 
 #define PRINTF_(...)                                    \
             do {                                        \
@@ -15,44 +17,57 @@ static Status::Statuses write_ir_subtype_(FILE* file, const IRNodeType type, con
             } while(0)
 
 
-Status::Statuses write_ir(List* ir, FILE* file) {
+Status::Statuses write_ir(List* ir, const char* filename) {
     assert(ir);
-    assert(file);
+    assert(filename);
     assert(ir->capacity >= 0);
 
-    for (size_t phys_i = 1; phys_i < (size_t)ir->capacity; phys_i++)  //< i = 1 first list element is dummy
-        STATUS_CHECK(write_ir_node_(file, &ir->arr[phys_i].elem, ir->arr[phys_i].next));
+    FILE* file = {};
+    if (!file_open(&file, filename, "wb"))
+        return Status::FILE_ERROR;
 
-    PRINTF_("\n");
+    STATUS_CHECK(write_ir_process_(ir, file),       file_close(file));
+
+    if (!file_close(file))
+        return Status::FILE_ERROR;
 
     return Status::NORMAL_WORK;
 };
+
+static Status::Statuses write_ir_process_(List* ir, FILE* file) {
+    assert(ir);
+    assert(file);
+
+    PRINTF_("%zd\n", ir->capacity);
+
+    for (size_t phys_i = 0; phys_i < (size_t)ir->capacity; phys_i++)
+        STATUS_CHECK(write_ir_node_(file, &ir->arr[phys_i].elem, ir->arr[phys_i].next));
+
+    return Status::NORMAL_WORK;
+}
 
 static Status::Statuses write_ir_node_(FILE* file, const IRNode* node, const ssize_t next) {
     assert(node);
     assert(file);
 
-    IRNodeType type = node->type;
+    PRINTF_("{{%d", (int)node->type);
 
-    if (type == IRNodeType::DEFAULT) //< replace poison value with empty node
-        type = IRNodeType::NONE;
+    if (node->type != IRNodeType::DEFAULT) {
+        if (node->type != IRNodeType::NONE) {
 
-    PRINTF_("{{%d", (int)type);
+            STATUS_CHECK(write_ir_val_(file, &node->src[0]));
+            STATUS_CHECK(write_ir_val_(file, &node->src[1]));
+            STATUS_CHECK(write_ir_val_(file, &node->dest[0]));
+            STATUS_CHECK(write_ir_val_(file, &node->dest[1]));
 
-    if (node->type != IRNodeType::NONE) {
+            STATUS_CHECK(write_ir_subtype_(file, node->type, node));
+        }
 
-        STATUS_CHECK(write_ir_val_(file, &node->src[0]));
-        STATUS_CHECK(write_ir_val_(file, &node->src[1]));
-        STATUS_CHECK(write_ir_val_(file, &node->dest[0]));
-        STATUS_CHECK(write_ir_val_(file, &node->dest[1]));
-
-        STATUS_CHECK(write_ir_subtype_(file, type, node));
+        PRINTF_(", ");
+        STATUS_CHECK(write_debug_data_(file, &node->debug_info));
     }
 
-    PRINTF_(", ");
-    STATUS_CHECK(write_debug_data(file, &node->debug_info));
-
-    PRINTF_("}, %zd} ", next);
+    PRINTF_("}, %zd}\n", next);
 
     return Status::NORMAL_WORK;
 };
@@ -141,6 +156,20 @@ static Status::Statuses write_ir_subtype_(FILE* file, const IRNodeType type, con
     }
 
     PRINTF_(", %d", val);
+
+    return Status::NORMAL_WORK;
+}
+
+static Status::Statuses write_debug_data_(FILE* file, const DebugInfo* info) {
+    assert(file);
+    assert(info);
+
+    if (info->filename == nullptr) {
+        PRINTF_("{}");
+        return Status::NORMAL_WORK;
+    }
+
+    PRINTF_("{\"%s\", %zu, %zu, %zu}", info->filename, info->line, info->symbol, info->line_position);
 
     return Status::NORMAL_WORK;
 }

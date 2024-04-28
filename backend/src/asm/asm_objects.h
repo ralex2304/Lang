@@ -9,7 +9,8 @@
 
 struct AsmData {
 
-    FILE* file = nullptr;
+    const char* filename = nullptr;
+    FILE* file = nullptr; //< must be nullptr if file is closed
 
     List ir = {};
 
@@ -17,12 +18,11 @@ struct AsmData {
 
     DebugInfo debug_info = {};
 
-    bool ctor(const char* filename) {
+    bool ctor(const char* filename_) {
         if (LIST_CTOR(&ir) != List::OK)
             return false;
 
-        if (!file_open(&file, filename, "wb"))
-            return false;
+        filename = filename_;
 
         return true;
     };
@@ -32,7 +32,10 @@ struct AsmData {
 
         res &= list_dtor(&ir) == List::OK;
 
-        res &= file_close(file);
+        if (file != nullptr) {
+            res &= file_close(file);
+            file = nullptr;
+        }
 
         return res;
     };

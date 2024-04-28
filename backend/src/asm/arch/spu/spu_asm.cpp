@@ -36,6 +36,9 @@ static const char* jump_str_(const OperNum jmp_type);
 Status::Statuses asm_spu_start(AsmData* asm_d) {
     assert(asm_d);
 
+    if (!file_open(&asm_d->file, asm_d->filename, "wb"))
+        return Status::FILE_ERROR;
+
     PRINTF_NO_TAB_("; Program start\n\n");
 
     PRINTF_NO_TAB_("jmp _start\n\n");
@@ -67,7 +70,10 @@ Status::Statuses asm_spu_write_to_file(AsmData* asm_d) {
 
     (void) asm_d;
 
-    // Do nothing. All information has been already written
+    if (!file_close(asm_d->file))
+        return Status::FILE_ERROR;
+
+    asm_d->file = nullptr;
 
     return Status::NORMAL_WORK;
 }
