@@ -11,6 +11,43 @@ extern LogFileData log_file;
 
 #define LOG_(...) list_log_printf(&log_file, __VA_ARGS__)
 
+#define CASE_(type_, spec_, ...)                                        \
+            case IRVal::type_:                                          \
+                LOG_("{" #type_", " spec_ "}%n",## __VA_ARGS__, &len);  \
+                break
+
+inline bool log_ir_val(IRVal* val) {
+    assert(val);
+
+    int len = 0;
+
+    switch (val->type) {
+        CASE_(NONE,       "-");
+        CASE_(CONST,      "%lg", val->num.k_double);
+        CASE_(INT_CONST,  "%ld", val->num.k_int);
+        CASE_(LOCAL_VAR,  "%zu", val->num.offset);
+        CASE_(GLOBAL_VAR, "%zu", val->num.offset);
+        CASE_(ARG_VAR,    "%zu", val->num.offset);
+        CASE_(ARR_VAR,    "%zu", val->num.offset);
+        CASE_(STK,        "%zu", val->num.rsp);
+        CASE_(REG,        "%zu", val->num.reg);
+        CASE_(ADDR,       "%zu", val->num.addr);
+
+        default:
+            assert(0 && "Unknown IRVal type");
+            return false;
+    };
+
+    LOG_("%*s", 16 - len, "");
+
+    return true;
+};
+#undef CASE_
+
+#define LOG_VAL_(val_)          \
+            log_ir_val(val_);   \
+            LOG_(" | ")
+
 void list_dump(const List* list, const VarCodeData call_data) {
     assert(list);
 
@@ -41,11 +78,19 @@ void list_dump(const List* list, const VarCodeData call_data) {
         return;
     }
 
-    LOG_("        ""  i | prev | next | elem\n");
+    LOG_("        ""  i | prev | next | elem       | src[0]           | src[1]           |"
+                                                   " dest[0]          | dest[1]\n");
 
     for (ssize_t i = 0; i < list->capacity; i++) {
-        LOG_("        ""%3zd | %4zd | %4zd | type = %d\n",
+        LOG_("        ""%3zd | %4zd | %4zd | type = %3d | ",
              i, list->arr[i].prev, list->arr[i].next, (int)list->arr[i].elem.type);
+
+        LOG_VAL_(list->arr[i].elem.src + 0);
+        LOG_VAL_(list->arr[i].elem.src + 1);
+        LOG_VAL_(list->arr[i].elem.dest + 0);
+        LOG_VAL_(list->arr[i].elem.dest + 1);
+
+        LOG_("\n");
     }
 
     LOG_("        }\n");
@@ -75,8 +120,47 @@ void list_dump(const List* list, const VarCodeData call_data) {
     LOG_("<img src=\"../../%s\">\n", img_filename);
 }
 #undef LOG_
+#undef LOG_VAL_
 
 #define FPRINTF_(...) if (fprintf(file, __VA_ARGS__) == 0) return false
+
+#define CASE_(type_, spec_, ...)                                        \
+            case IRVal::type_:                                          \
+                FPRINTF_("{" #type_", " spec_ "}",## __VA_ARGS__);      \
+                break
+
+inline bool print_ir_val(FILE* file, const char* name, IRVal* val) {
+    assert(name);
+    assert(val);
+
+    FPRINTF_("elem.%s = ", name);
+
+    switch (val->type) {
+        CASE_(NONE,       "-");
+        CASE_(CONST,      "%lf", val->num.k_double);
+        CASE_(INT_CONST,  "%ld", val->num.k_int);
+        CASE_(LOCAL_VAR,  "%zu", val->num.offset);
+        CASE_(GLOBAL_VAR, "%zu", val->num.offset);
+        CASE_(ARG_VAR,    "%zu", val->num.offset);
+        CASE_(ARR_VAR,    "%zu", val->num.offset);
+        CASE_(STK,        "%zu", val->num.rsp);
+        CASE_(REG,        "%zu", val->num.reg);
+        CASE_(ADDR,       "%zu", val->num.addr);
+
+        default:
+            assert(0 && "Unknown IRVal type");
+            return false;
+    };
+
+    return true;
+};
+#undef CASE_
+
+#define PRINT_VAL_(name_, val_)                                 \
+            FPRINTF_("<tr><td colspan=\"2\">elem.");            \
+            if (!print_ir_val(file, name_, val_)) return false; \
+            FPRINTF_("</td></tr>\n")
+
 bool list_dump_dot(const List* list, char* img_filename) {
     #define BACKGROUND_COLOR "\"#1f1f1f\""
     #define FONT_COLOR       "\"#000000\""
@@ -117,6 +201,10 @@ bool list_dump_dot(const List* list, char* img_filename) {
             FPRINTF_("<tr><td colspan=\"2\">elem = PZN</td></tr>\n");
         } else {
             FPRINTF_("<tr><td colspan=\"2\">elem.type = %d</td></tr>\n", (int)list->arr[phys_i].elem.type);
+            PRINT_VAL_("src[0]", list->arr[phys_i].elem.src + 0);
+            PRINT_VAL_("src[1]", list->arr[phys_i].elem.src + 1);
+            PRINT_VAL_("dest[0]", list->arr[phys_i].elem.dest + 0);
+            PRINT_VAL_("dest[1]", list->arr[phys_i].elem.dest + 1);
         }
 
         FPRINTF_("<tr><td>prev = %zd </td><td>next = %zd</td></tr></table>>", list->arr[phys_i].prev, list->arr[phys_i].next);
@@ -191,6 +279,7 @@ bool list_dump_dot(const List* list, char* img_filename) {
     return true;
 }
 #undef FPRINTF_
+#undef PRINT_VAL_
 
 #endif //< #ifndef NDEBUG
 
