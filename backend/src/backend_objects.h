@@ -10,9 +10,8 @@
 #include "config.h"
 #include TREE_INCLUDE
 #include "Stack/stack.h"
-#include "asm/arch/dispatcher.h"
 
-#include "asm/asm_objects.h"
+#include "ir_gen/ir_gen_objects.h"
 
 struct BackData {
     Tree tree = {};
@@ -22,13 +21,11 @@ struct BackData {
 
     size_t max_local_frame_size = 0;
 
-    AsmData asm_d = {};
+    IrData ir_d = {};
 
     FuncTable func_table = {};
 
-    ArchDispatcher asm_disp = {};
-
-    inline bool ctor(const char* output_filename, const Arches arch) {
+    inline bool ctor(const char* output_filename) {
         if (TREE_CTOR(&tree, sizeof(TreeElem), &tree_elem_dtor, &tree_elem_verify,
                                                &tree_elem_str_val) != Tree::OK)
             return false;
@@ -42,10 +39,7 @@ struct BackData {
         if (!func_table.ctor())
             return false;
 
-        if (!asm_d.ctor(output_filename))
-            return false;
-
-        if (asm_disp.fill_table(arch) != Status::NORMAL_WORK)
+        if (!ir_d.ctor(output_filename))
             return false;
 
         return true;
@@ -69,7 +63,7 @@ struct BackData {
 
         func_table.dtor();
 
-        no_error &= asm_d.dtor();
+        no_error &= ir_d.dtor();
 
         return no_error;
     };

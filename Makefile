@@ -20,10 +20,10 @@ middleend:
 	@LANG=ru_RU.CP1251 luit ./middleend/./main -i $(PROG_PATH)/prog.tre -o $(PROG_PATH)/prog.treopt
 
 backend:
-	@LANG=ru_RU.CP1251 luit ./backend/./main -i $(PROG_PATH)/prog.treopt -o $(PROG_PATH)/prog.ir -a ir
+	@LANG=ru_RU.CP1251 luit ./backend/./main -i $(PROG_PATH)/prog.treopt -o $(PROG_PATH)/prog.ir
 
 ir_backend:
-	@LANG=ru_RU.CP1251 luit ./ir_backend/./main -i $(PROG_PATH)/prog.ir -l $(PROG_PATH)/prog.nasm
+	@LANG=ru_RU.CP1251 luit ./ir_backend/./main -i $(PROG_PATH)/prog.ir -l $(PROG_PATH)/prog.code -a spu
 
 run: asm
 	@./$(PROG_PATH)/prog

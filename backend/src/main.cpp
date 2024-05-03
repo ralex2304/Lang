@@ -14,8 +14,6 @@ const Argument ARGS_DICT[] = {
     {"-i", read_input_filename,  "#   -i - specify input file name after this\n"},  //< Input filename
 
     {"-o", read_output_filename, "#   -o - specify output file name after this\n"}, //< Output filename
-
-    {"-a", read_arch,            "#   -a - specify arch after this: \"spu\", \"ir\"\n"}
 };
 
 const int ARGS_DICT_LEN = sizeof(ARGS_DICT) / sizeof(ARGS_DICT[0]);                 //< args_dict array len
@@ -25,13 +23,12 @@ int main(int argc, char* argv[]) {
     /// Parsing console arguments
     ArgsVars args_vars = {};
     args_vars.input_filename  = "Programs/main/prog.tre"; //< default value
-    args_vars.output_filename = "Programs/main/prog.asm"; //< default value
-    args_vars.arch            = Arches::SPU;              //< default value
+    args_vars.output_filename = "Programs/main/prog.ir";  //< default value
 
     STATUS_CHECK_RAISE(args_parse(argc, argv, &args_vars, ARGS_DICT, ARGS_DICT_LEN));
     /// Parsing console arguments end
 
-    STATUS_CHECK_RAISE(back_process(args_vars.input_filename, args_vars.output_filename, args_vars.arch));
+    STATUS_CHECK_RAISE(back_process(args_vars.input_filename, args_vars.output_filename));
 
     return Status::OK_EXIT;
 }

@@ -70,8 +70,6 @@ Status::Statuses asm_x86_64_END(BackData* data, [[maybe_unused]] IRNode* block, 
     assert(data);
     assert(block);
 
-    (void) block;
-
     LST("leave\n");
 
     LST("mov rax, 0x3c\n");
@@ -644,3 +642,20 @@ Status::Statuses asm_x86_64_PRINT_DOUBLE(BackData* data, IRNode* block, size_t) 
     return Status::NORMAL_WORK;
 }
 
+Status::Statuses asm_x86_64_SET_FPS(BackData* data, IRNode* block, size_t) {
+    assert(data);
+    assert(block);
+
+    fprintf(stderr, "IR block SET_FPS is not supproted by x86-64 arch\n");
+
+    return Status::INPUT_ERROR;
+}
+
+Status::Statuses asm_x86_64_SHOW_VIDEO_FRAME(BackData* data, IRNode* block, size_t) {
+    assert(data);
+    assert(block);
+
+    fprintf(stderr, "IR block SHOW_VIDEO_FRAME is not supproted by x86-64 arch\n");
+
+    return Status::INPUT_ERROR;
+}

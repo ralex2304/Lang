@@ -6,7 +6,7 @@
 
 #include "utils/vector.h"
 
-#include "asm/asm_objects.h"
+#include "ir_gen/ir_gen_objects.h"
 
 enum class VarType {
     NONE  = 0,
@@ -36,7 +36,7 @@ struct ScopeData {
 
     ScopeType type = ScopeType::NONE;
 
-    AsmScopeData asm_scope_data = {};
+    IRScopeData ir_scope_data = {};
 
     Vector vars = {};
 
@@ -44,14 +44,14 @@ struct ScopeData {
 
     inline bool ctor(ScopeType type_) {
         static size_t counter = 0;
-        asm_scope_data.scope_num = counter++;
+        ir_scope_data.scope_num = counter++;
 
         assert(type_ != ScopeType::NONE);
 
         if (!vars.ctor(sizeof(Var)))
             return false;
 
-        if (!asm_scope_data.ctor())
+        if (!ir_scope_data.ctor())
             return false;
 
         type = type_;
@@ -62,10 +62,10 @@ struct ScopeData {
 
     inline void dtor() {
         vars.dtor();
-        asm_scope_data.dtor();
+        ir_scope_data.dtor();
         is_initialised = false;
         type = ScopeType::NONE;
-        asm_scope_data.scope_num = 0;
+        ir_scope_data.scope_num = 0;
     };
 
     inline bool reset_vars() {

@@ -1,68 +1,81 @@
+___ir_block_1:
 ; Program start
 
 jmp _start
 
 _start:
-        ; Regs initialisation
-        push 0
-        pop rax
-        push 0
-        pop rbx
-        ; Regs initialisation end
+                ; Regs initialisation
+                push 0
+                pop rax
+                push 0
+                pop rbx
+                ; Regs initialisation end
 
-        ; func call: остров_в_океане
-        push rbx
-        push rbx + 0
-        pop rbx
-        call ___func_0
-        pop rbx
-        ; func call end
+___ir_block_2:
+                ; func call begin
+                push rbx
+                push rbx + 0
+                pop rbx
+                call ___func_4
+                pop rbx
+                ; func call end
 
-        hlt
+___ir_block_3:
+                hlt
 
+___ir_block_4:
 ; =========================== Function definition =========================
-; func name: остров_в_океане
-___func_0:
-        push 5
-        ; var assignment: переменная
-        pop [rbx + 0]
+___func_4:
+___ir_block_5:
+                push 5
+___ir_block_6:
+                pop [rbx + 0]
+___ir_block_7:
+                push [rbx + 0]
+___ir_block_8:
+                out
+___ir_block_9:
+                push 10
+___ir_block_10:
+                pop [rbx + 1]
+___ir_block_11:
+                push [rbx + 1]
+___ir_block_12:
+                out
+___ir_block_13:
+                push 10
+___ir_block_14:
+                push [rbx + 1]
+___ir_block_15:
+                ; swap last stk vals
+                pop rdx
+                pop rex
+                push rdx
+                push rex
 
-        ; scope begin
-        push [rbx + 0]
-        out
+___ir_block_16:
+                add
+___ir_block_17:
+                pop [rbx + 1]
+___ir_block_18:
+                push [rbx + 1]
+___ir_block_19:
+                out
+___ir_block_20:
+                push [rbx + 0]
+___ir_block_21:
+                out
+___ir_block_22:
+                push 0
+___ir_block_23:
+                pop rax
 
-        push 10
-        ; var assignment: переменная
-        pop [rbx + 1]
+___ir_block_24:
+                ret
 
-        push [rbx + 1]
-        out
-
-        push 10
-        push [rbx + 1]
-        ; swap last stk vals
-        pop rdx
-        pop rex
-        push rdx
-        push rex
-
-        add
-        ; var assignment: переменная
-        pop [rbx + 1]
-
-        push [rbx + 1]
-        out
-
-        ; scope end
-        push [rbx + 0]
-        out
-
-        push 0
-        pop rax
-
-        ret
-
-        ret
+___ir_block_25:
+                ret
 ; ------------------------- Function definition end -----------------------
 
 
+___ir_block_26:

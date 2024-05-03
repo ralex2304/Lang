@@ -1,5 +1,5 @@
-#ifndef ASM_OBJECTS_H_
-#define ASM_OBJECTS_H_
+#ifndef IR_GEN_OBJECTS_H_
+#define IR_GEN_OBJECTS_H_
 
 #include <stdio.h>
 #include "List/list.h"
@@ -7,10 +7,9 @@
 #include "utils/vector.h"
 #include "objects.h"
 
-struct AsmData {
+struct IrData {
 
     const char* filename = nullptr;
-    FILE* file = nullptr; //< must be nullptr if file is closed
 
     List ir = {};
 
@@ -32,16 +31,13 @@ struct AsmData {
 
         res &= list_dtor(&ir) == List::OK;
 
-        if (file != nullptr) {
-            res &= file_close(file);
-            file = nullptr;
-        }
+        filename = nullptr;
 
         return res;
     };
 };
 
-struct AsmScopeData {
+struct IRScopeData {
 
     size_t scope_num = 0;
 
@@ -68,4 +64,4 @@ struct AsmScopeData {
     };
 };
 
-#endif //< #ifndef ASM_OBJECTS_H_
+#endif //< #ifndef IR_GEN_OBJECTS_H_

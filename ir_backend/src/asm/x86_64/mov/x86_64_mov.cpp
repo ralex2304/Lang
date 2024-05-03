@@ -68,6 +68,7 @@ bool X86_64_Mov::is_irval_equal(IRVal* val1, IRVal* val2) {
 Status::Statuses X86_64_Mov::src_const(BackData* data, IRVal* src, IRVal* dest) {
     assert(data);
     assert(src);
+    assert(src->type == IRVal::CONST);
     assert(dest);
 
     const uint64_t k_double = get_bin_double(src->num.k_double);

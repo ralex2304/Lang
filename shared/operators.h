@@ -149,14 +149,11 @@ DEF_OPER(67, BREAK,            LEAF,   NO_MATH,  STOP, STOP,       { ASM_MAKE_BR
 DEF_OPER(68, CONTINUE,         LEAF,   NO_MATH,  STOP, STOP,       { ASM_MAKE_CONTINUE(node); })
 
 DEF_OPER(69, NEW_SCOPE,        UNARY,  MATH_R,   STOP, NO_VAL,     {
-    ASM_COMMENT("scope begin");
     ENTER_SCOPE(nullptr);
 
     EVAL_SUBTREE_NO_VAL(*R(node));
 
     EXIT_SCOPE();
-
-    ASM_COMMENT("scope end");
 })
 
 DEF_OPER(70, IN,               LEAF,   NO_MATH,  STOP, STOP,       { ASM_READ_DOUBLE(); })

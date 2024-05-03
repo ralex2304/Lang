@@ -137,6 +137,8 @@ static Status::Statuses write_ir_subtype_(FILE* file, const IRNode* node) {
         case IRNodeType::SET_FLAGS_CMP_WITH_ZERO:
         case IRNodeType::READ_DOUBLE:
         case IRNodeType::PRINT_DOUBLE:
+        case IRNodeType::SET_FPS:
+        case IRNodeType::SHOW_VIDEO_FRAME:
             return Status::NORMAL_WORK;
 
         case IRNodeType::STORE_CMP_RES:

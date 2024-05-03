@@ -1,4 +1,4 @@
-#include "ir_asm.h"
+#include "ir_blocks_gen.h"
 
 #include <assert.h>
 #include <math.h>
@@ -21,42 +21,31 @@ static Status::Statuses dest_addr_fixup_(List* ir, Vector* array, size_t addr);
 
 #define ADD_IR_BLOCK(...)                                                                           \
             do {                                                                                    \
-                if (list_pushback(&asm_d->ir, {__VA_ARGS__, .debug_info = asm_d->debug_info},       \
+                if (list_pushback(&ir_d->ir, {__VA_ARGS__, .debug_info = ir_d->debug_info},         \
                     nullptr) != List::OK)                                                           \
                     return Status::LIST_ERROR;                                                      \
             } while (0)
 
 #define ADD_IR_BLOCK_GET_INDEX(i_, ...)                                                             \
             do {                                                                                    \
-                if (list_pushback(&asm_d->ir, {__VA_ARGS__, .debug_info = asm_d->debug_info},       \
+                if (list_pushback(&ir_d->ir, {__VA_ARGS__, .debug_info = ir_d->debug_info},         \
                     i_) != List::OK)                                                                \
                     return Status::LIST_ERROR;                                                      \
             } while (0)
 
 
-Status::Statuses asm_ir_start(AsmData* asm_d) {
-    assert(asm_d);
+Status::Statuses ir_block_start(IrData* ir_d) {
+    assert(ir_d);
 
     ADD_IR_BLOCK(.type = IRNodeType::START);
 
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_ir_end(AsmData* asm_d) {
-    assert(asm_d);
+Status::Statuses ir_block_end(IrData* ir_d) {
+    assert(ir_d);
 
     ADD_IR_BLOCK(.type = IRNodeType::END);
-
-    return Status::NORMAL_WORK;
-}
-
-Status::Statuses asm_ir_write_to_file(AsmData* asm_d) {
-    assert(asm_d);
-
-    assert(asm_d->file == nullptr);
-    STATUS_CHECK(write_ir(&asm_d->ir, asm_d->filename));
-
-    asm_d->file = nullptr;
 
     return Status::NORMAL_WORK;
 }
@@ -75,37 +64,35 @@ static Status::Statuses dest_addr_fixup_(List* ir, Vector* array, size_t addr) {
     return Status::NORMAL_WORK;
 };
 
-Status::Statuses asm_ir_begin_func_definition(AsmData* asm_d, Func* func, String func_name) {
-    assert(asm_d);
-
-    (void) func_name;
+Status::Statuses ir_block_begin_func_definition(IrData* ir_d, Func* func) {
+    assert(ir_d);
 
     size_t func_addr = 0;
     ADD_IR_BLOCK_GET_INDEX(&func_addr, .type = IRNodeType::BEGIN_FUNC_DEF);
 
     func->addr = (ssize_t)func_addr;
 
-    asm_d->cur_func_def = func_addr;
+    ir_d->cur_func_def = func_addr;
 
-    STATUS_CHECK(dest_addr_fixup_(&asm_d->ir, &func->addr_fixups, func_addr));
+    STATUS_CHECK(dest_addr_fixup_(&ir_d->ir, &func->addr_fixups, func_addr));
 
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_ir_end_func_definition(AsmData* asm_d, const size_t frame_size) {
-    assert(asm_d);
+Status::Statuses ir_block_end_func_definition(IrData* ir_d, const size_t frame_size) {
+    assert(ir_d);
 
     IRVal func_frame_size = {.type = IRVal::INT_CONST, .num = {.k_int = (long)frame_size}};
 
-    asm_d->ir.arr[asm_d->cur_func_def].elem.src[0] = func_frame_size;
+    ir_d->ir.arr[ir_d->cur_func_def].elem.src[0] = func_frame_size;
 
     ADD_IR_BLOCK(.type = IRNodeType::END_FUNC_DEF);
 
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_ir_init_mem_for_global_vars(AsmData* asm_d, size_t size) {
-    assert(asm_d);
+Status::Statuses ir_block_init_mem_for_global_vars(IrData* ir_d, size_t size) {
+    assert(ir_d);
 
     IRVal global_vars_number = {.type = IRVal::INT_CONST, .num = {.k_int = (long)size}};
 
@@ -114,36 +101,33 @@ Status::Statuses asm_ir_init_mem_for_global_vars(AsmData* asm_d, size_t size) {
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_ir_call_function(AsmData* asm_d, Func* func, size_t offset,
-                                      String func_name) {
-    assert(asm_d);
-    assert(func_name.s);
-
-    (void) offset; //< used for other arches
-    (void) func_name;
+Status::Statuses ir_block_call_function(IrData* ir_d, Func* func, size_t offset) {
+    assert(ir_d);
 
     IRVal dest = {.type = IRVal::ADDR, .num = {.addr = 0}};
 
-    size_t fixup_index = 0;
-    ADD_IR_BLOCK_GET_INDEX(&fixup_index, .type = IRNodeType::CALL_FUNC, .dest = dest);
+    IRVal src = {.type = IRVal::INT_CONST, .num = {.k_int = (long)offset}};
 
-    size_t* addr_field = &asm_d->ir.arr[fixup_index].elem.dest.num.addr;
+    size_t fixup_index = 0;
+    ADD_IR_BLOCK_GET_INDEX(&fixup_index, .type = IRNodeType::CALL_FUNC, .src = {src, {}}, .dest = dest);
+
+    size_t* addr_field = &ir_d->ir.arr[fixup_index].elem.dest.num.addr;
     if (!func->set_addr_or_add_to_fixups(addr_field, fixup_index))
         return Status::MEMORY_EXCEED;
 
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_ir_ret(AsmData* asm_d) {
-    assert(asm_d);
+Status::Statuses ir_block_ret(IrData* ir_d) {
+    assert(ir_d);
 
     ADD_IR_BLOCK(.type = IRNodeType::RET);
 
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_ir_pop_var_value(AsmData* asm_d, size_t addr_offset, bool is_global) {
-    assert(asm_d);
+Status::Statuses ir_block_pop_var_value(IrData* ir_d, size_t addr_offset, bool is_global) {
+    assert(ir_d);
 
     IRVal src = {.type = IRVal::STK};
 
@@ -159,22 +143,22 @@ Status::Statuses asm_ir_pop_var_value(AsmData* asm_d, size_t addr_offset, bool i
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_ir_pop_func_arg_value(AsmData* asm_d, size_t frame_offset, size_t var_offset) {
-    assert(asm_d);
+Status::Statuses ir_block_pop_func_arg_value(IrData* ir_d, size_t frame_offset, size_t var_offset) {
+    assert(ir_d);
 
-    (void) frame_offset; //< used for other archs
+    IRVal src0 = {.type = IRVal::STK};
 
-    IRVal src = {.type = IRVal::STK};
+    IRVal src1 = {.type = IRVal::ARG_VAR, .num = {.offset = frame_offset}};
 
     IRVal dest = {.type = IRVal::ARG_VAR, .num = {.offset = var_offset}};
 
-    ADD_IR_BLOCK(.type = IRNodeType::MOV, .src = {src, {}}, .dest = dest);
+    ADD_IR_BLOCK(.type = IRNodeType::MOV, .src = {src0, src1}, .dest = dest);
 
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_ir_save_arr_elem_addr(AsmData* asm_d, size_t addr_offset, bool is_global) {
-    assert(asm_d);
+Status::Statuses ir_block_save_arr_elem_addr(IrData* ir_d, size_t addr_offset, bool is_global) {
+    assert(ir_d);
 
     IRVal src = {.num = {.offset = addr_offset}};
 
@@ -193,8 +177,8 @@ Status::Statuses asm_ir_save_arr_elem_addr(AsmData* asm_d, size_t addr_offset, b
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_ir_pop_arr_elem_value_the_same(AsmData* asm_d) {
-    assert(asm_d);
+Status::Statuses ir_block_pop_arr_elem_value_the_same(IrData* ir_d) {
+    assert(ir_d);
 
     IRVal src = {.type = IRVal::STK};
 
@@ -205,9 +189,9 @@ Status::Statuses asm_ir_pop_arr_elem_value_the_same(AsmData* asm_d) {
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_ir_pop_arr_elem_value_with_const_index(AsmData* asm_d, size_t addr_offset,
-                                                            size_t index, bool is_global) {
-    assert(asm_d);
+Status::Statuses ir_block_pop_arr_elem_value_with_const_index(IrData* ir_d, size_t addr_offset,
+                                                              size_t index, bool is_global) {
+    assert(ir_d);
 
     IRVal src = {.num = {.offset = addr_offset + index}};
 
@@ -218,13 +202,13 @@ Status::Statuses asm_ir_pop_arr_elem_value_with_const_index(AsmData* asm_d, size
 
     ADD_IR_BLOCK(.type = IRNodeType::COUNT_ARR_ELEM_ADDR_CONST, .src = {src, {}});
 
-    STATUS_CHECK(asm_ir_pop_arr_elem_value_the_same(asm_d));
+    STATUS_CHECK(ir_block_pop_arr_elem_value_the_same(ir_d));
 
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_ir_push_const(AsmData* asm_d, double num) {
-    assert(asm_d);
+Status::Statuses ir_block_push_const(IrData* ir_d, double num) {
+    assert(ir_d);
     assert(isfinite(num));
 
     IRVal src = {.type = IRVal::CONST, .num = {.k_double = num}};
@@ -236,8 +220,8 @@ Status::Statuses asm_ir_push_const(AsmData* asm_d, double num) {
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_ir_push_var_val(AsmData* asm_d, size_t addr_offset, bool is_global) {
-    assert(asm_d);
+Status::Statuses ir_block_push_var_val(IrData* ir_d, size_t addr_offset, bool is_global) {
+    assert(ir_d);
 
     IRVal src = {.num = {.offset = addr_offset}};
 
@@ -253,8 +237,8 @@ Status::Statuses asm_ir_push_var_val(AsmData* asm_d, size_t addr_offset, bool is
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_ir_push_arr_elem_val_the_same(AsmData* asm_d) {
-    assert(asm_d);
+Status::Statuses ir_block_push_arr_elem_val_the_same(IrData* ir_d) {
+    assert(ir_d);
 
     IRVal src = {.type = IRVal::ARR_VAR};
 
@@ -279,8 +263,8 @@ Status::Statuses asm_ir_push_arr_elem_val_the_same(AsmData* asm_d) {
 
 
 
-Status::Statuses asm_ir_math_operator(AsmData* asm_d, const OperNum oper) {
-    assert(asm_d);
+Status::Statuses ir_block_math_operator(IrData* ir_d, const OperNum oper) {
+    assert(ir_d);
 
     IRVal src  = {.type = IRVal::STK};
     IRVal dest = {.type = IRVal::STK};
@@ -309,11 +293,11 @@ Status::Statuses asm_ir_math_operator(AsmData* asm_d, const OperNum oper) {
 #undef CASE_BINARY_
 #undef CASE_UNARY_
 
-Status::Statuses asm_ir_write_global_oper(AsmData* asm_d, OperNum oper, DebugInfo* debug_info) {
-    assert(asm_d);
+Status::Statuses ir_block_write_global_oper(IrData* ir_d, OperNum oper, DebugInfo* debug_info) {
+    assert(ir_d);
     assert(debug_info);
 
-    Status::Statuses res = asm_ir_math_operator(asm_d, oper);
+    Status::Statuses res = ir_block_math_operator(ir_d, oper);
 
     if (res == Status::TREE_ERROR)
         return syntax_error(*debug_info, "This operator is forbidden in global scope");
@@ -321,14 +305,14 @@ Status::Statuses asm_ir_write_global_oper(AsmData* asm_d, OperNum oper, DebugInf
     return res;
 }
 
-#define CASE_(jmp_, cmp_type_)                                                                          \
-            case OperNum::jmp_:                                                                         \
-                ADD_IR_BLOCK(.type = IRNodeType::STORE_CMP_RES, .src = {src, src}, .dest = dest,  \
-                             .subtype = {.cmp = CmpType::cmp_type_});                                            \
+#define CASE_(jmp_, cmp_type_)                                                                      \
+            case OperNum::jmp_:                                                                     \
+                ADD_IR_BLOCK(.type = IRNodeType::STORE_CMP_RES, .src = {src, src}, .dest = dest,    \
+                             .subtype = {.cmp = CmpType::cmp_type_});                               \
                 break
 
-Status::Statuses asm_ir_logic_compare(AsmData* asm_d, const OperNum jump) {
-    assert(asm_d);
+Status::Statuses ir_block_logic_compare(IrData* ir_d, const OperNum jump) {
+    assert(ir_d);
 
     IRVal src  = {.type = IRVal::STK};
     IRVal dest = {.type = IRVal::STK};
@@ -352,40 +336,16 @@ Status::Statuses asm_ir_logic_compare(AsmData* asm_d, const OperNum jump) {
 }
 #undef CASE_
 
-Status::Statuses asm_ir_var_assignment_header(AsmData* asm_d, const char* var_name) {
-    assert(asm_d);
-    assert(var_name);
-
-    (void) asm_d;
-    (void) var_name;
-
-    // used for other arches;
-
-    return Status::NORMAL_WORK;
-}
-
-Status::Statuses asm_ir_arr_elem_assignment_header(AsmData* asm_d, const char* var_name) {
-    assert(asm_d);
-    assert(var_name);
-
-    (void) asm_d;
-    (void) var_name;
-
-    // used for other arches;
-
-    return Status::NORMAL_WORK;
-}
-
-Status::Statuses asm_ir_swap_last_stk_vals(AsmData* asm_d) {
-    assert(asm_d);
+Status::Statuses ir_block_swap_last_stk_vals(IrData* ir_d) {
+    assert(ir_d);
 
     ADD_IR_BLOCK(.type = IRNodeType::SWAP, .src = {{.type = IRVal::STK}, {.type = IRVal::STK}});
 
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_ir_if_begin(AsmData* asm_d, AsmScopeData* scope) {
-    assert(asm_d);
+Status::Statuses ir_block_if_begin(IrData* ir_d, IRScopeData* scope) {
+    assert(ir_d);
     assert(scope);
 
     ADD_IR_BLOCK_GET_INDEX(&scope->begin_i, .type = IRNodeType::SET_FLAGS_CMP_WITH_ZERO,
@@ -402,21 +362,21 @@ Status::Statuses asm_ir_if_begin(AsmData* asm_d, AsmScopeData* scope) {
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_ir_if_end(AsmData* asm_d, AsmScopeData* scope) {
-    assert(asm_d);
+Status::Statuses ir_block_if_end(IrData* ir_d, IRScopeData* scope) {
+    assert(ir_d);
     assert(scope);
 
     ADD_IR_BLOCK_GET_INDEX(&scope->end_i, .type = IRNodeType::NONE);
 
-    STATUS_CHECK(dest_addr_fixup_(&asm_d->ir, &scope->middle_fixups, scope->middle_i));
+    STATUS_CHECK(dest_addr_fixup_(&ir_d->ir, &scope->middle_fixups, scope->middle_i));
 
-    STATUS_CHECK(dest_addr_fixup_(&asm_d->ir, &scope->end_fixups, scope->end_i));
+    STATUS_CHECK(dest_addr_fixup_(&ir_d->ir, &scope->end_fixups, scope->end_i));
 
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_ir_if_else_begin(AsmData* asm_d, AsmScopeData* scope) {
-    assert(asm_d);
+Status::Statuses ir_block_if_else_begin(IrData* ir_d, IRScopeData* scope) {
+    assert(ir_d);
     assert(scope);
 
     ADD_IR_BLOCK_GET_INDEX(&scope->begin_i, .type = IRNodeType::SET_FLAGS_CMP_WITH_ZERO,
@@ -433,8 +393,8 @@ Status::Statuses asm_ir_if_else_begin(AsmData* asm_d, AsmScopeData* scope) {
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_ir_if_else_middle(AsmData* asm_d, AsmScopeData* scope) {
-    assert(asm_d);
+Status::Statuses ir_block_if_else_middle(IrData* ir_d, IRScopeData* scope) {
+    assert(ir_d);
     assert(scope);
 
     size_t fixup_index = 0;
@@ -450,12 +410,8 @@ Status::Statuses asm_ir_if_else_middle(AsmData* asm_d, AsmScopeData* scope) {
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_ir_if_else_end(AsmData* asm_d, AsmScopeData* scope) {
-    return asm_ir_if_end(asm_d, scope);
-}
-
-Status::Statuses asm_ir_do_if_check_clause(AsmData* asm_d, AsmScopeData* scope) {
-    assert(asm_d);
+Status::Statuses ir_block_do_if_check_clause(IrData* ir_d, IRScopeData* scope) {
+    assert(ir_d);
     assert(scope);
 
     ADD_IR_BLOCK(.type = IRNodeType::SET_FLAGS_CMP_WITH_ZERO, .src = {{.type = IRVal::STK}, {}});
@@ -475,13 +431,13 @@ Status::Statuses asm_ir_do_if_check_clause(AsmData* asm_d, AsmScopeData* scope) 
     ADD_IR_BLOCK_GET_INDEX(&scope->end_i, .type = IRNodeType::NONE);
 
     // do if has no middle part
-    STATUS_CHECK(dest_addr_fixup_(&asm_d->ir, &scope->end_fixups, scope->end_i));
+    STATUS_CHECK(dest_addr_fixup_(&ir_d->ir, &scope->end_fixups, scope->end_i));
 
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_ir_while_begin(AsmData* asm_d, AsmScopeData* scope) {
-    assert(asm_d);
+Status::Statuses ir_block_while_begin(IrData* ir_d, IRScopeData* scope) {
+    assert(ir_d);
     assert(scope);
 
     ADD_IR_BLOCK_GET_INDEX(&scope->begin_i, .type = IRNodeType::NONE);
@@ -489,8 +445,8 @@ Status::Statuses asm_ir_while_begin(AsmData* asm_d, AsmScopeData* scope) {
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_ir_while_check_clause(AsmData* asm_d, AsmScopeData* scope) {
-    assert(asm_d);
+Status::Statuses ir_block_while_check_clause(IrData* ir_d, IRScopeData* scope) {
+    assert(ir_d);
     assert(scope);
 
     ADD_IR_BLOCK(.type = IRNodeType::SET_FLAGS_CMP_WITH_ZERO, .src = {{.type = IRVal::STK}, {}});
@@ -506,8 +462,8 @@ Status::Statuses asm_ir_while_check_clause(AsmData* asm_d, AsmScopeData* scope) 
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_ir_while_end(AsmData* asm_d, AsmScopeData* scope) {
-    assert(asm_d);
+Status::Statuses ir_block_while_end(IrData* ir_d, IRScopeData* scope) {
+    assert(ir_d);
     assert(scope);
 
     IRVal dest = {.type = IRVal::ADDR, .num = {.addr = scope->begin_i}};
@@ -518,15 +474,15 @@ Status::Statuses asm_ir_while_end(AsmData* asm_d, AsmScopeData* scope) {
     ADD_IR_BLOCK_GET_INDEX(&scope->end_i, .type = IRNodeType::NONE);
 
 
-    STATUS_CHECK(dest_addr_fixup_(&asm_d->ir, &scope->middle_fixups, scope->end_i));
+    STATUS_CHECK(dest_addr_fixup_(&ir_d->ir, &scope->middle_fixups, scope->end_i));
 
-    STATUS_CHECK(dest_addr_fixup_(&asm_d->ir, &scope->end_fixups, scope->end_i));
+    STATUS_CHECK(dest_addr_fixup_(&ir_d->ir, &scope->end_fixups, scope->end_i));
 
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_ir_while_else_check_clause(AsmData* asm_d, AsmScopeData* scope) {
-    assert(asm_d);
+Status::Statuses ir_block_while_else_check_clause(IrData* ir_d, IRScopeData* scope) {
+    assert(ir_d);
     assert(scope);
 
     ADD_IR_BLOCK(.type = IRNodeType::SET_FLAGS_CMP_WITH_ZERO, .src = {{.type = IRVal::STK}, {}});
@@ -542,8 +498,8 @@ Status::Statuses asm_ir_while_else_check_clause(AsmData* asm_d, AsmScopeData* sc
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_ir_while_else_else(AsmData* asm_d, AsmScopeData* scope) {
-    assert(asm_d);
+Status::Statuses ir_block_while_else_else(IrData* ir_d, IRScopeData* scope) {
+    assert(ir_d);
     assert(scope);
 
     ADD_IR_BLOCK_GET_INDEX(&scope->middle_i, .type = IRNodeType::NONE);
@@ -551,8 +507,8 @@ Status::Statuses asm_ir_while_else_else(AsmData* asm_d, AsmScopeData* scope) {
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_ir_Continue(AsmData* asm_d, AsmScopeData* scope) {
-    assert(asm_d);
+Status::Statuses ir_block_continue(IrData* ir_d, IRScopeData* scope) {
+    assert(ir_d);
     assert(scope);
 
     IRVal dest = {.type = IRVal::ADDR, .num = {.addr = scope->begin_i}};
@@ -563,8 +519,8 @@ Status::Statuses asm_ir_Continue(AsmData* asm_d, AsmScopeData* scope) {
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_ir_Break(AsmData* asm_d, AsmScopeData* scope) {
-    assert(asm_d);
+Status::Statuses ir_block_break(IrData* ir_d, IRScopeData* scope) {
+    assert(ir_d);
     assert(scope);
 
     size_t fixup_index = 0;
@@ -578,29 +534,26 @@ Status::Statuses asm_ir_Break(AsmData* asm_d, AsmScopeData* scope) {
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_ir_fps(AsmData* asm_d, const int val) {
-    assert(asm_d);
+Status::Statuses ir_block_fps(IrData* ir_d, const int val) {
+    assert(ir_d);
 
-    (void) asm_d;
-    (void) val;
+    IRVal src = {.type = IRVal::INT_CONST, .num = {.k_int = val}};
 
-    fprintf(stderr, "Command \"fps\" is not supproted by selected arch\n");
+    ADD_IR_BLOCK(.type = IRNodeType::SET_FPS, .src = {src, {}});
 
-    return Status::SYNTAX_ERROR;
+    return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_ir_video_show_frame(AsmData* asm_d) {
-    assert(asm_d);
+Status::Statuses ir_block_video_show_frame(IrData* ir_d) {
+    assert(ir_d);
 
-    (void) asm_d;
+    ADD_IR_BLOCK(.type = IRNodeType::SHOW_VIDEO_FRAME);
 
-    fprintf(stderr, "Command \"shw\" is not supproted by selected arch\n");
-
-    return Status::SYNTAX_ERROR;
+    return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_ir_get_returned_value(AsmData* asm_d) {
-    assert(asm_d);
+Status::Statuses ir_block_get_returned_value(IrData* ir_d) {
+    assert(ir_d);
 
     IRVal src = {.type = IRVal::REG, .num = {.reg = 0}};
 
@@ -611,28 +564,7 @@ Status::Statuses asm_ir_get_returned_value(AsmData* asm_d) {
     return Status::NORMAL_WORK;
 };
 
-Status::Statuses asm_ir_insert_empty_line(AsmData* asm_d) {
-    assert(asm_d);
-
-    (void) asm_d;
-
-    // used only for listing
-
-    return Status::NORMAL_WORK;
-}
-
-Status::Statuses asm_ir_comment(AsmData* asm_d, const char* comment) {
-    assert(asm_d);
-
-    (void) asm_d;
-    (void) comment;
-
-    // used only for listing
-
-    return Status::NORMAL_WORK;
-}
-
-Status::Statuses asm_ir_read_double(AsmData* asm_d, const bool is_val_needed) {
+Status::Statuses ir_block_read_double(IrData* ir_d, const bool is_val_needed) {
 
     IRVal dest = {.type = IRVal::REG, .num = {.reg = 0}};
 
@@ -644,7 +576,7 @@ Status::Statuses asm_ir_read_double(AsmData* asm_d, const bool is_val_needed) {
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_ir_write_returned_value(AsmData* asm_d) {
+Status::Statuses ir_block_write_returned_value(IrData* ir_d) {
 
     IRVal src = {.type = IRVal::STK};
 
@@ -655,8 +587,8 @@ Status::Statuses asm_ir_write_returned_value(AsmData* asm_d) {
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_ir_print_double(AsmData* asm_d) {
-    assert(asm_d);
+Status::Statuses ir_block_print_double(IrData* ir_d) {
+    assert(ir_d);
 
     ADD_IR_BLOCK(.type = IRNodeType::PRINT_DOUBLE, .src = {{.type = IRVal::STK}, {}});
 

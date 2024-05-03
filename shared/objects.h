@@ -28,7 +28,7 @@ struct DebugInfo {
 enum class Arches {
     NONE   = -1,
     SPU    =  0,
-    IR     =  1,
+    X86_64 =  1,
 };
 
 enum class TreeElemType {

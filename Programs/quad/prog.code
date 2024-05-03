@@ -1,281 +1,373 @@
+___ir_block_1:
 ; Program start
 
 jmp _start
 
 _start:
-        ; Regs initialisation
-        push 0
-        pop rax
-        push 0
-        pop rbx
-        ; Regs initialisation end
+                ; Regs initialisation
+                push 0
+                pop rax
+                push 0
+                pop rbx
+                ; Regs initialisation end
 
-        ; func call: остров_в_океане
-        push rbx
-        push rbx + 0
-        pop rbx
-        call ___func_0
-        pop rbx
-        ; func call end
+___ir_block_2:
+                ; func call begin
+                push rbx
+                push rbx + 0
+                pop rbx
+                call ___func_4
+                pop rbx
+                ; func call end
 
-        hlt
+___ir_block_3:
+                hlt
 
+___ir_block_4:
 ; =========================== Function definition =========================
-; func name: остров_в_океане
-___func_0:
-        in
-        ; var assignment: А
-        pop [rbx + 0]
-
-        in
-        ; var assignment: Б
-        pop [rbx + 1]
-
-        in
-        ; var assignment: В
-        pop [rbx + 2]
-
-        push [rbx + 0]
-        pop [rbx + 3]
-
-        push [rbx + 1]
-        pop [rbx + 4]
-
-        push [rbx + 2]
-        pop [rbx + 5]
-
-        ; func call: квадратка
-        push rbx
-        push rbx + 3
-        pop rbx
-        call ___func_4
-        pop rbx
-        ; func call end
-
-        push rax
-
-        pop rax
-
-        ret
-
-        ret
-; ------------------------- Function definition end -----------------------
-
-
-; =========================== Function definition =========================
-; func name: квадратка
 ___func_4:
-        push [rbx + 0]
-        push 0
-        je ___compare_1_true
-        push 0
-        jmp ___compare_1_end
+___ir_block_5:
+                in
+___ir_block_6:
+                pop [rbx + 0]
+___ir_block_7:
+                in
+___ir_block_8:
+                pop [rbx + 1]
+___ir_block_9:
+                in
+___ir_block_10:
+                pop [rbx + 2]
+___ir_block_11:
+                push [rbx + 0]
+___ir_block_12:
+                pop [rbx + 3]
+___ir_block_13:
+                push [rbx + 1]
+___ir_block_14:
+                pop [rbx + 4]
+___ir_block_15:
+                push [rbx + 2]
+___ir_block_16:
+                pop [rbx + 5]
+___ir_block_17:
+                ; func call begin
+                push rbx
+                push rbx + 3
+                pop rbx
+                call ___func_22
+                pop rbx
+                ; func call end
 
-___compare_1_true:
-        push 1
-___compare_1_end:
+___ir_block_18:
+                push rax
+___ir_block_19:
+                pop rax
 
-        ; if begin
-        push 0
-        je ___if_5_end
-        push [rbx + 1]
-        pop [rbx + 3]
+___ir_block_20:
+                ret
 
-        push [rbx + 2]
-        pop [rbx + 4]
-
-        ; func call: не_квадратка
-        push rbx
-        push rbx + 3
-        pop rbx
-        call ___func_5
-        pop rbx
-        ; func call end
-
-        push rax
-
-        pop rax
-
-        ret
-
-___if_5_end:
-        ; if end
-
-        push [rbx + 1]
-        push [rbx + 1]
-        mul
-        push 4
-        push [rbx + 0]
-        push [rbx + 2]
-        mul
-        mul
-        sub
-        ; var assignment: дискр
-        pop [rbx + 3]
-
-        push [rbx + 3]
-        push 0
-        jb ___compare_2_true
-        push 0
-        jmp ___compare_2_end
-
-___compare_2_true:
-        push 1
-___compare_2_end:
-
-        ; if begin
-        push 0
-        je ___if_6_end
-        push 0
-        out
-
-        push 0
-        pop rax
-
-        ret
-
-___if_6_end:
-        ; if end
-
-        push [rbx + 3]
-        push 0
-        je ___compare_3_true
-        push 0
-        jmp ___compare_3_end
-
-___compare_3_true:
-        push 1
-___compare_3_end:
-
-        ; if begin
-        push 0
-        je ___if_7_end
-        push 1
-        out
-
-        push [rbx + 1]
-        push -1
-        mul
-        push 2
-        push [rbx + 0]
-        mul
-        div
-        out
-
-        push 0
-        pop rax
-
-        ret
-
-___if_7_end:
-        ; if end
-
-        push [rbx + 3]
-        sqrt
-        ; var assignment: дискр
-        pop [rbx + 3]
-
-        push 2
-        out
-
-        push [rbx + 1]
-        push -1
-        mul
-        push [rbx + 3]
-        sub
-        push 2
-        push [rbx + 0]
-        mul
-        div
-        out
-
-        push [rbx + 1]
-        push -1
-        mul
-        push [rbx + 3]
-        add
-        push 2
-        push [rbx + 0]
-        mul
-        div
-        out
-
-        push 0
-        pop rax
-
-        ret
-
-        ret
+___ir_block_21:
+                ret
 ; ------------------------- Function definition end -----------------------
 
 
+___ir_block_22:
 ; =========================== Function definition =========================
-; func name: не_квадратка
-___func_5:
-        push [rbx + 0]
-        push 0
-        je ___compare_4_true
-        push 0
-        jmp ___compare_4_end
+___func_22:
+___ir_block_23:
+                push [rbx + 0]
+___ir_block_24:
+                push 0
+___ir_block_25:
+                je ___compare_25_true
+                push 0
+                jmp ___compare_25_end
 
-___compare_4_true:
-        push 1
-___compare_4_end:
+___compare_25_true:
+                push 1
+___compare_25_end:
 
-        ; if begin
-        push 0
-        je ___if_10_end
-        push [rbx + 1]
-        push 0
-        je ___compare_5_true
-        push 0
-        jmp ___compare_5_end
+___ir_block_26:
+___ir_block_27:
+                push 0
+                je ___ir_block_36
 
-___compare_5_true:
-        push 1
-___compare_5_end:
+___ir_block_28:
+                push [rbx + 1]
+___ir_block_29:
+                pop [rbx + 3]
+___ir_block_30:
+                push [rbx + 2]
+___ir_block_31:
+                pop [rbx + 4]
+___ir_block_32:
+                ; func call begin
+                push rbx
+                push rbx + 3
+                pop rbx
+                call ___func_103
+                pop rbx
+                ; func call end
 
-        ; if begin
-        push 0
-        je ___if_11_end
-        push -1
-        out
+___ir_block_33:
+                push rax
+___ir_block_34:
+                pop rax
 
-        push 0
-        pop rax
+___ir_block_35:
+                ret
 
-        ret
+___ir_block_36:
+___ir_block_37:
+                push [rbx + 1]
+___ir_block_38:
+                push [rbx + 1]
+___ir_block_39:
+                mul
+___ir_block_40:
+                push 4
+___ir_block_41:
+                push [rbx + 0]
+___ir_block_42:
+                push [rbx + 2]
+___ir_block_43:
+                mul
+___ir_block_44:
+                mul
+___ir_block_45:
+                sub
+___ir_block_46:
+                pop [rbx + 3]
+___ir_block_47:
+                push [rbx + 3]
+___ir_block_48:
+                push 0
+___ir_block_49:
+                jb ___compare_49_true
+                push 0
+                jmp ___compare_49_end
 
-___if_11_end:
-        ; if end
+___compare_49_true:
+                push 1
+___compare_49_end:
 
-        push 0
-        out
+___ir_block_50:
+___ir_block_51:
+                push 0
+                je ___ir_block_57
 
-        push 0
-        pop rax
+___ir_block_52:
+                push 0
+___ir_block_53:
+                out
+___ir_block_54:
+                push 0
+___ir_block_55:
+                pop rax
 
-        ret
+___ir_block_56:
+                ret
 
-___if_10_end:
-        ; if end
+___ir_block_57:
+___ir_block_58:
+                push [rbx + 3]
+___ir_block_59:
+                push 0
+___ir_block_60:
+                je ___compare_60_true
+                push 0
+                jmp ___compare_60_end
 
-        push 1
-        out
+___compare_60_true:
+                push 1
+___compare_60_end:
 
-        push [rbx + 1]
-        push -1
-        mul
-        push [rbx + 0]
-        div
-        out
+___ir_block_61:
+___ir_block_62:
+                push 0
+                je ___ir_block_75
 
-        push 0
-        pop rax
+___ir_block_63:
+                push 1
+___ir_block_64:
+                out
+___ir_block_65:
+                push [rbx + 1]
+___ir_block_66:
+                push -1
+                mul
+___ir_block_67:
+                push 2
+___ir_block_68:
+                push [rbx + 0]
+___ir_block_69:
+                mul
+___ir_block_70:
+                div
+___ir_block_71:
+                out
+___ir_block_72:
+                push 0
+___ir_block_73:
+                pop rax
 
-        ret
+___ir_block_74:
+                ret
 
-        ret
+___ir_block_75:
+___ir_block_76:
+                push [rbx + 3]
+___ir_block_77:
+                sqrt
+___ir_block_78:
+                pop [rbx + 3]
+___ir_block_79:
+                push 2
+___ir_block_80:
+                out
+___ir_block_81:
+                push [rbx + 1]
+___ir_block_82:
+                push -1
+                mul
+___ir_block_83:
+                push [rbx + 3]
+___ir_block_84:
+                sub
+___ir_block_85:
+                push 2
+___ir_block_86:
+                push [rbx + 0]
+___ir_block_87:
+                mul
+___ir_block_88:
+                div
+___ir_block_89:
+                out
+___ir_block_90:
+                push [rbx + 1]
+___ir_block_91:
+                push -1
+                mul
+___ir_block_92:
+                push [rbx + 3]
+___ir_block_93:
+                add
+___ir_block_94:
+                push 2
+___ir_block_95:
+                push [rbx + 0]
+___ir_block_96:
+                mul
+___ir_block_97:
+                div
+___ir_block_98:
+                out
+___ir_block_99:
+                push 0
+___ir_block_100:
+                pop rax
+
+___ir_block_101:
+                ret
+
+___ir_block_102:
+                ret
 ; ------------------------- Function definition end -----------------------
 
 
+___ir_block_103:
+; =========================== Function definition =========================
+___func_103:
+___ir_block_104:
+                push [rbx + 0]
+___ir_block_105:
+                push 0
+___ir_block_106:
+                je ___compare_106_true
+                push 0
+                jmp ___compare_106_end
+
+___compare_106_true:
+                push 1
+___compare_106_end:
+
+___ir_block_107:
+___ir_block_108:
+                push 0
+                je ___ir_block_125
+
+___ir_block_109:
+                push [rbx + 1]
+___ir_block_110:
+                push 0
+___ir_block_111:
+                je ___compare_111_true
+                push 0
+                jmp ___compare_111_end
+
+___compare_111_true:
+                push 1
+___compare_111_end:
+
+___ir_block_112:
+___ir_block_113:
+                push 0
+                je ___ir_block_119
+
+___ir_block_114:
+                push -1
+___ir_block_115:
+                out
+___ir_block_116:
+                push 0
+___ir_block_117:
+                pop rax
+
+___ir_block_118:
+                ret
+
+___ir_block_119:
+___ir_block_120:
+                push 0
+___ir_block_121:
+                out
+___ir_block_122:
+                push 0
+___ir_block_123:
+                pop rax
+
+___ir_block_124:
+                ret
+
+___ir_block_125:
+___ir_block_126:
+                push 1
+___ir_block_127:
+                out
+___ir_block_128:
+                push [rbx + 1]
+___ir_block_129:
+                push -1
+                mul
+___ir_block_130:
+                push [rbx + 0]
+___ir_block_131:
+                div
+___ir_block_132:
+                out
+___ir_block_133:
+                push 0
+___ir_block_134:
+                pop rax
+
+___ir_block_135:
+                ret
+
+___ir_block_136:
+                ret
+; ------------------------- Function definition end -----------------------
+
+
+___ir_block_137:

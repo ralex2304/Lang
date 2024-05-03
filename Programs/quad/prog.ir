@@ -1,7 +1,7 @@
 257
 {{-1}, 1}
 {{1, {0}, {0}, {0}, {}}, 2}
-{{5, {0}, {0}, {9, 4}, {"Programs/quad/prog.snb", 60, 1, 911}}, 3}
+{{5, {2, 0}, {0}, {9, 4}, {"Programs/quad/prog.snb", 60, 1, 911}}, 3}
 {{2, {0}, {0}, {0}, {"Programs/quad/prog.snb", 60, 1, 911}}, 4}
 {{3, {2, 3}, {0}, {0}, {"Programs/quad/prog.snb", 60, 1, 911}}, 5}
 {{16, {0}, {0}, {7, 0}, {"Programs/quad/prog.snb", 2, 12, 26}}, 6}
@@ -11,12 +11,12 @@
 {{16, {0}, {0}, {7, 0}, {"Programs/quad/prog.snb", 4, 12, 64}}, 10}
 {{10, {7, 0}, {0}, {3, 2}, {"Programs/quad/prog.snb", 4, 12, 64}}, 11}
 {{10, {3, 0}, {0}, {7, 0}, {"Programs/quad/prog.snb", 6, 29, 84}}, 12}
-{{10, {7, 0}, {0}, {5, 0}, {"Programs/quad/prog.snb", 6, 29, 84}}, 13}
+{{10, {7, 0}, {5, 3}, {5, 0}, {"Programs/quad/prog.snb", 6, 29, 84}}, 13}
 {{10, {3, 1}, {0}, {7, 0}, {"Programs/quad/prog.snb", 6, 32, 84}}, 14}
-{{10, {7, 0}, {0}, {5, 1}, {"Programs/quad/prog.snb", 6, 32, 84}}, 15}
+{{10, {7, 0}, {5, 3}, {5, 1}, {"Programs/quad/prog.snb", 6, 32, 84}}, 15}
 {{10, {3, 2}, {0}, {7, 0}, {"Programs/quad/prog.snb", 6, 35, 84}}, 16}
-{{10, {7, 0}, {0}, {5, 2}, {"Programs/quad/prog.snb", 6, 35, 84}}, 17}
-{{5, {0}, {0}, {9, 22}, {"Programs/quad/prog.snb", 6, 35, 84}}, 18}
+{{10, {7, 0}, {5, 3}, {5, 2}, {"Programs/quad/prog.snb", 6, 35, 84}}, 17}
+{{5, {2, 3}, {0}, {9, 22}, {"Programs/quad/prog.snb", 6, 35, 84}}, 18}
 {{10, {8, 0}, {0}, {7, 0}, {"Programs/quad/prog.snb", 6, 35, 84}}, 19}
 {{10, {7, 0}, {0}, {8, 0}, {"Programs/quad/prog.snb", 6, 35, 84}}, 20}
 {{6, {0}, {0}, {0}, {"Programs/quad/prog.snb", 6, 35, 84}}, 21}
@@ -28,10 +28,10 @@
 {{13, {7, 0}, {0}, {0}, {"Programs/quad/prog.snb", 11, 24, 185}}, 27}
 {{15, {0}, {0}, {9, 36}, 2, {"Programs/quad/prog.snb", 11, 24, 185}}, 28}
 {{10, {3, 1}, {0}, {7, 0}, {"Programs/quad/prog.snb", 12, 36, 212}}, 29}
-{{10, {7, 0}, {0}, {5, 0}, {"Programs/quad/prog.snb", 12, 36, 212}}, 30}
+{{10, {7, 0}, {5, 3}, {5, 0}, {"Programs/quad/prog.snb", 12, 36, 212}}, 30}
 {{10, {3, 2}, {0}, {7, 0}, {"Programs/quad/prog.snb", 12, 39, 212}}, 31}
-{{10, {7, 0}, {0}, {5, 1}, {"Programs/quad/prog.snb", 12, 39, 212}}, 32}
-{{5, {0}, {0}, {9, 103}, {"Programs/quad/prog.snb", 12, 39, 212}}, 33}
+{{10, {7, 0}, {5, 3}, {5, 1}, {"Programs/quad/prog.snb", 12, 39, 212}}, 32}
+{{5, {2, 3}, {0}, {9, 103}, {"Programs/quad/prog.snb", 12, 39, 212}}, 33}
 {{10, {8, 0}, {0}, {7, 0}, {"Programs/quad/prog.snb", 12, 39, 212}}, 34}
 {{10, {7, 0}, {0}, {8, 0}, {"Programs/quad/prog.snb", 12, 39, 212}}, 35}
 {{6, {0}, {0}, {0}, {"Programs/quad/prog.snb", 12, 39, 212}}, 36}

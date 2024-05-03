@@ -1,98 +1,123 @@
+___ir_block_1:
 ; Program start
 
 jmp _start
 
 _start:
-        ; Regs initialisation
-        push 0
-        pop rax
-        push 0
-        pop rbx
-        ; Regs initialisation end
+                ; Regs initialisation
+                push 0
+                pop rax
+                push 0
+                pop rbx
+                ; Regs initialisation end
 
-        ; func call: остров_в_океане
-        push rbx
-        push rbx + 0
-        pop rbx
-        call ___func_0
-        pop rbx
-        ; func call end
+___ir_block_2:
+                ; func call begin
+                push rbx
+                push rbx + 0
+                pop rbx
+                call ___func_4
+                pop rbx
+                ; func call end
 
-        hlt
+___ir_block_3:
+                hlt
 
+___ir_block_4:
 ; =========================== Function definition =========================
-; func name: остров_в_океане
-___func_0:
-        in
-        pop [rbx + 0]
+___func_4:
+___ir_block_5:
+                in
+___ir_block_6:
+                pop [rbx + 0]
+___ir_block_7:
+                ; func call begin
+                push rbx
+                push rbx + 0
+                pop rbx
+                call ___func_14
+                pop rbx
+                ; func call end
 
-        ; func call: факториал
-        push rbx
-        push rbx + 0
-        pop rbx
-        call ___func_1
-        pop rbx
-        ; func call end
+___ir_block_8:
+                push rax
+___ir_block_9:
+                out
+___ir_block_10:
+                push 0
+___ir_block_11:
+                pop rax
 
-        push rax
+___ir_block_12:
+                ret
 
-        out
-
-        push 0
-        pop rax
-
-        ret
-
-        ret
+___ir_block_13:
+                ret
 ; ------------------------- Function definition end -----------------------
 
 
+___ir_block_14:
 ; =========================== Function definition =========================
-; func name: факториал
-___func_1:
-        push [rbx + 0]
-        push 1
-        ja ___compare_1_true
-        push 0
-        jmp ___compare_1_end
+___func_14:
+___ir_block_15:
+                push [rbx + 0]
+___ir_block_16:
+                push 1
+___ir_block_17:
+                ja ___compare_17_true
+                push 0
+                jmp ___compare_17_end
 
-___compare_1_true:
-        push 1
-___compare_1_end:
+___compare_17_true:
+                push 1
+___compare_17_end:
 
-        ; if begin
-        push 0
-        je ___if_5_end
-        push [rbx + 0]
-        push 1
-        sub
-        pop [rbx + 1]
+___ir_block_18:
+___ir_block_19:
+                push 0
+                je ___ir_block_30
 
-        ; func call: факториал
-        push rbx
-        push rbx + 1
-        pop rbx
-        call ___func_1
-        pop rbx
-        ; func call end
+___ir_block_20:
+                push [rbx + 0]
+___ir_block_21:
+                push 1
+___ir_block_22:
+                sub
+___ir_block_23:
+                pop [rbx + 1]
+___ir_block_24:
+                ; func call begin
+                push rbx
+                push rbx + 1
+                pop rbx
+                call ___func_14
+                pop rbx
+                ; func call end
 
-        push rax
+___ir_block_25:
+                push rax
+___ir_block_26:
+                push [rbx + 0]
+___ir_block_27:
+                mul
+___ir_block_28:
+                pop rax
 
-        push [rbx + 0]
-        mul
-        pop rax
+___ir_block_29:
+                ret
 
-        ret
+___ir_block_30:
+___ir_block_31:
+                push 1
+___ir_block_32:
+                pop rax
 
-___if_5_end:
-        ; if end
+___ir_block_33:
+                ret
 
-        push 1
-        pop rax
-
-        ret
-
-        ret
+___ir_block_34:
+                ret
 ; ------------------------- Function definition end -----------------------
 
 
+___ir_block_35:

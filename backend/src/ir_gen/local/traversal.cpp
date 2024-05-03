@@ -8,89 +8,89 @@
 #include "TreeAddon/TreeAddon.h" // IWYU pragma: keep
 #include "error_printer/error_printer.h"
 
-#include "arch/arch_common.h"
-#include "../Stack/stack.h"
-#include "../scopes.h"
+#include "local.h"
+#include "../../Stack/stack.h"
+#include "../../scopes.h"
 
-static Status::Statuses asm_command_traversal_var_(BackData* data, TreeNode* node, bool is_val_needed);
+static Status::Statuses traversal_var_(BackData* data, TreeNode* node, bool is_val_needed);
 
-static Status::Statuses asm_add_num_var_(BackData* data, TreeNode* node, bool is_const);
+static Status::Statuses add_num_var_(BackData* data, TreeNode* node, bool is_const);
 
-static Status::Statuses asm_check_var_for_assign_(BackData* data, TreeNode* node, Var* var = nullptr);
+static Status::Statuses check_var_for_assign_(BackData* data, TreeNode* node, Var* var = nullptr);
 
-static Status::Statuses asm_provide_func_call_(BackData* data, TreeNode* node, bool is_val_needed);
+static Status::Statuses provide_func_call_(BackData* data, TreeNode* node, bool is_val_needed);
 
-static Status::Statuses asm_get_arr_elem_val_(BackData* data, TreeNode* node, bool is_val_needed);
+static Status::Statuses get_arr_elem_val_(BackData* data, TreeNode* node, bool is_val_needed);
 
-static Status::Statuses asm_array_definition_assignment_(BackData* data, TreeNode* node);
+static Status::Statuses array_definition_assignment_(BackData* data, TreeNode* node);
 
-static Status::Statuses asm_add_array_(BackData* data, TreeNode* node, bool is_const);
+static Status::Statuses add_array_(BackData* data, TreeNode* node, bool is_const);
 
-static Status::Statuses asm_eval_func_args_(BackData* data, TreeNode* cur_sep, size_t addr_offset,
-                                            ssize_t arg_cnt, DebugInfo* debug_info);
+static Status::Statuses eval_func_args_(BackData* data, TreeNode* cur_sep, size_t addr_offset,
+                                        ssize_t arg_cnt, DebugInfo* debug_info);
 
-static Status::Statuses asm_binary_math_(BackData* data, TreeNode* node,
-                                         const OperNum math_op, bool is_val_needed);
+static Status::Statuses binary_math_(BackData* data, TreeNode* node,
+                                     const OperNum math_op, bool is_val_needed);
 
-static Status::Statuses asm_unary_math_(BackData* data, TreeNode* node,
-                                        const OperNum math_op, bool is_val_needed);
+static Status::Statuses unary_math_(BackData* data, TreeNode* node,
+                                    const OperNum math_op, bool is_val_needed);
 
-static Status::Statuses asm_make_set_fps_(BackData* data, TreeNode* val_node);
+static Status::Statuses make_set_fps_(BackData* data, TreeNode* val_node);
 
-static Status::Statuses asm_make_if_(BackData* data, TreeNode* node);
+static Status::Statuses make_if_(BackData* data, TreeNode* node);
 
-static Status::Statuses asm_make_do_if_(BackData* data, TreeNode* node);
+static Status::Statuses make_do_if_(BackData* data, TreeNode* node);
 
-static Status::Statuses asm_make_if_else_(BackData* data, TreeNode* node);
+static Status::Statuses make_if_else_(BackData* data, TreeNode* node);
 
-static Status::Statuses asm_make_while_(BackData* data, TreeNode* parent_node);
+static Status::Statuses make_while_(BackData* data, TreeNode* parent_node);
 
-static Status::Statuses asm_make_do_while_(BackData* data, TreeNode* node);
+static Status::Statuses make_do_while_(BackData* data, TreeNode* node);
 
-static Status::Statuses asm_make_while_else_(BackData* data, TreeNode* parent_node);
+static Status::Statuses make_while_else_(BackData* data, TreeNode* parent_node);
 
-static Status::Statuses asm_make_continue_(BackData* data, TreeNode* node);
+static Status::Statuses make_continue_(BackData* data, TreeNode* node);
 
-static Status::Statuses asm_make_break_(BackData* data, TreeNode* node);
+static Status::Statuses make_break_(BackData* data, TreeNode* node);
 
-static Status::Statuses asm_make_prefix_oper_(BackData* data, TreeNode* node,
-                                              const OperNum oper, bool is_val_needed);
+static Status::Statuses make_prefix_oper_(BackData* data, TreeNode* node, const OperNum oper,
+                                          bool is_val_needed);
 
-static Status::Statuses asm_make_postfix_oper_(BackData* data, TreeNode* node,
-                                               const OperNum oper, bool is_val_needed);
+static Status::Statuses make_postfix_oper_(BackData* data, TreeNode* node, const OperNum oper,
+                                           bool is_val_needed);
 
-static Status::Statuses asm_make_prepost_init_var_(BackData* data, TreeNode* node,
-                                                   bool* is_array_elem, TreeNode** var_node,
-                                                   Var** var, bool* is_global);
+static Status::Statuses make_prepost_init_var_(BackData* data, TreeNode* node,
+                                               bool* is_array_elem, TreeNode** var_node,
+                                               Var** var, bool* is_global);
 
-static Status::Statuses asm_make_prefix_oper_eval_(BackData* data, TreeNode* node,
-                                                   const bool is_array_elem, const Var* var,
-                                                   const bool is_global, TreeNode* var_node,
-                                                   const OperNum oper);
+static Status::Statuses make_prefix_oper_eval_(BackData* data, TreeNode* node,
+                                               const bool is_array_elem, const Var* var,
+                                               const bool is_global, TreeNode* var_node,
+                                               const OperNum oper);
 
-static Status::Statuses asm_make_postfix_oper_eval_(BackData* data, TreeNode* node,
-                                                    const bool is_array_elem, const Var* var,
-                                                    const bool is_global, TreeNode* var_node,
-                                                    const OperNum oper, bool is_val_needed);
+static Status::Statuses make_postfix_oper_eval_(BackData* data, TreeNode* node,
+                                                const bool is_array_elem, const Var* var,
+                                                const bool is_global, TreeNode* var_node,
+                                                const OperNum oper, bool is_val_needed);
 
 
-Status::Statuses asm_command_traversal(BackData* data, TreeNode* node, bool is_val_needed) {
+Status::Statuses ir_command_traversal(BackData* data, TreeNode* node, bool is_val_needed) {
     assert(data);
 
     if (node == nullptr)
         return Status::NORMAL_WORK;
 
-    data->asm_d.debug_info = *DEBUG_INFO(node);
+    data->ir_d.debug_info = *DEBUG_INFO(node);
 
     if (TYPE_IS_NUM(node)) {
         if (is_val_needed)
-            STATUS_CHECK(ASM_DISP.push_const(&data->asm_d, NODE_DATA(node)->num));
+            STATUS_CHECK(ir_block_push_const(&data->ir_d, NODE_DATA(node)->num));
 
         return Status::NORMAL_WORK;
     }
 
     if (TYPE_IS_VAR(node)) {
-        STATUS_CHECK(asm_command_traversal_var_(data, node, is_val_needed));
+        STATUS_CHECK(traversal_var_(data, node, is_val_needed));
 
         return Status::NORMAL_WORK;
     }
@@ -120,13 +120,13 @@ Status::Statuses asm_command_traversal(BackData* data, TreeNode* node, bool is_v
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses asm_command_traversal_var_(BackData* data, TreeNode* node, bool is_val_needed) {
+static Status::Statuses traversal_var_(BackData* data, TreeNode* node, bool is_val_needed) {
     assert(data);
     assert(node);
     assert(TYPE_IS_VAR(node));
 
     bool is_global = false;
-    Var* var = asm_common_search_var(&data->scopes, NODE_DATA(node)->var, &is_global);
+    Var* var = local_search_var(&data->scopes, NODE_DATA(node)->var, &is_global);
 
     if (var == nullptr)
         return SYNTAX_ERROR("Unknown var name");
@@ -135,12 +135,12 @@ static Status::Statuses asm_command_traversal_var_(BackData* data, TreeNode* nod
         return SYNTAX_ERROR("Expected numeric var");
 
     if (is_val_needed)
-        STATUS_CHECK(ASM_DISP.push_var_val(&data->asm_d, var->addr_offset, is_global));
+        STATUS_CHECK(ir_block_push_var_val(&data->ir_d, var->addr_offset, is_global));
 
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses asm_add_num_var_(BackData* data, TreeNode* node, bool is_const) {
+static Status::Statuses add_num_var_(BackData* data, TreeNode* node, bool is_const) {
     assert(data);
     assert(node);
     assert(TYPE_IS_VAR(node));
@@ -154,7 +154,7 @@ static Status::Statuses asm_add_num_var_(BackData* data, TreeNode* node, bool is
                    .type = VarType::NUM,
                    .size = 1,
                    .is_const = is_const,
-                   .addr_offset = asm_common_count_addr_offset(&data->scopes)};
+                   .addr_offset = local_count_addr_offset(&data->scopes)};
 
     if (!LAST_VAR_TABLE.vars.push_back(&new_var))
         return Status::MEMORY_EXCEED;
@@ -162,12 +162,12 @@ static Status::Statuses asm_add_num_var_(BackData* data, TreeNode* node, bool is
     LAST_VAR_TABLE.size += new_var.size;
 
     data->max_local_frame_size = MAX(data->max_local_frame_size,
-                                     asm_common_count_addr_offset(&data->scopes));
+                                     local_count_addr_offset(&data->scopes));
 
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses asm_add_array_(BackData* data, TreeNode* node, bool is_const) {
+static Status::Statuses add_array_(BackData* data, TreeNode* node, bool is_const) {
     assert(data);
     assert(node);
     assert(NODE_IS_OPER(node, OperNum::VAR_SEPARATOR));
@@ -190,7 +190,7 @@ static Status::Statuses asm_add_array_(BackData* data, TreeNode* node, bool is_c
                    .type = VarType::ARRAY,
                    .size = (size_t)array_size,
                    .is_const = is_const,
-                   .addr_offset = asm_common_count_addr_offset(&data->scopes)};
+                   .addr_offset = local_count_addr_offset(&data->scopes)};
 
     if (!LAST_VAR_TABLE.vars.push_back(&new_var))
         return Status::MEMORY_EXCEED;
@@ -198,12 +198,12 @@ static Status::Statuses asm_add_array_(BackData* data, TreeNode* node, bool is_c
     LAST_VAR_TABLE.size += new_var.size;
 
     data->max_local_frame_size = MAX(data->max_local_frame_size,
-                                     asm_common_count_addr_offset(&data->scopes));
+                                     local_count_addr_offset(&data->scopes));
 
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses asm_check_var_for_assign_(BackData* data, TreeNode* node, Var* var) {
+static Status::Statuses check_var_for_assign_(BackData* data, TreeNode* node, Var* var) {
     assert(data);
 
     if (node == nullptr || !(TYPE_IS_VAR(node) || NODE_IS_OPER(node, OperNum::ARRAY_ELEM)))
@@ -211,9 +211,9 @@ static Status::Statuses asm_check_var_for_assign_(BackData* data, TreeNode* node
 
     if (var == nullptr) {
         if (TYPE_IS_VAR(node))
-            var = asm_common_search_var(&data->scopes, NODE_DATA(node)->var, nullptr);
+            var = local_search_var(&data->scopes, NODE_DATA(node)->var, nullptr);
         else
-            var = asm_common_search_var(&data->scopes, NODE_DATA(*L(node))->var, nullptr);
+            var = local_search_var(&data->scopes, NODE_DATA(*L(node))->var, nullptr);
     }
 
     if (var == nullptr)
@@ -225,8 +225,8 @@ static Status::Statuses asm_check_var_for_assign_(BackData* data, TreeNode* node
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses asm_eval_func_args_(BackData* data, TreeNode* cur_sep, size_t addr_offset,
-                                            ssize_t arg_cnt, DebugInfo* debug_info) {
+static Status::Statuses eval_func_args_(BackData* data, TreeNode* cur_sep, size_t addr_offset,
+                                        ssize_t arg_cnt, DebugInfo* debug_info) {
     assert(data);
     assert(debug_info);
 
@@ -237,7 +237,7 @@ static Status::Statuses asm_eval_func_args_(BackData* data, TreeNode* cur_sep, s
 
         EVAL_SUBTREE_GET_VAL(cur_sep->left);
 
-        STATUS_CHECK(ASM_DISP.pop_func_arg_value(&data->asm_d, addr_offset, var_offset++));
+        STATUS_CHECK(ir_block_pop_func_arg_value(&data->ir_d, addr_offset, var_offset++));
 
         cur_sep = cur_sep->right;
     }
@@ -250,7 +250,7 @@ static Status::Statuses asm_eval_func_args_(BackData* data, TreeNode* cur_sep, s
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses asm_provide_func_call_(BackData* data, TreeNode* node, bool is_val_needed) {
+static Status::Statuses provide_func_call_(BackData* data, TreeNode* node, bool is_val_needed) {
     assert(data);
     assert(node);
 
@@ -260,29 +260,27 @@ static Status::Statuses asm_provide_func_call_(BackData* data, TreeNode* node, b
     if (func == nullptr)
         return SYNTAX_ERROR("Function name was not declared in this scope");
 
-    size_t offset = asm_common_count_addr_offset(&data->scopes);
+    size_t offset = local_count_addr_offset(&data->scopes);
 
     EVAL_FUNC_ARGS(*R(node), offset, (ssize_t)func->arg_num);
 
     if (!TYPE_IS_VAR(*L(node)))
         return DAMAGED_TREE("incorrect var arguments list in function call");
 
-    STATUS_CHECK(asm_common_call_function(data, func, offset));
+    STATUS_CHECK(ir_block_call_function(&data->ir_d, func, offset));
 
     if (is_val_needed)
-        STATUS_CHECK(ASM_DISP.get_returned_value(&data->asm_d));
-
-    STATUS_CHECK(ASM_DISP.insert_empty_line(&data->asm_d));
+        STATUS_CHECK(ir_block_get_returned_value(&data->ir_d));
 
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses asm_get_arr_elem_val_(BackData* data, TreeNode* node, bool is_val_needed) {
+static Status::Statuses get_arr_elem_val_(BackData* data, TreeNode* node, bool is_val_needed) {
     assert(data);
     assert(node);
 
     bool is_global = false;
-    Var* var = asm_common_search_var(&data->scopes, NODE_DATA(*L(node))->var, &is_global);
+    Var* var = local_search_var(&data->scopes, NODE_DATA(*L(node))->var, &is_global);
 
     if (var == nullptr)
         return SYNTAX_ERROR("unknown var name");
@@ -293,20 +291,20 @@ static Status::Statuses asm_get_arr_elem_val_(BackData* data, TreeNode* node, bo
     if (is_val_needed) {
         EVAL_SUBTREE_GET_VAL(*R(node));
 
-        STATUS_CHECK(asm_common_push_arr_elem_val(data, var->addr_offset, is_global));
+        STATUS_CHECK(local_push_arr_elem_val(data, var->addr_offset, is_global));
     }
 
     return Status::NORMAL_WORK;
 }
 
 
-static Status::Statuses asm_array_definition_assignment_(BackData* data, TreeNode* node) {
+static Status::Statuses array_definition_assignment_(BackData* data, TreeNode* node) {
     assert(data);
     assert(node);
     assert(NODE_IS_OPER(node, OperNum::ARRAY_DEFINITION));
 
     bool is_global = false;
-    const Var* var = asm_common_search_var(&data->scopes, (size_t)*VAR_NUM(*L(*L(node))), &is_global);
+    const Var* var = local_search_var(&data->scopes, (size_t)*VAR_NUM(*L(*L(node))), &is_global);
     assert(var);
     assert(var->type == VarType::ARRAY);
 
@@ -321,7 +319,7 @@ static Status::Statuses asm_array_definition_assignment_(BackData* data, TreeNod
 
         EVAL_SUBTREE_GET_VAL(*L(cur_separator));
 
-        STATUS_CHECK(ASM_DISP.pop_arr_elem_value_with_const_index(&data->asm_d, var->addr_offset,
+        STATUS_CHECK(ir_block_pop_arr_elem_value_with_const_index(&data->ir_d, var->addr_offset,
                                                                   i++, is_global));
 
         cur_separator = *R(cur_separator);
@@ -330,7 +328,7 @@ static Status::Statuses asm_array_definition_assignment_(BackData* data, TreeNod
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses asm_binary_math_(BackData* data, TreeNode* node,
+static Status::Statuses binary_math_(BackData* data, TreeNode* node,
                                          const OperNum math_op, bool is_val_needed) {
     assert(data);
     assert(node);
@@ -339,12 +337,12 @@ static Status::Statuses asm_binary_math_(BackData* data, TreeNode* node,
     EVAL_SUBTREE(*R(node), is_val_needed);
 
     if (is_val_needed)
-        STATUS_CHECK(ASM_DISP.math_operator(&data->asm_d, math_op));
+        STATUS_CHECK(ir_block_math_operator(&data->ir_d, math_op));
 
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses asm_unary_math_(BackData* data, TreeNode* node,
+static Status::Statuses unary_math_(BackData* data, TreeNode* node,
                                         const OperNum math_op, bool is_val_needed) {
     assert(data);
     assert(node);
@@ -354,98 +352,98 @@ static Status::Statuses asm_unary_math_(BackData* data, TreeNode* node,
     EVAL_SUBTREE(*R(node), is_val_needed);
 
     if (is_val_needed)
-        STATUS_CHECK(ASM_DISP.math_operator(&data->asm_d, math_op));
+        STATUS_CHECK(ir_block_math_operator(&data->ir_d, math_op));
 
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses asm_make_if_(BackData* data, TreeNode* node) {
+static Status::Statuses make_if_(BackData* data, TreeNode* node) {
     assert(data);
 
-    AsmScopeData* asm_scope_data = nullptr;
-    ENTER_SCOPE(&asm_scope_data);
+    IRScopeData* scope_data = nullptr;
+    ENTER_SCOPE(&scope_data);
 
-    STATUS_CHECK(ASM_DISP.if_begin(&data->asm_d, asm_scope_data));
+    STATUS_CHECK(ir_block_if_begin(&data->ir_d, scope_data));
 
     EVAL_SUBTREE_GET_VAL(node);
 
-    STATUS_CHECK(ASM_DISP.if_end(&data->asm_d, asm_scope_data));
+    STATUS_CHECK(ir_block_if_end(&data->ir_d, scope_data));
 
     EXIT_SCOPE();
 
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses asm_make_do_if_(BackData* data, TreeNode* node) {
+static Status::Statuses make_do_if_(BackData* data, TreeNode* node) {
     assert(data);
     assert(node);
 
-    AsmScopeData* asm_scope_data = nullptr;
-    ENTER_SCOPE(&asm_scope_data);
+    IRScopeData* scope_data = nullptr;
+    ENTER_SCOPE(&scope_data);
 
     EVAL_SUBTREE_NO_VAL(*R(node));
 
     EXIT_SCOPE();
 
-    STATUS_CHECK(ASM_DISP.do_if_check_clause(&data->asm_d, asm_scope_data));
+    STATUS_CHECK(ir_block_do_if_check_clause(&data->ir_d, scope_data));
 
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses asm_make_if_else_(BackData* data, TreeNode* node) {
+static Status::Statuses make_if_else_(BackData* data, TreeNode* node) {
     assert(data);
     assert(node);
 
-    AsmScopeData* asm_scope_data = nullptr;
-    ENTER_SCOPE(&asm_scope_data);
+    IRScopeData* scope_data = nullptr;
+    ENTER_SCOPE(&scope_data);
 
-    STATUS_CHECK(ASM_DISP.if_else_begin(&data->asm_d, asm_scope_data));
+    STATUS_CHECK(ir_block_if_else_begin(&data->ir_d, scope_data));
 
     EVAL_SUBTREE_GET_VAL(*L(node));
 
-    STATUS_CHECK(ASM_DISP.if_else_middle(&data->asm_d, asm_scope_data));
+    STATUS_CHECK(ir_block_if_else_middle(&data->ir_d, scope_data));
 
     SCOPE_RESET_VARS();
 
     EVAL_SUBTREE_GET_VAL(*R(node));
 
-    STATUS_CHECK(ASM_DISP.if_else_end(&data->asm_d, asm_scope_data));
+    STATUS_CHECK(ir_block_if_end(&data->ir_d, scope_data));
 
     EXIT_SCOPE();
 
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses asm_make_while_(BackData* data, TreeNode* parent_node) {
+static Status::Statuses make_while_(BackData* data, TreeNode* parent_node) {
     assert(data);
     assert(parent_node);
 
-    AsmScopeData* asm_scope_data = nullptr;
-    ENTER_LOOP_SCOPE(&asm_scope_data);
+    IRScopeData* scope_data = nullptr;
+    ENTER_LOOP_SCOPE(&scope_data);
 
-    STATUS_CHECK(ASM_DISP.while_begin(&data->asm_d, asm_scope_data));
+    STATUS_CHECK(ir_block_while_begin(&data->ir_d, scope_data));
 
     EVAL_SUBTREE_GET_VAL(*L(parent_node));
 
-    STATUS_CHECK(ASM_DISP.while_check_clause(&data->asm_d, asm_scope_data));
+    STATUS_CHECK(ir_block_while_check_clause(&data->ir_d, scope_data));
 
     EVAL_SUBTREE_NO_VAL(*R(parent_node));
 
-    STATUS_CHECK(ASM_DISP.while_end(&data->asm_d, asm_scope_data));
+    STATUS_CHECK(ir_block_while_end(&data->ir_d, scope_data));
 
     EXIT_SCOPE();
 
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses asm_make_do_while_(BackData* data, TreeNode* node) {
+static Status::Statuses make_do_while_(BackData* data, TreeNode* node) {
     assert(data);
     assert(node);
 
-    AsmScopeData* asm_scope_data = nullptr;
-    ENTER_LOOP_SCOPE(&asm_scope_data);
+    IRScopeData* scope_data = nullptr;
+    ENTER_LOOP_SCOPE(&scope_data);
 
-    STATUS_CHECK(ASM_DISP.while_begin(&data->asm_d, asm_scope_data));
+    STATUS_CHECK(ir_block_while_begin(&data->ir_d, scope_data));
 
     EVAL_SUBTREE_NO_VAL(*R(node));
 
@@ -454,83 +452,83 @@ static Status::Statuses asm_make_do_while_(BackData* data, TreeNode* node) {
 
     EVAL_SUBTREE_GET_VAL(*L(node));
 
-    STATUS_CHECK(ASM_DISP.while_check_clause(&data->asm_d, asm_scope_data));
+    STATUS_CHECK(ir_block_while_check_clause(&data->ir_d, scope_data));
 
-    STATUS_CHECK(ASM_DISP.while_end(&data->asm_d, asm_scope_data));
+    STATUS_CHECK(ir_block_while_end(&data->ir_d, scope_data));
 
     EXIT_SCOPE();
 
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses asm_make_while_else_(BackData* data, TreeNode* parent_node) {
+static Status::Statuses make_while_else_(BackData* data, TreeNode* parent_node) {
     assert(data);
     assert(parent_node);
 
-    AsmScopeData* asm_scope_data = nullptr;
-    ENTER_LOOP_SCOPE(&asm_scope_data);
+    IRScopeData* scope_data = nullptr;
+    ENTER_LOOP_SCOPE(&scope_data);
 
-    STATUS_CHECK(ASM_DISP.while_begin(&data->asm_d, asm_scope_data));
+    STATUS_CHECK(ir_block_while_begin(&data->ir_d, scope_data));
 
     EVAL_SUBTREE_GET_VAL(*L(parent_node));
 
-    STATUS_CHECK(ASM_DISP.while_else_check_clause(&data->asm_d, asm_scope_data));
+    STATUS_CHECK(ir_block_while_else_check_clause(&data->ir_d, scope_data));
 
     EVAL_SUBTREE_NO_VAL(*L(*R(parent_node)));
 
     SCOPE_RESET_VARS();
     SCOPE_SET_TYPE(ScopeType::NEUTRAL);
 
-    STATUS_CHECK(ASM_DISP.while_else_else(&data->asm_d, asm_scope_data));
+    STATUS_CHECK(ir_block_while_else_else(&data->ir_d, scope_data));
 
     EVAL_SUBTREE_NO_VAL(*R(*R(parent_node)));
 
-    STATUS_CHECK(ASM_DISP.while_end(&data->asm_d, asm_scope_data));
+    STATUS_CHECK(ir_block_while_end(&data->ir_d, scope_data));
 
     EXIT_SCOPE();
 
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses asm_make_set_fps_(BackData* data, TreeNode* val_node) {
+static Status::Statuses make_set_fps_(BackData* data, TreeNode* val_node) {
     assert(data);
     assert(val_node);
 
     if (!TYPE_IS_NUM(val_node))
         return DAMAGED_TREE("Set fps must have const argument");
 
-    STATUS_CHECK(ASM_DISP.fps(&data->asm_d, (int)(NODE_DATA(val_node)->num)));
+    STATUS_CHECK(ir_block_fps(&data->ir_d, (int)(NODE_DATA(val_node)->num)));
 
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses asm_make_continue_(BackData* data, TreeNode* node) {
+static Status::Statuses make_continue_(BackData* data, TreeNode* node) {
     assert(data);
 
-    AsmScopeData* asm_scope_data = asm_common_find_loop_scope_num(data);
+    IRScopeData* scope_data = local_find_loop_scope_num(data);
 
-    if (asm_scope_data == nullptr)
+    if (scope_data == nullptr)
         return SYNTAX_ERROR("\"continue\" must be inside loop");
 
-    STATUS_CHECK(ASM_DISP.Continue(&data->asm_d, asm_scope_data));
+    STATUS_CHECK(ir_block_continue(&data->ir_d, scope_data));
 
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses asm_make_break_(BackData* data, TreeNode* node) {
+static Status::Statuses make_break_(BackData* data, TreeNode* node) {
     assert(data);
 
-    AsmScopeData* asm_scope_data = asm_common_find_loop_scope_num(data);
+    IRScopeData* scope_data = local_find_loop_scope_num(data);
 
-    if (asm_scope_data == nullptr)
+    if (scope_data == nullptr)
         return SYNTAX_ERROR("\"break\" must be inside loop");
 
-    STATUS_CHECK(ASM_DISP.Break(&data->asm_d, asm_scope_data));
+    STATUS_CHECK(ir_block_break(&data->ir_d, scope_data));
 
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses asm_make_prefix_oper_(BackData* data, TreeNode* node,
+static Status::Statuses make_prefix_oper_(BackData* data, TreeNode* node,
                                               const OperNum oper, bool is_val_needed) {
     assert(data);
     assert(node);
@@ -542,18 +540,18 @@ static Status::Statuses asm_make_prefix_oper_(BackData* data, TreeNode* node,
     bool is_array_elem = false;
     Var* var = nullptr;
     bool is_global = false;
-    STATUS_CHECK(asm_make_prepost_init_var_(data, node, &is_array_elem, &var_node, &var, &is_global));
+    STATUS_CHECK(make_prepost_init_var_(data, node, &is_array_elem, &var_node, &var, &is_global));
 
-    STATUS_CHECK(asm_make_prefix_oper_eval_(data, node, is_array_elem, var, is_global,
+    STATUS_CHECK(make_prefix_oper_eval_(data, node, is_array_elem, var, is_global,
                                             var_node, oper));
 
     if (*R(node) == nullptr || TYPE_IS_VAR(*R(node))) { //< This is the last oper
 
         if (is_val_needed) {
             if (is_array_elem || var->type == VarType::ARRAY)
-                STATUS_CHECK(ASM_DISP.push_arr_elem_val_the_same(&data->asm_d));
+                STATUS_CHECK(ir_block_push_arr_elem_val_the_same(&data->ir_d));
             else
-                STATUS_CHECK(ASM_DISP.push_var_val(&data->asm_d, var->addr_offset, is_global));
+                STATUS_CHECK(ir_block_push_var_val(&data->ir_d, var->addr_offset, is_global));
         }
 
         return Status::NORMAL_WORK;
@@ -569,7 +567,7 @@ static Status::Statuses asm_make_prefix_oper_(BackData* data, TreeNode* node,
     return DAMAGED_TREE("Right child of prefix oper must be null, var or other prepost-opers");
 }
 
-static Status::Statuses asm_make_prefix_oper_eval_(BackData* data, TreeNode* node,
+static Status::Statuses make_prefix_oper_eval_(BackData* data, TreeNode* node,
                                                    const bool is_array_elem, const Var* var,
                                                    const bool is_global, TreeNode* var_node,
                                                    const OperNum oper) {
@@ -584,16 +582,16 @@ static Status::Statuses asm_make_prefix_oper_eval_(BackData* data, TreeNode* nod
 
     if (is_array_elem) {
         EVAL_SUBTREE_GET_VAL(*R(*L(node)));
-        STATUS_CHECK(asm_common_prepost_oper_arr_elem(data, var->addr_offset, is_global, oper));
+        STATUS_CHECK(local_prepost_oper_arr_elem(data, var->addr_offset, is_global, oper));
     } else if (var->type == VarType::ARRAY)
-        STATUS_CHECK(asm_common_prepost_oper_arr_elem_the_same(data, oper));
+        STATUS_CHECK(local_prepost_oper_arr_elem_the_same(data, oper));
     else
-        STATUS_CHECK(asm_common_prepost_oper_var(data, var->addr_offset, is_global, oper));
+        STATUS_CHECK(local_prepost_oper_var(data, var->addr_offset, is_global, oper));
 
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses asm_make_postfix_oper_(BackData* data, TreeNode* node,
+static Status::Statuses make_postfix_oper_(BackData* data, TreeNode* node,
                                                const OperNum oper, bool is_val_needed) {
     assert(data);
     assert(node);
@@ -605,11 +603,11 @@ static Status::Statuses asm_make_postfix_oper_(BackData* data, TreeNode* node,
     bool is_array_elem = false;
     Var* var = nullptr;
     bool is_global = false;
-    STATUS_CHECK(asm_make_prepost_init_var_(data, node, &is_array_elem, &var_node, &var, &is_global));
+    STATUS_CHECK(make_prepost_init_var_(data, node, &is_array_elem, &var_node, &var, &is_global));
 
-    STATUS_CHECK(asm_check_var_for_assign_(data, *L(node), var));
+    STATUS_CHECK(check_var_for_assign_(data, *L(node), var));
 
-    STATUS_CHECK(asm_make_postfix_oper_eval_(data, node, is_array_elem, var, is_global,
+    STATUS_CHECK(make_postfix_oper_eval_(data, node, is_array_elem, var, is_global,
                                              var_node, oper, is_val_needed));
 
     if (*R(node) == nullptr || TYPE_IS_VAR(*R(node))) //< This is the last oper
@@ -625,7 +623,7 @@ static Status::Statuses asm_make_postfix_oper_(BackData* data, TreeNode* node,
     return DAMAGED_TREE("Right child of prefix oper must be null, var or other prepost-opers");
 }
 
-static Status::Statuses asm_make_prepost_init_var_(BackData* data, TreeNode* node,
+static Status::Statuses make_prepost_init_var_(BackData* data, TreeNode* node,
                                                    bool* is_array_elem, TreeNode** var_node,
                                                    Var** var, bool* is_global) {
     assert(data);
@@ -642,14 +640,14 @@ static Status::Statuses asm_make_prepost_init_var_(BackData* data, TreeNode* nod
         *var_node = *L(*L(node));
     }
 
-    *var = asm_common_search_var(&data->scopes, NODE_DATA(*var_node)->var, is_global);
+    *var = local_search_var(&data->scopes, NODE_DATA(*var_node)->var, is_global);
 
-    STATUS_CHECK(asm_check_var_for_assign_(data, *L(node), *var));
+    STATUS_CHECK(check_var_for_assign_(data, *L(node), *var));
 
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses asm_make_postfix_oper_eval_(BackData* data, TreeNode* node,
+static Status::Statuses make_postfix_oper_eval_(BackData* data, TreeNode* node,
                                                     const bool is_array_elem, const Var* var,
                                                     const bool is_global, TreeNode* var_node,
                                                     const OperNum oper, bool is_val_needed) {
@@ -663,22 +661,22 @@ static Status::Statuses asm_make_postfix_oper_eval_(BackData* data, TreeNode* no
             return syntax_error(*DEBUG_INFO(var_node), "array var expected");
 
         EVAL_SUBTREE_GET_VAL(*R(*L(node)));
-        STATUS_CHECK(ASM_DISP.save_arr_elem_addr(&data->asm_d, var->addr_offset, is_global));
+        STATUS_CHECK(ir_block_save_arr_elem_addr(&data->ir_d, var->addr_offset, is_global));
     }
 
     if (is_val_needed) {
         if (is_array_elem || var->type == VarType::ARRAY)
-            STATUS_CHECK(ASM_DISP.push_arr_elem_val_the_same(&data->asm_d));
+            STATUS_CHECK(ir_block_push_arr_elem_val_the_same(&data->ir_d));
         else
-            STATUS_CHECK(ASM_DISP.push_var_val(&data->asm_d, var->addr_offset, is_global));
+            STATUS_CHECK(ir_block_push_var_val(&data->ir_d, var->addr_offset, is_global));
 
         is_val_needed = false;
     }
 
     if (is_array_elem || var->type == VarType::ARRAY)
-        STATUS_CHECK(asm_common_prepost_oper_arr_elem_the_same(data, oper));
+        STATUS_CHECK(local_prepost_oper_arr_elem_the_same(data, oper));
     else
-        STATUS_CHECK(asm_common_prepost_oper_var(data, var->addr_offset, is_global, oper));
+        STATUS_CHECK(local_prepost_oper_var(data, var->addr_offset, is_global, oper));
 
     return Status::NORMAL_WORK;
 }

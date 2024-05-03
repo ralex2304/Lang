@@ -5,19 +5,47 @@
 #include "asm/traversal.h"
 
 Status::Statuses ir_back_process(const char* input_filename, const char* output_filename,
-                                 const char* lst_filename) {
+                                 const char* lst_filename, const Arches arch) {
     assert(input_filename);
     assert(output_filename);
-    // lst_filename can be nullptr
+    //< lst_filename can be nullptr
+    assert(arch != Arches::NONE);
 
     BackData data = {};
     if (!data.ctor(input_filename, lst_filename))
         return Status::MEMORY_EXCEED;
 
-    STATUS_CHECK(ir_blocks_traversal(&data), data.dtor());
+    STATUS_CHECK(ir_blocks_traversal(&data, arch), data.dtor());
 
     if (!data.dtor())
         return Status::LIST_ERROR;
 
     return Status::NORMAL_WORK;
+}
+
+ArgsMode read_arch(const Argument args_dict[], const int args_dict_len,
+                   int* arg_i, const int argc, char* argv[], ArgsVars* args_vars) {
+    assert(args_dict);
+    assert(arg_i);
+    assert(argv);
+    assert(args_vars);
+
+    (void) args_dict;
+    (void) args_dict_len;
+
+    if (++(*arg_i) >= argc) {
+        fprintf(stderr, "No arch name found\n");
+        return ArgsMode::ERROR;
+    }
+
+    if (strcmp(argv[*arg_i], "spu") == 0)
+        args_vars->arch = Arches::SPU;
+    else if (strcmp(argv[*arg_i], "x86_64") == 0)
+        args_vars->arch = Arches::X86_64;
+    else {
+        fprintf(stderr, "Unknown arch name specified. See -h for supported arhitectures list\n");
+        return ArgsMode::ERROR;
+    }
+
+    return ArgsMode::CONTINUE;
 }
