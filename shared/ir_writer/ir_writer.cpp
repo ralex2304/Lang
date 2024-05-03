@@ -6,7 +6,7 @@ static Status::Statuses write_ir_node_(FILE* file, const IRNode* node, const ssi
 
 static Status::Statuses write_ir_val_(FILE* file, const IRVal* val);
 
-static Status::Statuses write_ir_subtype_(FILE* file, const IRNodeType type, const IRNode* node);
+static Status::Statuses write_ir_subtype_(FILE* file, const IRNode* node);
 
 static Status::Statuses write_debug_data_(FILE* file, const DebugInfo* info);
 
@@ -57,10 +57,9 @@ static Status::Statuses write_ir_node_(FILE* file, const IRNode* node, const ssi
 
             STATUS_CHECK(write_ir_val_(file, &node->src[0]));
             STATUS_CHECK(write_ir_val_(file, &node->src[1]));
-            STATUS_CHECK(write_ir_val_(file, &node->dest[0]));
-            STATUS_CHECK(write_ir_val_(file, &node->dest[1]));
+            STATUS_CHECK(write_ir_val_(file, &node->dest));
 
-            STATUS_CHECK(write_ir_subtype_(file, node->type, node));
+            STATUS_CHECK(write_ir_subtype_(file, node));
         }
 
         PRINTF_(", ");
@@ -114,15 +113,15 @@ static Status::Statuses write_ir_val_(FILE* file, const IRVal* val) {
 
     return Status::NORMAL_WORK;
 }
-#undef CASE_
+#undef CASE_PRINTF_
 
-static Status::Statuses write_ir_subtype_(FILE* file, const IRNodeType type, const IRNode* node) {
+static Status::Statuses write_ir_subtype_(FILE* file, const IRNode* node) {
     assert(file);
     assert(node);
 
     int val = 0;
 
-    switch (type) {
+    switch (node->type) {
         case IRNodeType::NONE:
         case IRNodeType::START:
         case IRNodeType::END:
@@ -134,6 +133,7 @@ static Status::Statuses write_ir_subtype_(FILE* file, const IRNodeType type, con
         case IRNodeType::COUNT_ARR_ELEM_ADDR_CONST:
         case IRNodeType::ARR_ELEM_ADDR_ADD_INDEX:
         case IRNodeType::MOV:
+        case IRNodeType::SWAP:
         case IRNodeType::SET_FLAGS_CMP_WITH_ZERO:
         case IRNodeType::READ_DOUBLE:
         case IRNodeType::PRINT_DOUBLE:

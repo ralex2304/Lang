@@ -2,7 +2,7 @@
 #define ASM_OBJECTS_H_
 
 #include <stdio.h>
-#include "../List/list.h"
+#include "List/list.h"
 #include "file/file.h"
 #include "utils/vector.h"
 #include "objects.h"

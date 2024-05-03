@@ -8,7 +8,7 @@
 
 #include "utils/macros.h"
 
-#include "../asm/arch/ir/ir_objects.h"
+#include "ir_objects.h"
 
 typedef IRNode ListElem_t;
 

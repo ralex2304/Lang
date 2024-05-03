@@ -4,12 +4,14 @@
 /frontend/main
 /middleend/main
 /backend/main
+/ir_backend/main
 /main.exe
 /build
 /log
 /frontend/log
 /middleend/log
 /backend/log
+/ir_backend/log
 /releases
 /trees/*
 !/trees/example.txt
@@ -17,5 +19,6 @@
 *.code-workspace
 /*/build
 /Programs/*/*.o
+/Programs/*/prog
 /compile_commands.json
 /.cache

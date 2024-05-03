@@ -68,8 +68,8 @@ static Status::Statuses dest_addr_fixup_(List* ir, Vector* array, size_t addr) {
     for (size_t i = 0; i < (size_t)array->size(); i++) {
         size_t list_i = *(size_t*)(*array)[i];
 
-        assert(ir->arr[list_i].elem.dest[0].type == IRVal::ADDR);
-        ir->arr[list_i].elem.dest[0].num.addr = addr;
+        assert(ir->arr[list_i].elem.dest.type == IRVal::ADDR);
+        ir->arr[list_i].elem.dest.num.addr = addr;
     }
 
     return Status::NORMAL_WORK;
@@ -107,7 +107,7 @@ Status::Statuses asm_ir_end_func_definition(AsmData* asm_d, const size_t frame_s
 Status::Statuses asm_ir_init_mem_for_global_vars(AsmData* asm_d, size_t size) {
     assert(asm_d);
 
-    IRVal global_vars_number = {.type = IRVal::CONST, .num = {.k_int = (long)size}};
+    IRVal global_vars_number = {.type = IRVal::INT_CONST, .num = {.k_int = (long)size}};
 
     ADD_IR_BLOCK(.type = IRNodeType::INIT_MEM_FOR_GLOBALS, .src = {global_vars_number, {}});
 
@@ -125,9 +125,9 @@ Status::Statuses asm_ir_call_function(AsmData* asm_d, Func* func, size_t offset,
     IRVal dest = {.type = IRVal::ADDR, .num = {.addr = 0}};
 
     size_t fixup_index = 0;
-    ADD_IR_BLOCK_GET_INDEX(&fixup_index, .type = IRNodeType::CALL_FUNC, .dest = {dest, {}});
+    ADD_IR_BLOCK_GET_INDEX(&fixup_index, .type = IRNodeType::CALL_FUNC, .dest = dest);
 
-    size_t* addr_field = &asm_d->ir.arr[fixup_index].elem.dest[0].num.addr;
+    size_t* addr_field = &asm_d->ir.arr[fixup_index].elem.dest.num.addr;
     if (!func->set_addr_or_add_to_fixups(addr_field, fixup_index))
         return Status::MEMORY_EXCEED;
 
@@ -154,7 +154,7 @@ Status::Statuses asm_ir_pop_var_value(AsmData* asm_d, size_t addr_offset, bool i
     else
         dest.type = IRVal::LOCAL_VAR;
 
-    ADD_IR_BLOCK(.type = IRNodeType::MOV, .src = {src, {}}, .dest = {dest, {}});
+    ADD_IR_BLOCK(.type = IRNodeType::MOV, .src = {src, {}}, .dest = dest);
 
     return Status::NORMAL_WORK;
 }
@@ -168,7 +168,7 @@ Status::Statuses asm_ir_pop_func_arg_value(AsmData* asm_d, size_t frame_offset, 
 
     IRVal dest = {.type = IRVal::ARG_VAR, .num = {.offset = var_offset}};
 
-    ADD_IR_BLOCK(.type = IRNodeType::MOV, .src = {src, {}}, .dest = {dest, {}});
+    ADD_IR_BLOCK(.type = IRNodeType::MOV, .src = {src, {}}, .dest = dest);
 
     return Status::NORMAL_WORK;
 }
@@ -185,9 +185,10 @@ Status::Statuses asm_ir_save_arr_elem_addr(AsmData* asm_d, size_t addr_offset, b
 
     ADD_IR_BLOCK(.type = IRNodeType::COUNT_ARR_ELEM_ADDR_CONST, .src = {src, {}});
 
-    src = {.type = IRVal::STK};
+    src.num.offset = 0;
+    IRVal src0 = {.type = IRVal::STK};
 
-    ADD_IR_BLOCK(.type = IRNodeType::ARR_ELEM_ADDR_ADD_INDEX, .src = {src, {}});
+    ADD_IR_BLOCK(.type = IRNodeType::ARR_ELEM_ADDR_ADD_INDEX, .src = {src0, src});
 
     return Status::NORMAL_WORK;
 }
@@ -199,7 +200,7 @@ Status::Statuses asm_ir_pop_arr_elem_value_the_same(AsmData* asm_d) {
 
     IRVal dest = {.type = IRVal::ARR_VAR};
 
-    ADD_IR_BLOCK(.type = IRNodeType::MOV, .src = {src, {}}, .dest = {dest, {}});
+    ADD_IR_BLOCK(.type = IRNodeType::MOV, .src = {src, {}}, .dest = dest);
 
     return Status::NORMAL_WORK;
 }
@@ -230,7 +231,7 @@ Status::Statuses asm_ir_push_const(AsmData* asm_d, double num) {
 
     IRVal dest = {.type = IRVal::STK};
 
-    ADD_IR_BLOCK(.type = IRNodeType::MOV, .src = {src, {}}, .dest = {dest, {}});
+    ADD_IR_BLOCK(.type = IRNodeType::MOV, .src = {src, {}}, .dest = dest);
 
     return Status::NORMAL_WORK;
 }
@@ -247,7 +248,7 @@ Status::Statuses asm_ir_push_var_val(AsmData* asm_d, size_t addr_offset, bool is
     else
         src.type = IRVal::LOCAL_VAR;
 
-    ADD_IR_BLOCK(.type = IRNodeType::MOV, .src = {src, {}}, .dest = {dest, {}});
+    ADD_IR_BLOCK(.type = IRNodeType::MOV, .src = {src, {}}, .dest = dest);
 
     return Status::NORMAL_WORK;
 }
@@ -259,20 +260,20 @@ Status::Statuses asm_ir_push_arr_elem_val_the_same(AsmData* asm_d) {
 
     IRVal dest = {.type = IRVal::STK};
 
-    ADD_IR_BLOCK(.type = IRNodeType::MOV, .src = {src, {}}, .dest = {dest, {}});
+    ADD_IR_BLOCK(.type = IRNodeType::MOV, .src = {src, {}}, .dest = dest);
 
     return Status::NORMAL_WORK;
 }
 
 #define CASE_BINARY_(oper_, math_oper_)                                                             \
             case OperNum::oper_:                                                                    \
-                ADD_IR_BLOCK(.type = IRNodeType::MATH_OPER, .src = {src, src}, .dest = {dest, {}},  \
+                ADD_IR_BLOCK(.type = IRNodeType::MATH_OPER, .src = {src, src}, .dest = dest,  \
                              .subtype = {.math = MathOper::math_oper_});                            \
                 break
 
 #define CASE_UNARY_(oper_, math_oper_)                                                              \
             case OperNum::oper_:                                                                    \
-                ADD_IR_BLOCK(.type = IRNodeType::MATH_OPER, .src = {src, {}}, .dest = {dest, {}},   \
+                ADD_IR_BLOCK(.type = IRNodeType::MATH_OPER, .src = {src, {}}, .dest = dest,   \
                              .subtype = {.math = MathOper::math_oper_});                            \
                 break
 
@@ -322,7 +323,7 @@ Status::Statuses asm_ir_write_global_oper(AsmData* asm_d, OperNum oper, DebugInf
 
 #define CASE_(jmp_, cmp_type_)                                                                          \
             case OperNum::jmp_:                                                                         \
-                ADD_IR_BLOCK(.type = IRNodeType::STORE_CMP_RES, .src = {src, src}, .dest = {dest, {}},  \
+                ADD_IR_BLOCK(.type = IRNodeType::STORE_CMP_RES, .src = {src, src}, .dest = dest,  \
                              .subtype = {.cmp = CmpType::cmp_type_});                                            \
                 break
 
@@ -378,8 +379,7 @@ Status::Statuses asm_ir_arr_elem_assignment_header(AsmData* asm_d, const char* v
 Status::Statuses asm_ir_swap_last_stk_vals(AsmData* asm_d) {
     assert(asm_d);
 
-    ADD_IR_BLOCK(.type = IRNodeType::MOV, .src = {{.type = IRVal::STK}, {}},
-                                          .dest = {{.type = IRVal::STK}, {}});
+    ADD_IR_BLOCK(.type = IRNodeType::SWAP, .src = {{.type = IRVal::STK}, {.type = IRVal::STK}});
 
     return Status::NORMAL_WORK;
 }
@@ -393,7 +393,7 @@ Status::Statuses asm_ir_if_begin(AsmData* asm_d, AsmScopeData* scope) {
 
     size_t fixup_index = 0;
     IRVal dest = {.type = IRVal::ADDR, .num = {.addr = 0}}; //< addr will be corrected in if_end()
-    ADD_IR_BLOCK_GET_INDEX(&fixup_index, .type = IRNodeType::JUMP, .dest = {dest, {}},
+    ADD_IR_BLOCK_GET_INDEX(&fixup_index, .type = IRNodeType::JUMP, .dest = dest,
                                          .subtype = {.jmp = JmpType::IS_ZERO});
 
     if (!scope->end_fixups.push_back(&fixup_index))
@@ -424,7 +424,7 @@ Status::Statuses asm_ir_if_else_begin(AsmData* asm_d, AsmScopeData* scope) {
 
     size_t fixup_index = 0;
     IRVal dest = {.type = IRVal::ADDR, .num = {.addr = 0}}; //< addr will be corrected in if_end()
-    ADD_IR_BLOCK_GET_INDEX(&fixup_index, .type = IRNodeType::JUMP, .dest = {dest, {}},
+    ADD_IR_BLOCK_GET_INDEX(&fixup_index, .type = IRNodeType::JUMP, .dest = dest,
                                          .subtype = {.jmp = JmpType::IS_ZERO});
 
     if (!scope->middle_fixups.push_back(&fixup_index))
@@ -439,7 +439,7 @@ Status::Statuses asm_ir_if_else_middle(AsmData* asm_d, AsmScopeData* scope) {
 
     size_t fixup_index = 0;
     IRVal dest = {.type = IRVal::ADDR, .num = {.addr = 0}};
-    ADD_IR_BLOCK_GET_INDEX(&fixup_index, .type = IRNodeType::JUMP, .dest = {dest, {}},
+    ADD_IR_BLOCK_GET_INDEX(&fixup_index, .type = IRNodeType::JUMP, .dest = dest,
                                          .subtype = {.jmp = JmpType::UNCONDITIONAL});
 
     if (!scope->end_fixups.push_back(&fixup_index))
@@ -462,7 +462,7 @@ Status::Statuses asm_ir_do_if_check_clause(AsmData* asm_d, AsmScopeData* scope) 
 
     size_t fixup_index = 0;
     IRVal dest = {.type = IRVal::ADDR, .num = {.addr = 0}}; //< addr will be corrected in if_end()
-    ADD_IR_BLOCK_GET_INDEX(&fixup_index, .type = IRNodeType::JUMP, .dest = {dest, {}},
+    ADD_IR_BLOCK_GET_INDEX(&fixup_index, .type = IRNodeType::JUMP, .dest = dest,
                                          .subtype = {.jmp = JmpType::IS_NOT_ZERO});
 
     if (!scope->end_fixups.push_back(&fixup_index))
@@ -493,9 +493,11 @@ Status::Statuses asm_ir_while_check_clause(AsmData* asm_d, AsmScopeData* scope) 
     assert(asm_d);
     assert(scope);
 
+    ADD_IR_BLOCK(.type = IRNodeType::SET_FLAGS_CMP_WITH_ZERO, .src = {{.type = IRVal::STK}, {}});
+
     size_t fixup_index = 0;
     IRVal dest = {.type = IRVal::ADDR, .num = {.addr = 0}}; //< addr will be corrected in if_end()
-    ADD_IR_BLOCK_GET_INDEX(&fixup_index, .type = IRNodeType::JUMP, .dest = {dest, {}},
+    ADD_IR_BLOCK_GET_INDEX(&fixup_index, .type = IRNodeType::JUMP, .dest = dest,
                                          .subtype = {.jmp = JmpType::IS_ZERO});
 
     if (!scope->end_fixups.push_back(&fixup_index))
@@ -510,7 +512,7 @@ Status::Statuses asm_ir_while_end(AsmData* asm_d, AsmScopeData* scope) {
 
     IRVal dest = {.type = IRVal::ADDR, .num = {.addr = scope->begin_i}};
 
-    ADD_IR_BLOCK(.type = IRNodeType::JUMP, .dest = {dest, {}},
+    ADD_IR_BLOCK(.type = IRNodeType::JUMP, .dest = dest,
                                            .subtype = {.jmp = JmpType::UNCONDITIONAL});
 
     ADD_IR_BLOCK_GET_INDEX(&scope->end_i, .type = IRNodeType::NONE);
@@ -527,9 +529,11 @@ Status::Statuses asm_ir_while_else_check_clause(AsmData* asm_d, AsmScopeData* sc
     assert(asm_d);
     assert(scope);
 
+    ADD_IR_BLOCK(.type = IRNodeType::SET_FLAGS_CMP_WITH_ZERO, .src = {{.type = IRVal::STK}, {}});
+
     size_t fixup_index = 0;
     IRVal dest = {.type = IRVal::ADDR, .num = {.addr = 0}}; //< addr will be corrected in if_end()
-    ADD_IR_BLOCK_GET_INDEX(&fixup_index, .type = IRNodeType::JUMP, .dest = {dest, {}},
+    ADD_IR_BLOCK_GET_INDEX(&fixup_index, .type = IRNodeType::JUMP, .dest = dest,
                                          .subtype = {.jmp = JmpType::IS_ZERO});
 
     if (!scope->middle_fixups.push_back(&fixup_index))
@@ -553,7 +557,7 @@ Status::Statuses asm_ir_Continue(AsmData* asm_d, AsmScopeData* scope) {
 
     IRVal dest = {.type = IRVal::ADDR, .num = {.addr = scope->begin_i}};
 
-    ADD_IR_BLOCK(.type = IRNodeType::JUMP, .dest = {dest, {}},
+    ADD_IR_BLOCK(.type = IRNodeType::JUMP, .dest = dest,
                  .subtype = {.jmp = JmpType::UNCONDITIONAL});
 
     return Status::NORMAL_WORK;
@@ -565,7 +569,7 @@ Status::Statuses asm_ir_Break(AsmData* asm_d, AsmScopeData* scope) {
 
     size_t fixup_index = 0;
     IRVal dest = {.type = IRVal::ADDR, .num = {.addr = 0}};
-    ADD_IR_BLOCK_GET_INDEX(&fixup_index, .type = IRNodeType::JUMP, .dest = {dest, {}},
+    ADD_IR_BLOCK_GET_INDEX(&fixup_index, .type = IRNodeType::JUMP, .dest = dest,
                                          .subtype = {.jmp = JmpType::UNCONDITIONAL});
 
     if (!scope->end_fixups.push_back(&fixup_index))
@@ -602,7 +606,7 @@ Status::Statuses asm_ir_get_returned_value(AsmData* asm_d) {
 
     IRVal dest  = {.type = IRVal::STK};
 
-    ADD_IR_BLOCK(.type = IRNodeType::MOV, .src = {src, {}}, .dest = {dest, {}});
+    ADD_IR_BLOCK(.type = IRNodeType::MOV, .src = {src, {}}, .dest = dest);
 
     return Status::NORMAL_WORK;
 };
@@ -632,15 +636,10 @@ Status::Statuses asm_ir_read_double(AsmData* asm_d, const bool is_val_needed) {
 
     IRVal dest = {.type = IRVal::REG, .num = {.reg = 0}};
 
-    ADD_IR_BLOCK(.type = IRNodeType::READ_DOUBLE, .dest = {dest, {}});
+    if (is_val_needed)
+        dest = {.type = IRVal::STK, .num = {}};
 
-    if (is_val_needed) {
-        IRVal src = dest;
-
-        dest = {.type = IRVal::STK};
-
-        ADD_IR_BLOCK(.type = IRNodeType::MOV, .src = {src, {}}, .dest = {dest, {}});
-    }
+    ADD_IR_BLOCK(.type = IRNodeType::READ_DOUBLE, .dest = dest);
 
     return Status::NORMAL_WORK;
 }
@@ -651,7 +650,7 @@ Status::Statuses asm_ir_write_returned_value(AsmData* asm_d) {
 
     IRVal dest = {.type = IRVal::REG, .num = {.reg = 0}};
 
-    ADD_IR_BLOCK(.type = IRNodeType::MOV, .src = {src, {}}, .dest = {dest, {}});
+    ADD_IR_BLOCK(.type = IRNodeType::MOV, .src = {src, {}}, .dest = dest);
 
     return Status::NORMAL_WORK;
 }

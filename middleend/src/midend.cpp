@@ -25,7 +25,7 @@ Status::Statuses mid_process(const char* input_filename, const char* output_file
     char* text = nullptr;
     STATUS_CHECK(read_tree(&data.tree, &data.vars, &text, input_filename), LOCAL_DTOR_());
 
-    STATUS_CHECK(tree_addon_dump_dot(&data.vars, &data.tree));
+    //STATUS_CHECK(tree_addon_dump_dot(&data.vars, &data.tree));
 
     STATUS_CHECK(diff_simplify(&data), LOCAL_DTOR_());
 
@@ -37,7 +37,7 @@ Status::Statuses mid_process(const char* input_filename, const char* output_file
 
     STATUS_CHECK(detect_dead_code(&data), LOCAL_DTOR_());
 
-    STATUS_CHECK(tree_addon_dump_dot(&data.vars, &data.tree));
+    //STATUS_CHECK(tree_addon_dump_dot(&data.vars, &data.tree));
 
     STATUS_CHECK(write_tree(&data.tree, &data.vars, output_filename), LOCAL_DTOR_());
 

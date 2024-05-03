@@ -1,31 +1,22 @@
-#ifndef IR_H_
-#define IR_H_
+#ifndef IR_OBJECTS_H_
+#define IR_OBJECTS_H_
 
 #include <stdlib.h>
+#include <assert.h>
+#include <stdio.h>
 #include <math.h>
 
+#include "utils/vector.h"
 #include "objects.h"
 
 enum class IRNodeType {
-    DEFAULT                   = -1, //< POISON
+    DEFAULT                   = -1,
 
-    NONE                      =  0,
-    START                     =  1,
-    END                       =  2,
-    BEGIN_FUNC_DEF            =  3,
-    END_FUNC_DEF              =  4,
-    CALL_FUNC                 =  5,
-    RET                       =  6,
-    INIT_MEM_FOR_GLOBALS      =  7,
-    COUNT_ARR_ELEM_ADDR_CONST =  8,
-    ARR_ELEM_ADDR_ADD_INDEX   =  9,
-    MOV                       = 10,
-    STORE_CMP_RES             = 11,
-    SET_FLAGS_CMP_WITH_ZERO   = 12,
-    MATH_OPER                 = 13,
-    JUMP                      = 14,
-    READ_DOUBLE               = 15,
-    PRINT_DOUBLE              = 16,
+#define IR_BLOCK(num_, name_, ...) name_ = num_,
+
+#include "ir_blocks.h"
+
+#undef IR_BLOCK
 };
 
 enum class MathOper {
@@ -91,7 +82,7 @@ struct IRNode {
     IRNodeType type = IRNodeType::NONE;
 
     IRVal src[2]  = {{}, {}};
-    IRVal dest[2] = {{}, {}};
+    IRVal dest = {};
 
     union {
         MathOper math = MathOper::NONE;
@@ -100,7 +91,6 @@ struct IRNode {
     } subtype;
 
     DebugInfo debug_info = {};
-    String comment = {};
 };
 
-#endif //< #ifndef IR_H_
+#endif //< #ifndef IR_OBJECTS_H_

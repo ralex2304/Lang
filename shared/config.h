@@ -13,8 +13,8 @@
 
 #endif //< #ifdef DEBUG
 
-// 8
-#define ASM_TAB "        "
+// 8 * 2
+#define ASM_TAB "    ""    ""    ""    "
 
 const double ASM_EPSILON = 0.000001;
 

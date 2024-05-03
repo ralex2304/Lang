@@ -86,16 +86,15 @@ void list_dump(const List* list, const VarCodeData call_data) {
     }
 
     LOG_("        ""  i | prev | next | elem       | src[0]           | src[1]           |"
-                                                   " dest[0]          | dest[1]          | subtype\n");
+                                                   " dest             | subtype\n");
 
     for (ssize_t i = 0; i < list->capacity; i++) {
         LOG_("        ""%3zd | %4zd | %4zd | type = %3d | ",
              i, list->arr[i].prev, list->arr[i].next, (int)list->arr[i].elem.type);
 
-        LOG_VAL_(list->arr[i].elem.src + 0);
-        LOG_VAL_(list->arr[i].elem.src + 1);
-        LOG_VAL_(list->arr[i].elem.dest + 0);
-        LOG_VAL_(list->arr[i].elem.dest + 1);
+        LOG_VAL_(&list->arr[i].elem.src[0]);
+        LOG_VAL_(&list->arr[i].elem.src[1]);
+        LOG_VAL_(&list->arr[i].elem.dest);
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wswitch-enum"
@@ -226,10 +225,9 @@ bool list_dump_dot(const List* list, char* img_filename) {
             FPRINTF_("<tr><td colspan=\"2\">elem = PZN</td></tr>\n");
         } else {
             FPRINTF_("<tr><td colspan=\"2\">elem.type = %d</td></tr>\n", (int)list->arr[phys_i].elem.type);
-            PRINT_VAL_("src[0]", list->arr[phys_i].elem.src + 0);
-            PRINT_VAL_("src[1]", list->arr[phys_i].elem.src + 1);
-            PRINT_VAL_("dest[0]", list->arr[phys_i].elem.dest + 0);
-            PRINT_VAL_("dest[1]", list->arr[phys_i].elem.dest + 1);
+            PRINT_VAL_("src[0]", &list->arr[phys_i].elem.src[0]);
+            PRINT_VAL_("src[1]", &list->arr[phys_i].elem.src[1]);
+            PRINT_VAL_("dest",   &list->arr[phys_i].elem.dest);
         }
 
         #pragma GCC diagnostic push

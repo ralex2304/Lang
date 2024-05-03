@@ -3,10 +3,10 @@
 
 #include <assert.h>
 
-#include "../ir_objects.h"
+#include "objects.h"
 #include "utils/statuses.h"
 #include "file/file.h"
-#include "../../../../List/list.h"
+#include "List/list.h"
 
 Status::Statuses write_ir(List* ir, const char* filename);
 
