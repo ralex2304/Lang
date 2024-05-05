@@ -425,6 +425,8 @@ Status::Statuses ir_block_do_if_check_clause(IrData* ir_d, IRScopeData* scope) {
         return Status::MEMORY_EXCEED;
 
     // exit block
+    ADD_IR_BLOCK(.type = IRNodeType::MOV, .src = {{.type = IRVal::CONST, .num = {.k_double = -1}}, {}},
+                                          .dest = {.type = IRVal::REG, .num = {.reg = 0}});
     ADD_IR_BLOCK(.type = IRNodeType::END);
 
 

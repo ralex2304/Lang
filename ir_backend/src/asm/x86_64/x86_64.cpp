@@ -17,7 +17,8 @@ enum CompRes {
     TRUE   =  1,
 };
 
-static Status::Statuses store_cmp_res_prepare_regs_(BackData* data, IRNode* block);
+static Status::Statuses store_cmp_res_prepare_regs_(BackData* data, IRNode* block,
+                                                    size_t* op1_reg, size_t* op2_reg);
 
 static Status::Statuses get_comp_params_(const CmpType cmp_type, CompRes* with_zero, CompRes* opers,
                                          const char** oper);
@@ -147,7 +148,8 @@ Status::Statuses asm_x86_64_INIT_MEM_FOR_GLOBALS(BackData* data, IRNode* block, 
 
     LST_NO_TAB("section .rodata\n\n");
 
-    LST_NO_TAB("EPSILON: dq 0x%lx ; %lg\n\n", X86_64_Mov::get_bin_double(ASM_EPSILON), ASM_EPSILON);
+    LST_NO_TAB("EPSILON: dq 0x%lx ; %lg\n", X86_64_Mov::get_bin_double(ASM_EPSILON), ASM_EPSILON);
+    LST_NO_TAB("DOUBLE_NEG_CONST: dq -1 >> 63, 0\n\n");
 
     return Status::NORMAL_WORK;
 }
@@ -239,10 +241,10 @@ Status::Statuses asm_x86_64_SWAP(BackData* data, IRNode* block, size_t) {
     if (block->src[0].type == IRVal::STK && block->src[1].type == IRVal::STK)
         strncpy(str_src0, "[rsp + 8]", STR_MAXLEN);
     else
-        STATUS_CHECK(X86_64_Mov::get_dest(str_src0, &block->src[0],
+        STATUS_CHECK(X86_64_Mov::get_location(str_src0, &block->src[0],
                  "SWAP must have src[0] with type LOCAL_VAR, GLOBAL_VAR, ARG_VAR, ARR_VAR, STK or REG"));
 
-    STATUS_CHECK(X86_64_Mov::get_dest(str_src1, &block->src[1],
+    STATUS_CHECK(X86_64_Mov::get_location(str_src1, &block->src[1],
                  "SWAP must have src[1] with type LOCAL_VAR, GLOBAL_VAR, ARG_VAR, ARR_VAR, STK or REG"));
 
     if (block->src[0].type != IRVal::REG && block->src[1].type != IRVal::REG) {
@@ -259,25 +261,57 @@ Status::Statuses asm_x86_64_SWAP(BackData* data, IRNode* block, size_t) {
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses store_cmp_res_prepare_regs_(BackData* data, IRNode* block) {
+static Status::Statuses store_cmp_res_prepare_regs_(BackData* data, IRNode* block,
+                                                    size_t* op1_reg, size_t* op2_reg) {
     assert(data);
     assert(block);
+    assert(op1_reg);
+    assert(op2_reg);
 
-    LST("movsd xmm2, [rsp]\n");
-    LST("movsd xmm1, [rsp + 8]\n");
+    using namespace X86_64_Mov;
 
-    LST("movsd xmm3, xmm1\n");
-    LST("subsd xmm3, xmm2\n");
-    LST("movsd [rsp], xmm3\n");
+    if (block->src[0].type == IRVal::REG)
+        *op1_reg = block->src[0].num.reg;
+    else {
+        *op1_reg = 1;
 
-    LST("mov rdx, -1 >> 1\n");
-    LST("and qword [rsp], rdx\n");
-    LST("movsd xmm3, [rsp]\n");
-    LST("add rsp, 16\n");
+        char str_src0[STR_MAXLEN + 1] = {};
 
-    // xmm1 - op1
-    // xmm2 - op2
-    // xmm3 - fabs(op1 - op2)
+        if (block->src[0].type == IRVal::STK && block->src[1].type == IRVal::STK)
+            strncpy(str_src0, "[rsp + 8]", STR_MAXLEN);
+        else if (block->src[0].type == IRVal::CONST)
+            snprintf(str_src0, STR_MAXLEN, "0x%lx", get_bin_double(block->src[0].num.k_double));
+        else
+            STATUS_CHECK(X86_64_Mov::get_location(str_src0, &block->src[0],"STORE_CMP_RES must have "
+                     "src[0] with type CONST, STK, REG, LOCAL_VAR, GLOBAL_VAR, ARG_VAR or ARR_VAR"));
+
+        LST("movsd xmm%zu, %s\n", *op1_reg, str_src0);
+    }
+
+    if (block->src[1].type == IRVal::REG)
+        *op2_reg = block->src[1].num.reg;
+    else {
+        char str_src1[STR_MAXLEN + 2] = {};
+
+        if (block->src[0].type == IRVal::CONST)
+            snprintf(str_src1, STR_MAXLEN, "0x%lx", get_bin_double(block->src[1].num.k_double));
+        else
+            STATUS_CHECK(X86_64_Mov::get_location(str_src1, &block->src[1], "STORE_CMP_RES must have "
+                        "src[1] with type CONST, STK, REG, LOCAL_VAR, GLOBAL_VAR, ARG_VAR or ARR_VAR"));
+
+        LST("movsd xmm%zu, %s\n", *op2_reg, str_src1);
+    }
+
+    ssize_t stk_vals_needed = (block->src[0].type == IRVal::STK)
+                            + (block->src[1].type == IRVal::STK) - 1; //< -1 for result
+
+    if (stk_vals_needed != 0)
+        LST("add rsp, %zu\n", stk_vals_needed * 8);
+
+    LST("movsd xmm3, xmm%zu\n", *op1_reg);
+    LST("subsd xmm3, xmm%zu\n", *op2_reg);
+
+    LST("andpd xmm3, [DOUBLE_NEG_CONST]\n");
 
     return Status::NORMAL_WORK;
 }
@@ -318,11 +352,6 @@ Status::Statuses asm_x86_64_STORE_CMP_RES(BackData* data, IRNode* block, size_t 
     assert(data);
     assert(block);
 
-    // TODO CMP not only with stack
-
-    if (block->src[0].type != IRVal::STK || block->src[1].type != IRVal::STK)
-        ERR("STORE_CMP_RES must have src[0] and src[1] with type STK");
-
     CompRes comp_with_zero = CompRes::INDIFF;
     CompRes comp_operands  = CompRes::INDIFF;
     const char* oper_str = nullptr;
@@ -330,9 +359,11 @@ Status::Statuses asm_x86_64_STORE_CMP_RES(BackData* data, IRNode* block, size_t 
 
     LST("; operands comparison: op1 %s op2\n", oper_str);
 
-    STATUS_CHECK(store_cmp_res_prepare_regs_(data, block));
+    size_t op1_reg = 0;
+    size_t op2_reg = 0;
+    STATUS_CHECK(store_cmp_res_prepare_regs_(data, block, &op1_reg, &op2_reg));
 
-    LST("; xmm1 - op1; xmm2 - op2; xmm3 - fabs(op1 - op2)\n\n");
+    LST("; xmm%zu - op1; xmm%zu - op2; xmm3 - fabs(op1 - op2)\n\n", op1_reg, op2_reg);
 
     if (comp_with_zero != CompRes::INDIFF) {
         LST("comisd xmm3, [EPSILON] ; fabs(op1 - op2) {'<' | '>'} EPSILON\n");
@@ -341,7 +372,7 @@ Status::Statuses asm_x86_64_STORE_CMP_RES(BackData* data, IRNode* block, size_t 
     }
 
     if (comp_operands != CompRes::INDIFF) {
-        LST("comisd xmm1, xmm2 ; op1 {'<' | '>'} op2\n");
+        LST("comisd xmm%zu, xmm%zu ; op1 {'<' | '>'} op2\n", op1_reg, op2_reg);
 
         LST("%s ___compare_%zu_false\n\n", (comp_operands == CompRes::FALSE) ? "jnc" : "jc", phys_i);
     }
@@ -349,13 +380,11 @@ Status::Statuses asm_x86_64_STORE_CMP_RES(BackData* data, IRNode* block, size_t 
     if (block->dest.type != IRVal::STK)
         ERR("STORE_CMP_RES must have dest with type STK");
 
-    LST("sub rsp, 8\n");
     LST("mov rdx, 0x%lx ; %lg\n", X86_64_Mov::get_bin_double(1), 1.0);
     LST("mov qword [rsp], rdx\n");
     LST("jmp ___compare_%zu_end\n\n", phys_i);
 
     LST_NO_TAB("___compare_%zu_false:\n", phys_i);
-    LST("sub rsp, 8\n");
     LST("mov rdx, 0x%lx ; %lg\n", X86_64_Mov::get_bin_double(0), 0.0);
     LST("mov qword [rsp], rdx\n");
 
@@ -370,7 +399,7 @@ Status::Statuses asm_x86_64_SET_FLAGS_CMP_WITH_ZERO(BackData* data, IRNode* bloc
 
     char str_src[STR_MAXLEN + 1] = {};
 
-    STATUS_CHECK(X86_64_Mov::get_dest(str_src, &block->src[0], "SET_FLAGS_CMP_WITH_ZERO must have "
+    STATUS_CHECK(X86_64_Mov::get_location(str_src, &block->src[0], "SET_FLAGS_CMP_WITH_ZERO must have "
                  "src[0] with type STK, REG, LOCAL_VAR, GLOBAL_VAR, ARG_VAR or ARR_VAR"));
 
     LST("mov rdx, -1 >> 1\n");
@@ -406,13 +435,13 @@ Status::Statuses math_binary_oper_(BackData* data, IRNode* block, const char* st
     if (block->src[0].type == IRVal::STK && block->src[1].type == IRVal::STK)
         strncpy(str_src0, "[rsp + 8]", STR_MAXLEN);
     else
-        STATUS_CHECK(X86_64_Mov::get_dest(str_src0, &block->src[0],
+        STATUS_CHECK(X86_64_Mov::get_location(str_src0, &block->src[0],
                  "MATH_OPER must have src[0] with type STK, REG, LOCAL_VAR, GLOBAL_VAR, ARG_VAR or ARR_VAR"));
 
-    STATUS_CHECK(X86_64_Mov::get_dest(str_src1, &block->src[1],
+    STATUS_CHECK(X86_64_Mov::get_location(str_src1, &block->src[1],
                  "MATH_OPER must have src[1] with type STK, REG, LOCAL_VAR, GLOBAL_VAR, ARG_VAR or ARR_VAR"));
 
-    STATUS_CHECK(X86_64_Mov::get_dest(str_dest, &block->dest,
+    STATUS_CHECK(X86_64_Mov::get_location(str_dest, &block->dest,
                  "MATH_OPER must have dest with type STK, REG, LOCAL_VAR, GLOBAL_VAR, ARG_VAR or ARR_VAR"));
 
     ssize_t needed_stk_values = + (block->src[0].type == IRVal::STK)
@@ -453,10 +482,10 @@ Status::Statuses math_unary_oper_(BackData* data, IRNode* block, const char* str
     char str_src [STR_MAXLEN + 1] = {};
     char str_dest[STR_MAXLEN + 1] = {};
 
-    STATUS_CHECK(X86_64_Mov::get_dest(str_src, &block->src[0],
+    STATUS_CHECK(X86_64_Mov::get_location(str_src, &block->src[0],
                  "MATH_OPER must have src[0] with type STK, REG, LOCAL_VAR, GLOBAL_VAR, ARG_VAR or ARR_VAR"));
 
-    STATUS_CHECK(X86_64_Mov::get_dest(str_dest, &block->dest,
+    STATUS_CHECK(X86_64_Mov::get_location(str_dest, &block->dest,
                  "MATH_OPER must have dest with type STK, REG, LOCAL_VAR, GLOBAL_VAR, ARG_VAR or ARR_VAR"));
 
 
@@ -493,10 +522,10 @@ static Status::Statuses math_unary_bitwise_oper_(BackData* data, IRNode* block, 
     char str_src [STR_MAXLEN + 1] = {};
     char str_dest[STR_MAXLEN + 1] = {};
 
-    STATUS_CHECK(X86_64_Mov::get_dest(str_src, &block->src[0],
+    STATUS_CHECK(X86_64_Mov::get_location(str_src, &block->src[0],
                  "MATH_OPER must have src[0] with type STK, REG, LOCAL_VAR, GLOBAL_VAR, ARG_VAR or ARR_VAR"));
 
-    STATUS_CHECK(X86_64_Mov::get_dest(str_dest, &block->dest,
+    STATUS_CHECK(X86_64_Mov::get_location(str_dest, &block->dest,
                  "MATH_OPER must have dest with type STK, REG, LOCAL_VAR, GLOBAL_VAR, ARG_VAR or ARR_VAR"));
 
     if (block->dest.type == IRVal::REG) {
@@ -605,7 +634,7 @@ Status::Statuses asm_x86_64_READ_DOUBLE(BackData* data, IRNode* block, size_t) {
     LST("call doubleio_in\n");
 
     char str_dest[STR_MAXLEN + 1] = {};
-    STATUS_CHECK(X86_64_Mov::get_dest(str_dest, &block->dest,
+    STATUS_CHECK(X86_64_Mov::get_location(str_dest, &block->dest,
             "READ_DOUBLE must have dest with type STK, REG, LOCAL_VAR, GLOBAL_VAR, ARG_VAR or ARR_VAR"));
 
     if (block->dest.type == IRVal::STK)
@@ -629,7 +658,7 @@ Status::Statuses asm_x86_64_PRINT_DOUBLE(BackData* data, IRNode* block, size_t) 
     }
 
     char str_src[STR_MAXLEN + 1] = {};
-    STATUS_CHECK(X86_64_Mov::get_dest(str_src, &block->src[0],  "PRINT_DOUBLE must have src[0] "
+    STATUS_CHECK(X86_64_Mov::get_location(str_src, &block->src[0],  "PRINT_DOUBLE must have src[0] "
                  "with type CONST, LOCAL_VAR, GLOBAL_VAR, ARG_VAR, ARR_VAR, STK or REG"));
 
     LST("movsd xmm0, %s\n", str_src);

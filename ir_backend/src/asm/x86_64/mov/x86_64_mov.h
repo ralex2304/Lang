@@ -17,7 +17,7 @@ namespace X86_64_Mov {
         return res;
     }
 
-    Status::Statuses get_dest(char* str, IRVal* val, const char* err_msg);
+    Status::Statuses get_location(char* str, IRVal* val, const char* err_msg);
 
     bool is_irval_equal(IRVal* val1, IRVal* val2);
 

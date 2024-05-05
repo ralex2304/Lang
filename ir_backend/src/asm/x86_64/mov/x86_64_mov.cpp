@@ -3,7 +3,7 @@
 
 #include "../x86_64_utils.h"
 
-Status::Statuses X86_64_Mov::get_dest(char* str, IRVal* val, const char* err_msg) {
+Status::Statuses X86_64_Mov::get_location(char* str, IRVal* val, const char* err_msg) {
 
     switch (val->type) {
         case IRVal::LOCAL_VAR:
@@ -81,7 +81,7 @@ Status::Statuses X86_64_Mov::src_const(BackData* data, IRVal* src, IRVal* dest) 
 
     char str_dest[STR_MAXLEN + 1] = {};
 
-    STATUS_CHECK(get_dest(str_dest, dest,
+    STATUS_CHECK(get_location(str_dest, dest,
                  "MOV must have dest with type STK, REG, LOCAL_VAR, GLOBAL_VAR, ARG_VAR or ARR_VAR"));
 
     if (dest->type == IRVal::STK)
@@ -105,7 +105,7 @@ Status::Statuses X86_64_Mov::src_var(BackData* data, const char* str_src, IRVal*
 
     char str_dest[STR_MAXLEN + 1] = {};
 
-    STATUS_CHECK(get_dest(str_dest, dest,
+    STATUS_CHECK(get_location(str_dest, dest,
                  "MOV must have dest with type STK, REG, LOCAL_VAR, GLOBAL_VAR, ARG_VAR or ARR_VAR"));
 
     if (dest->type == IRVal::STK)
@@ -134,7 +134,7 @@ Status::Statuses X86_64_Mov::src_stk(BackData* data, IRVal* src, IRVal* dest) {
 
     char str_dest[STR_MAXLEN + 1] = {};
 
-    STATUS_CHECK(get_dest(str_dest, dest,
+    STATUS_CHECK(get_location(str_dest, dest,
                  "MOV must have dest with type STK, REG, LOCAL_VAR, GLOBAL_VAR, ARG_VAR or ARR_VAR"));
 
     LST("mov rdx, [rsp]\n");
@@ -160,7 +160,7 @@ Status::Statuses X86_64_Mov::src_reg(BackData* data, IRVal* src, IRVal* dest) {
 
     char str_dest[STR_MAXLEN + 1] = {};
 
-    STATUS_CHECK(get_dest(str_dest, dest,
+    STATUS_CHECK(get_location(str_dest, dest,
                  "MOV must have dest with type STK, REG, LOCAL_VAR, GLOBAL_VAR, ARG_VAR or ARR_VAR"));
 
     if (dest->type == IRVal::STK)
