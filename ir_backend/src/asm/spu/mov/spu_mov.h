@@ -16,13 +16,13 @@ namespace SPU_Mov {
         return SPU_REGS[num];
     };
 
-    Status::Statuses src_const(BackData* data, IRVal* src, IRVal* dest);
+    Status::Statuses src_const(IRBackData* data, IRVal* src, IRVal* dest);
 
-    Status::Statuses src_stk  (BackData* data, IRVal* src0, IRVal* src1, IRVal* dest);
+    Status::Statuses src_stk  (IRBackData* data, IRVal* src0, IRVal* src1, IRVal* dest);
 
-    Status::Statuses src_reg  (BackData* data, IRVal* src, IRVal* dest);
+    Status::Statuses src_reg  (IRBackData* data, IRVal* src, IRVal* dest);
 
-    Status::Statuses src_var  (BackData* data, IRVal* src, IRVal* dest);
+    Status::Statuses src_var  (IRBackData* data, IRVal* src, IRVal* dest);
 };
 
 #endif //< ##ifndef SPU_MOV_H_

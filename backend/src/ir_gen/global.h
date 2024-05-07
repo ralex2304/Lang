@@ -4,6 +4,6 @@
 #include "utils/statuses.h"
 #include "../backend_objects.h"
 
-Status::Statuses generate_ir(BackData* data);
+Status::Statuses generate_ir(IRBackData* data);
 
 #endif //< #ifndef IR_GLOBAL_H_

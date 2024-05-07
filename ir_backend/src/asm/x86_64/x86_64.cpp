@@ -17,7 +17,7 @@ enum CompRes {
     TRUE   =  1,
 };
 
-static Status::Statuses store_cmp_res_prepare_regs_(BackData* data, IRNode* block,
+static Status::Statuses store_cmp_res_prepare_regs_(IRBackData* data, IRNode* block,
                                                     size_t* op1_reg, size_t* op2_reg);
 
 static Status::Statuses get_comp_params_(const CmpType cmp_type, CompRes* with_zero, CompRes* opers,
@@ -32,7 +32,7 @@ register usage:
     xmm1, xmm2, xmm3, xmm4 - calculations
 */
 
-Status::Statuses asm_x86_64_begin_ir_block(BackData* data, [[maybe_unused]] IRNode* block, size_t phys_y) {
+Status::Statuses asm_x86_64_begin_ir_block(IRBackData* data, [[maybe_unused]] IRNode* block, size_t phys_y) {
     assert(data);
     assert(block);
 
@@ -41,14 +41,14 @@ Status::Statuses asm_x86_64_begin_ir_block(BackData* data, [[maybe_unused]] IRNo
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_x86_64_NONE([[maybe_unused]] BackData* data, [[maybe_unused]] IRNode* block, size_t) {
+Status::Statuses asm_x86_64_NONE([[maybe_unused]] IRBackData* data, [[maybe_unused]] IRNode* block, size_t) {
     assert(data);
     assert(block);
 
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_x86_64_START(BackData* data, [[maybe_unused]] IRNode* block, size_t) {
+Status::Statuses asm_x86_64_START(IRBackData* data, [[maybe_unused]] IRNode* block, size_t) {
     assert(data);
     assert(block);
 
@@ -67,7 +67,7 @@ Status::Statuses asm_x86_64_START(BackData* data, [[maybe_unused]] IRNode* block
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_x86_64_END(BackData* data, [[maybe_unused]] IRNode* block, size_t) {
+Status::Statuses asm_x86_64_END(IRBackData* data, [[maybe_unused]] IRNode* block, size_t) {
     assert(data);
     assert(block);
 
@@ -80,7 +80,7 @@ Status::Statuses asm_x86_64_END(BackData* data, [[maybe_unused]] IRNode* block, 
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_x86_64_BEGIN_FUNC_DEF(BackData* data, IRNode* block, size_t phys_i) {
+Status::Statuses asm_x86_64_BEGIN_FUNC_DEF(IRBackData* data, IRNode* block, size_t phys_i) {
     assert(data);
     assert(block);
 
@@ -96,7 +96,7 @@ Status::Statuses asm_x86_64_BEGIN_FUNC_DEF(BackData* data, IRNode* block, size_t
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_x86_64_END_FUNC_DEF(BackData* data, [[maybe_unused]]IRNode* block, size_t) {
+Status::Statuses asm_x86_64_END_FUNC_DEF(IRBackData* data, [[maybe_unused]] IRNode* block, size_t) {
     assert(data);
     assert(block);
 
@@ -109,7 +109,7 @@ Status::Statuses asm_x86_64_END_FUNC_DEF(BackData* data, [[maybe_unused]]IRNode*
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_x86_64_CALL_FUNC(BackData* data, IRNode* block, size_t) {
+Status::Statuses asm_x86_64_CALL_FUNC(IRBackData* data, IRNode* block, size_t) {
     assert(data);
     assert(block);
 
@@ -123,7 +123,7 @@ Status::Statuses asm_x86_64_CALL_FUNC(BackData* data, IRNode* block, size_t) {
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_x86_64_RET(BackData* data, [[maybe_unused]] IRNode* block, size_t) {
+Status::Statuses asm_x86_64_RET(IRBackData* data, [[maybe_unused]] IRNode* block, size_t) {
     assert(data);
     assert(block);
 
@@ -133,7 +133,7 @@ Status::Statuses asm_x86_64_RET(BackData* data, [[maybe_unused]] IRNode* block, 
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_x86_64_INIT_MEM_FOR_GLOBALS(BackData* data, IRNode* block, size_t) {
+Status::Statuses asm_x86_64_INIT_MEM_FOR_GLOBALS(IRBackData* data, IRNode* block, size_t) {
     assert(data);
     assert(block);
 
@@ -148,13 +148,15 @@ Status::Statuses asm_x86_64_INIT_MEM_FOR_GLOBALS(BackData* data, IRNode* block, 
 
     LST_NO_TAB("section .rodata\n\n");
 
+    LST_NO_TAB("align 8\n");
     LST_NO_TAB("EPSILON: dq 0x%lx ; %lg\n", X86_64_Mov::get_bin_double(ASM_EPSILON), ASM_EPSILON);
-    LST_NO_TAB("DOUBLE_NEG_CONST: dq -1 >> 63, 0\n\n");
+    LST_NO_TAB("align 16\n");
+    LST_NO_TAB("DOUBLE_NEG_CONST: dq -1 >> 1, 0\n\n");
 
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_x86_64_COUNT_ARR_ELEM_ADDR_CONST(BackData* data, IRNode* block, size_t) {
+Status::Statuses asm_x86_64_COUNT_ARR_ELEM_ADDR_CONST(IRBackData* data, IRNode* block, size_t) {
     assert(data);
     assert(block);
 
@@ -168,7 +170,7 @@ Status::Statuses asm_x86_64_COUNT_ARR_ELEM_ADDR_CONST(BackData* data, IRNode* bl
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_x86_64_ARR_ELEM_ADDR_ADD_INDEX(BackData* data, IRNode* block, size_t) {
+Status::Statuses asm_x86_64_ARR_ELEM_ADDR_ADD_INDEX(IRBackData* data, IRNode* block, size_t) {
     assert(data);
     assert(block);
 
@@ -197,26 +199,18 @@ Status::Statuses asm_x86_64_ARR_ELEM_ADDR_ADD_INDEX(BackData* data, IRNode* bloc
                 STATUS_CHECK(X86_64_Mov::func_(data, &block->src[0], &block->dest));    \
                 break
 
-#define CASE_VAR_(name_, ...)                                                   \
-            case IRVal::name_:                                                  \
-                STR_VAR(str_src, __VA_ARGS__);                                  \
-                STATUS_CHECK(X86_64_Mov::src_var(data, str_src, &block->dest)); \
-                break
-
-Status::Statuses asm_x86_64_MOV(BackData* data, IRNode* block, size_t) {
+Status::Statuses asm_x86_64_MOV(IRBackData* data, IRNode* block, size_t) {
     assert(data);
     assert(block);
 
-    char str_src[STR_MAXLEN + 1] = {};
-
     switch (block->src[0].type) {
-        CASE_(    CONST,      src_const);
-        CASE_VAR_(LOCAL_VAR,  LOCAL_VAR_FMT_STR,  block->src[0].num.offset * 8);
-        CASE_VAR_(GLOBAL_VAR, GLOBAL_VAR_FMT_STR, block->src[0].num.offset * 8);
-        CASE_VAR_(ARG_VAR,    ARG_VAR_FMT_STR,    block->src[0].num.offset * 8);
-        CASE_VAR_(ARR_VAR,    ARR_VAR_FMT_STR);
-        CASE_(    STK,        src_stk);
-        CASE_(    REG,        src_reg);
+        CASE_(CONST,      src_const);
+        CASE_(LOCAL_VAR,  src_var);
+        CASE_(GLOBAL_VAR, src_var);
+        CASE_(ARG_VAR,    src_var);
+        CASE_(ARR_VAR,    src_var);
+        CASE_(STK,        src_stk);
+        CASE_(REG,        src_reg);
 
         case IRVal::INT_CONST:
         case IRVal::ADDR:
@@ -229,11 +223,13 @@ Status::Statuses asm_x86_64_MOV(BackData* data, IRNode* block, size_t) {
     return Status::NORMAL_WORK;
 }
 #undef CASE_
-#undef CASE_VAR_
 
-Status::Statuses asm_x86_64_SWAP(BackData* data, IRNode* block, size_t) {
+Status::Statuses asm_x86_64_SWAP(IRBackData* data, IRNode* block, size_t) {
     assert(data);
     assert(block);
+
+    if (block->src[0].type != IRVal::STK && is_irval_equal(&block->src[0], &block->src[1]))
+        ERR("SWAP: src[0] equals to src[1]. Operation is meaningless");
 
     char str_src0[STR_MAXLEN + 1] = {};
     char str_src1[STR_MAXLEN + 1] = {};
@@ -248,20 +244,20 @@ Status::Statuses asm_x86_64_SWAP(BackData* data, IRNode* block, size_t) {
                  "SWAP must have src[1] with type LOCAL_VAR, GLOBAL_VAR, ARG_VAR, ARR_VAR, STK or REG"));
 
     if (block->src[0].type != IRVal::REG && block->src[1].type != IRVal::REG) {
-        LST("movsd xmm1, %s\n", str_src0);
-        LST("movsd xmm2, %s\n", str_src1);
-        LST("movsd %s, xmm2\n", str_src0);
-        LST("movsd %s, xmm1\n", str_src1);
+        LST("movq xmm1, %s\n", str_src0);
+        LST("movq xmm2, %s\n", str_src1);
+        LST("movq %s, xmm2\n", str_src0);
+        LST("movq %s, xmm1\n", str_src1);
     } else {
-        LST("movsd xmm1, %s\n", str_src0);
-        LST("movsd %s, %s\n",   str_src0, str_src1);
-        LST("movsd %s, xmm1\n", str_src1);
+        LST("movq xmm1, %s\n", str_src0);
+        LST("movq %s, %s\n",   str_src0, str_src1);
+        LST("movq%s, xmm1\n", str_src1);
     }
 
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses store_cmp_res_prepare_regs_(BackData* data, IRNode* block,
+static Status::Statuses store_cmp_res_prepare_regs_(IRBackData* data, IRNode* block,
                                                     size_t* op1_reg, size_t* op2_reg) {
     assert(data);
     assert(block);
@@ -277,38 +273,44 @@ static Status::Statuses store_cmp_res_prepare_regs_(BackData* data, IRNode* bloc
 
         char str_src0[STR_MAXLEN + 1] = {};
 
-        if (block->src[0].type == IRVal::STK && block->src[1].type == IRVal::STK)
-            strncpy(str_src0, "[rsp + 8]", STR_MAXLEN);
-        else if (block->src[0].type == IRVal::CONST)
-            snprintf(str_src0, STR_MAXLEN, "0x%lx", get_bin_double(block->src[0].num.k_double));
-        else
-            STATUS_CHECK(X86_64_Mov::get_location(str_src0, &block->src[0],"STORE_CMP_RES must have "
-                     "src[0] with type CONST, STK, REG, LOCAL_VAR, GLOBAL_VAR, ARG_VAR or ARR_VAR"));
+        if (block->src[0].type == IRVal::CONST) {
+            LST("mov rdx, 0x%lx\n", get_bin_double(block->src[0].num.k_double));
+            LST("movq xmm%zu, rdx\n", *op1_reg);
+        } else {
+            if (block->src[0].type == IRVal::STK && block->src[1].type == IRVal::STK)
+                strncpy(str_src0, "[rsp + 8]", STR_MAXLEN);
+            else
+                STATUS_CHECK(X86_64_Mov::get_location(str_src0, &block->src[0],"STORE_CMP_RES must have "
+                        "src[0] with type CONST, STK, REG, LOCAL_VAR, GLOBAL_VAR, ARG_VAR or ARR_VAR"));
 
-        LST("movsd xmm%zu, %s\n", *op1_reg, str_src0);
+            LST("movq xmm%zu, %s\n", *op1_reg, str_src0);
+        }
     }
 
     if (block->src[1].type == IRVal::REG)
         *op2_reg = block->src[1].num.reg;
     else {
+        *op2_reg = 2;
+
         char str_src1[STR_MAXLEN + 2] = {};
 
-        if (block->src[0].type == IRVal::CONST)
-            snprintf(str_src1, STR_MAXLEN, "0x%lx", get_bin_double(block->src[1].num.k_double));
-        else
+        if (block->src[1].type == IRVal::CONST) {
+            LST("mov rdx, 0x%lx\n", get_bin_double(block->src[1].num.k_double));
+            LST("movq xmm%zu, rdx\n", *op2_reg);
+        } else {
             STATUS_CHECK(X86_64_Mov::get_location(str_src1, &block->src[1], "STORE_CMP_RES must have "
                         "src[1] with type CONST, STK, REG, LOCAL_VAR, GLOBAL_VAR, ARG_VAR or ARR_VAR"));
-
-        LST("movsd xmm%zu, %s\n", *op2_reg, str_src1);
+            LST("movq xmm%zu, %s\n", *op2_reg, str_src1);
+        }
     }
 
-    ssize_t stk_vals_needed = (block->src[0].type == IRVal::STK)
-                            + (block->src[1].type == IRVal::STK) - 1; //< -1 for result
+    ssize_t stk_vals_needed = (block->src[0].type == IRVal::STK) + (block->src[1].type == IRVal::STK)
+                            - (block->dest.type   == IRVal::STK);
 
     if (stk_vals_needed != 0)
         LST("add rsp, %zu\n", stk_vals_needed * 8);
 
-    LST("movsd xmm3, xmm%zu\n", *op1_reg);
+    LST("movq xmm3, xmm%zu\n", *op1_reg);
     LST("subsd xmm3, xmm%zu\n", *op2_reg);
 
     LST("andpd xmm3, [DOUBLE_NEG_CONST]\n");
@@ -328,8 +330,6 @@ static Status::Statuses get_comp_params_(const CmpType cmp_type, CompRes* with_z
     assert(opers);
     assert(oper);
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wswitch-enum"
     switch (cmp_type) {
         CASE_(GREATER,       FALSE,  TRUE,   ">");
         CASE_(LOWER,         FALSE,  FALSE,  "<");
@@ -338,17 +338,17 @@ static Status::Statuses get_comp_params_(const CmpType cmp_type, CompRes* with_z
         CASE_(GREATER_EQUAL, INDIFF, TRUE,   ">=");
         CASE_(LOWER_EQUAL,   INDIFF, FALSE,  "<=");
 
+        case CmpType::NONE:
         default:
             ERR("STORE_CMP_RES have incorrect subtype");
     };
-#pragma GCC diagnostic pop
 
     return Status::NORMAL_WORK;
 }
 #undef CASE_
 
 
-Status::Statuses asm_x86_64_STORE_CMP_RES(BackData* data, IRNode* block, size_t phys_i) {
+Status::Statuses asm_x86_64_STORE_CMP_RES(IRBackData* data, IRNode* block, size_t phys_i) {
     assert(data);
     assert(block);
 
@@ -377,23 +377,28 @@ Status::Statuses asm_x86_64_STORE_CMP_RES(BackData* data, IRNode* block, size_t 
         LST("%s ___compare_%zu_false\n\n", (comp_operands == CompRes::FALSE) ? "jnc" : "jc", phys_i);
     }
 
-    if (block->dest.type != IRVal::STK)
-        ERR("STORE_CMP_RES must have dest with type STK");
-
     LST("mov rdx, 0x%lx ; %lg\n", X86_64_Mov::get_bin_double(1), 1.0);
-    LST("mov qword [rsp], rdx\n");
     LST("jmp ___compare_%zu_end\n\n", phys_i);
 
     LST_NO_TAB("___compare_%zu_false:\n", phys_i);
     LST("mov rdx, 0x%lx ; %lg\n", X86_64_Mov::get_bin_double(0), 0.0);
-    LST("mov qword [rsp], rdx\n");
 
-    LST_NO_TAB("___compare_%zu_end:\n\n", phys_i);
+    LST_NO_TAB("___compare_%zu_end:\n", phys_i);
+
+    if (block->dest.type == IRVal::REG) {
+        LST("movq xmm%zu, rdx\n\n", block->dest.num.reg);
+    } else {
+        char dest_str[STR_MAXLEN + 1] = {};
+        STATUS_CHECK(X86_64_Mov::get_location(dest_str, &block->dest, "STORE_CMP_RES must have "
+                     "dest with type STK, REG, LOCAL_VAR, GLOBAL_VAR, ARG_VAR or ARR_VAR"));
+
+        LST("mov %s, rdx\n\n", dest_str);
+    }
 
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_x86_64_SET_FLAGS_CMP_WITH_ZERO(BackData* data, IRNode* block, size_t) {
+Status::Statuses asm_x86_64_SET_FLAGS_CMP_WITH_ZERO(IRBackData* data, IRNode* block, size_t) {
     assert(data);
     assert(block);
 
@@ -405,15 +410,15 @@ Status::Statuses asm_x86_64_SET_FLAGS_CMP_WITH_ZERO(BackData* data, IRNode* bloc
     LST("mov rdx, -1 >> 1\n");
 
     if (block->src[0].type == IRVal::REG) {
-        LST("movsd r8, %s\n", str_src);
+        LST("movq r8, %s\n", str_src);
         LST("and r8, rdx\n");
-        LST("movsd xmm1, r8\n");
+        LST("movq xmm1, r8\n");
         LST("comisd xmm1, [EPSILON]\n");
         return Status::NORMAL_WORK;
     }
 
     LST("and %s, rdx\n", str_src);
-    LST("movsd xmm1, %s\n", str_src);
+    LST("movq xmm1, %s\n", str_src);
 
     if (block->src[0].type == IRVal::STK)
         LST("add rsp, 8\n");
@@ -423,7 +428,7 @@ Status::Statuses asm_x86_64_SET_FLAGS_CMP_WITH_ZERO(BackData* data, IRNode* bloc
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses math_binary_oper_(BackData* data, IRNode* block, const char* str_oper) {
+Status::Statuses math_binary_oper_(IRBackData* data, IRNode* block, const char* str_oper) {
     assert(data);
     assert(block);
     assert(str_oper);
@@ -449,8 +454,8 @@ Status::Statuses math_binary_oper_(BackData* data, IRNode* block, const char* st
                                 - (block->dest.type   == IRVal::STK);
 
     if (block->dest.type == IRVal::REG) {
-        if (!X86_64_Mov::is_irval_equal(&block->dest, &block->src[0]))
-            LST("movsd %s, %s\n", str_dest, str_src0);
+        if (!is_irval_equal(&block->dest, &block->src[0]))
+            LST("movq %s, %s\n", str_dest, str_src0);
 
         LST("%s %s, %s\n", str_oper, str_dest, str_src1);
 
@@ -461,20 +466,20 @@ Status::Statuses math_binary_oper_(BackData* data, IRNode* block, const char* st
     }
 
     if (needed_stk_values < 0)
-        LST("sub rsp, %zu", -needed_stk_values * 8);
+        LST("sub rsp, %zu\n", -needed_stk_values * 8);
 
-    LST("movsd xmm0, %s\n", str_src0);
+    LST("movq xmm0, %s\n", str_src0);
     LST("%s xmm0, %s\n", str_oper, str_src1);
 
     if (needed_stk_values > 0)
         LST("add rsp, %zu\n", needed_stk_values * 8);
 
-    LST("movsd %s, xmm0\n", str_dest);
+    LST("movq %s, xmm0\n", str_dest);
 
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses math_unary_oper_(BackData* data, IRNode* block, const char* str_oper) {
+Status::Statuses math_unary_oper_(IRBackData* data, IRNode* block, const char* str_oper) {
     assert(data);
     assert(block);
     assert(str_oper);
@@ -499,10 +504,10 @@ Status::Statuses math_unary_oper_(BackData* data, IRNode* block, const char* str
     }
 
     if (block->src[0].type != IRVal::STK && block->dest.type == IRVal::STK)
-        LST("sub rsp, 8");
+        LST("sub rsp, 8\n");
 
     LST("%s xmm0, %s\n", str_oper, str_src);
-    LST("movsd %s, xmm0\n", str_dest);
+    LST("movq %s, xmm0\n", str_dest);
 
     if (block->src[0].type == IRVal::STK && block->dest.type != IRVal::STK)
         LST("add rsp, 8\n");
@@ -510,12 +515,11 @@ Status::Statuses math_unary_oper_(BackData* data, IRNode* block, const char* str
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses math_unary_bitwise_oper_(BackData* data, IRNode* block, const char* str_oper,
-                                                 const char* str_xmm_oper, uint64_t op2) {
+static Status::Statuses math_unary_bitwise_oper_(IRBackData* data, IRNode* block, const char* str_oper,
+                                                 uint64_t op2) {
     assert(data);
     assert(block);
     assert(str_oper);
-    assert(str_xmm_oper);
 
     LST("mov rdx, %lu\n", op2);
 
@@ -530,12 +534,12 @@ static Status::Statuses math_unary_bitwise_oper_(BackData* data, IRNode* block, 
 
     if (block->dest.type == IRVal::REG) {
         if (block->src[0].type == IRVal::REG)
-            LST("movsd r8, %s\n", str_src);
+            LST("movq r8, %s\n", str_src);
         else
             LST("mov r8, %s\n", str_src);
 
         LST("%s r8, rdx\n", str_oper);
-        LST("movsd %s, r8\n", str_dest);
+        LST("movq %s, r8\n", str_dest);
 
         if (block->src[0].type == IRVal::STK)
             LST("add rsp, 8\n");
@@ -547,8 +551,8 @@ static Status::Statuses math_unary_bitwise_oper_(BackData* data, IRNode* block, 
         LST("sub rsp, 8\n");
 
     if (block->src[0].type == IRVal::REG)
-        LST("movsd %s, %s\n", str_dest, str_src);
-    else if (!X86_64_Mov::is_irval_equal(&block->src[0], &block->dest)) {
+        LST("movq %s, %s\n", str_dest, str_src);
+    else if (!is_irval_equal(&block->src[0], &block->dest)) {
         LST("mov r8, %s\n", str_src);
         LST("mov %s, r8\n", str_dest);
     }
@@ -571,12 +575,12 @@ static Status::Statuses math_unary_bitwise_oper_(BackData* data, IRNode* block, 
                 STATUS_CHECK(math_unary_oper_(data, block, str_oper_));     \
                 break
 
-#define UNARY_BITWISE_OP_(name_, str_oper_, str_xmm_oper_, const_)                                      \
-            case MathOper::name_:                                                                       \
-                STATUS_CHECK(math_unary_bitwise_oper_(data, block, str_oper_, str_xmm_oper_, const_));  \
+#define UNARY_BITWISE_OP_(name_, str_oper_, const_)                                      \
+            case MathOper::name_:                                                        \
+                STATUS_CHECK(math_unary_bitwise_oper_(data, block, str_oper_, const_));  \
                 break
 
-Status::Statuses asm_x86_64_MATH_OPER(BackData* data, IRNode* block, size_t) {
+Status::Statuses asm_x86_64_MATH_OPER(IRBackData* data, IRNode* block, size_t) {
     assert(data);
     assert(block);
 
@@ -588,7 +592,7 @@ Status::Statuses asm_x86_64_MATH_OPER(BackData* data, IRNode* block, size_t) {
 
         UNARY_OP_(SQRT, "sqrtsd");
 
-        UNARY_BITWISE_OP_(NEG, "xor", "pxor", 1ul << 63);
+        UNARY_BITWISE_OP_(NEG, "xor", 1ul << 63);
 
         case MathOper::POW:
         case MathOper::SIN:
@@ -609,7 +613,7 @@ Status::Statuses asm_x86_64_MATH_OPER(BackData* data, IRNode* block, size_t) {
                 LST(jmp_ " ___ir_block_%zu\n", block->dest.num.addr);   \
                 break
 
-Status::Statuses asm_x86_64_JUMP(BackData* data, IRNode* block, size_t) {
+Status::Statuses asm_x86_64_JUMP(IRBackData* data, IRNode* block, size_t) {
     assert(data);
     assert(block);
 
@@ -627,7 +631,7 @@ Status::Statuses asm_x86_64_JUMP(BackData* data, IRNode* block, size_t) {
 }
 #undef CASE_
 
-Status::Statuses asm_x86_64_READ_DOUBLE(BackData* data, IRNode* block, size_t) {
+Status::Statuses asm_x86_64_READ_DOUBLE(IRBackData* data, IRNode* block, size_t) {
     assert(data);
     assert(block);
 
@@ -640,19 +644,19 @@ Status::Statuses asm_x86_64_READ_DOUBLE(BackData* data, IRNode* block, size_t) {
     if (block->dest.type == IRVal::STK)
         LST("sub rsp, 8\n");
 
-    LST("movsd %s, xmm0\n", str_dest);
+    LST("movq %s, xmm0\n", str_dest);
 
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_x86_64_PRINT_DOUBLE(BackData* data, IRNode* block, size_t) {
+Status::Statuses asm_x86_64_PRINT_DOUBLE(IRBackData* data, IRNode* block, size_t) {
     assert(data);
     assert(block);
 
     if (block->src[0].type == IRVal::CONST) {
         LST("mov rdx, 0x%lx ; %lg\n", X86_64_Mov::get_bin_double(block->src[0].num.k_double),
                                                                  block->src[0].num.k_double);
-        LST("movsd xmm0, rdx\n");
+        LST("movq xmm0, rdx\n");
         LST("call doubleio_out\n");
         return Status::NORMAL_WORK;
     }
@@ -661,7 +665,7 @@ Status::Statuses asm_x86_64_PRINT_DOUBLE(BackData* data, IRNode* block, size_t) 
     STATUS_CHECK(X86_64_Mov::get_location(str_src, &block->src[0],  "PRINT_DOUBLE must have src[0] "
                  "with type CONST, LOCAL_VAR, GLOBAL_VAR, ARG_VAR, ARR_VAR, STK or REG"));
 
-    LST("movsd xmm0, %s\n", str_src);
+    LST("movq xmm0, %s\n", str_src);
 
     if (block->src[0].type == IRVal::STK)
         LST("add rsp, 8\n");
@@ -671,7 +675,7 @@ Status::Statuses asm_x86_64_PRINT_DOUBLE(BackData* data, IRNode* block, size_t) 
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_x86_64_SET_FPS(BackData* data, IRNode* block, size_t) {
+Status::Statuses asm_x86_64_SET_FPS(IRBackData* data, IRNode* block, size_t) {
     assert(data);
     assert(block);
 
@@ -680,7 +684,7 @@ Status::Statuses asm_x86_64_SET_FPS(BackData* data, IRNode* block, size_t) {
     return Status::INPUT_ERROR;
 }
 
-Status::Statuses asm_x86_64_SHOW_VIDEO_FRAME(BackData* data, IRNode* block, size_t) {
+Status::Statuses asm_x86_64_SHOW_VIDEO_FRAME(IRBackData* data, IRNode* block, size_t) {
     assert(data);
     assert(block);
 

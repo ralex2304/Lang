@@ -55,17 +55,17 @@ enum class JmpType {
 
 struct IRVal {
     enum {
-        NONE  = 0,
+        NONE       = 0,
 
-        CONST      = 1,
-        INT_CONST  = 2,
-        LOCAL_VAR  = 3,
-        GLOBAL_VAR = 4,
-        ARG_VAR    = 5,
-        ARR_VAR    = 6,
-        STK        = 7,
-        REG        = 8,
-        ADDR       = 9,
+        CONST      = 1 << 0,
+        INT_CONST  = 1 << 1,
+        LOCAL_VAR  = 1 << 2,
+        GLOBAL_VAR = 1 << 3,
+        ARG_VAR    = 1 << 4,
+        ARR_VAR    = 1 << 5,
+        STK        = 1 << 6,
+        REG        = 1 << 7,
+        ADDR       = 1 << 8,
     } type = NONE;
 
     union {
@@ -92,5 +92,55 @@ struct IRNode {
 
     DebugInfo debug_info = {};
 };
+
+const size_t IRARGTYPE_NUM = 3;
+enum class IRArgType {
+    NONE = -1,
+    SRC0 =  0,
+    SRC1 =  1,
+    DEST =  2,
+};
+
+static_assert((size_t)Arches::X86_64 == 0);
+static_assert((size_t)Arches::SPU    == 1);
+static_assert((size_t)IRArgType::SRC0 == 0);
+static_assert((size_t)IRArgType::SRC1 == 1);
+static_assert((size_t)IRArgType::DEST == 2);
+
+#define NONE        0
+#define MEM         STK | IRVal::LOCAL_VAR | IRVal::GLOBAL_VAR | IRVal::ARR_VAR | IRVal::ARG_VAR
+#define VAR_TYPE    IRVal::LOCAL_VAR | IRVal::GLOBAL_VAR
+#define ALL         MEM | REG | IRVal::CONST
+#define INT_CONST   IRVal::INT_CONST
+#define ADDR        IRVal::ADDR
+#define STK         IRVal::STK
+#define REG         IRVal::REG
+
+const size_t IR_BLOCKS_VALID_ARGS[][ARCHES_NUM][IRARGTYPE_NUM] = {
+
+#define IR_BLOCK(num_, name_, ...) {__VA_ARGS__},
+
+#include "ir_blocks.h"
+
+#undef IR_BLOCK
+
+};
+#undef NONE
+#undef MEM
+#undef VAR_TYPE
+#undef ALL
+#undef INT_CONST
+#undef ADDR
+#undef STK
+#undef REG
+
+#define IR_BLOCK(num_, name_, ...) \
+            static_assert(num_ < sizeof(IR_BLOCKS_VALID_ARGS) / sizeof(*IR_BLOCKS_VALID_ARGS));
+
+#include "ir_blocks.h"
+
+#undef IR_BLOCK
+
+
 
 #endif //< #ifndef IR_OBJECTS_H_

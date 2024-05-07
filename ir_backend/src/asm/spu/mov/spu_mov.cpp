@@ -4,7 +4,7 @@
 #include "../spu_utils.h"
 
 
-Status::Statuses SPU_Mov::src_const(BackData* data, IRVal* src, IRVal* dest) {
+Status::Statuses SPU_Mov::src_const(IRBackData* data, IRVal* src, IRVal* dest) {
     assert(data);
     assert(src);
     assert(src->type == IRVal::CONST);
@@ -18,7 +18,7 @@ Status::Statuses SPU_Mov::src_const(BackData* data, IRVal* src, IRVal* dest) {
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses SPU_Mov::src_var(BackData* data, IRVal* src, IRVal* dest) {
+Status::Statuses SPU_Mov::src_var(IRBackData* data, IRVal* src, IRVal* dest) {
     assert(data);
     assert(src);
     assert(src->type == IRVal::LOCAL_VAR || src->type == IRVal::GLOBAL_VAR ||
@@ -42,7 +42,7 @@ Status::Statuses SPU_Mov::src_var(BackData* data, IRVal* src, IRVal* dest) {
 
 #define CASE_(name_, ...)  case IRVal::name_: LST(__VA_ARGS__); break
 
-Status::Statuses SPU_Mov::src_stk(BackData* data, IRVal* src0, IRVal* src1, IRVal* dest) {
+Status::Statuses SPU_Mov::src_stk(IRBackData* data, IRVal* src0, IRVal* src1, IRVal* dest) {
     assert(data);
     assert(src0);
     assert(src0->type == IRVal::STK);
@@ -80,7 +80,7 @@ Status::Statuses SPU_Mov::src_stk(BackData* data, IRVal* src0, IRVal* src1, IRVa
 }
 #undef CASE_
 
-Status::Statuses SPU_Mov::src_reg(BackData* data, IRVal* src, IRVal* dest) {
+Status::Statuses SPU_Mov::src_reg(IRBackData* data, IRVal* src, IRVal* dest) {
     assert(data);
     assert(src);
     assert(src->type == IRVal::REG);

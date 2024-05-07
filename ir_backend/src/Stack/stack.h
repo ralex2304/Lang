@@ -18,10 +18,8 @@
 
 #endif
 
-#include "../scopes.h"
-
-typedef ScopeData Elem_t;                                        //< stack elements type
-static const Elem_t ELEM_T_POISON = {};                          //< poison value for stack
+typedef ssize_t Elem_t;                                           //< stack elements type
+static const Elem_t ELEM_T_POISON = -1;                           //< poison value for stack
 
 typedef unsigned long long Canary_t;                             //< canary type
 static const Canary_t CANARY_VAL = 0x8BADF00DDEADDEAD;           //< canary protect value

@@ -3,19 +3,18 @@
 #include "x86_64/x86_64.h"
 #include "spu/spu.h"
 
-static Status::Statuses ir_x86_64_traversal_block_(BackData* data, IRNode* block, size_t phys_i);
+static Status::Statuses ir_x86_64_traversal_block_(IRBackData* data, IRNode* block, size_t phys_i);
 
-static Status::Statuses ir_spu_traversal_block_(BackData* data, IRNode* block, size_t phys_i);
+static Status::Statuses ir_spu_traversal_block_(IRBackData* data, IRNode* block, size_t phys_i);
 
 
-Status::Statuses ir_blocks_traversal(BackData* data, const Arches arch) {
+Status::Statuses ir_blocks_traversal(IRBackData* data) {
     assert(data);
-    assert(arch != Arches::NONE);
 
     ssize_t phys_i = list_head(&data->ir);
     ssize_t log_i = 0;
 
-    switch (arch) {
+    switch (data->arch) {
         case Arches::SPU:
             LIST_FOREACH(data->ir, phys_i, log_i)
                 STATUS_CHECK(ir_spu_traversal_block_(data, &data->ir.arr[phys_i].elem, (size_t)phys_i));
@@ -34,7 +33,7 @@ Status::Statuses ir_blocks_traversal(BackData* data, const Arches arch) {
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses ir_x86_64_traversal_block_(BackData* data, IRNode* block, size_t phys_i) {
+static Status::Statuses ir_x86_64_traversal_block_(IRBackData* data, IRNode* block, size_t phys_i) {
     assert(data);
     assert(block);
     assert(block->type != IRNodeType::DEFAULT);
@@ -61,7 +60,7 @@ static Status::Statuses ir_x86_64_traversal_block_(BackData* data, IRNode* block
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses ir_spu_traversal_block_(BackData* data, IRNode* block, size_t phys_i) {
+static Status::Statuses ir_spu_traversal_block_(IRBackData* data, IRNode* block, size_t phys_i) {
     assert(data);
     assert(block);
     assert(block->type != IRNodeType::DEFAULT);

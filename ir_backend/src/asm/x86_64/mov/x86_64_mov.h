@@ -19,16 +19,14 @@ namespace X86_64_Mov {
 
     Status::Statuses get_location(char* str, IRVal* val, const char* err_msg);
 
-    bool is_irval_equal(IRVal* val1, IRVal* val2);
-
     // srcs:
-    Status::Statuses src_const(BackData* data, IRVal* src, IRVal* dest);
+    Status::Statuses src_const(IRBackData* data, IRVal* src, IRVal* dest);
 
-    Status::Statuses src_stk  (BackData* data, IRVal* src, IRVal* dest);
+    Status::Statuses src_stk  (IRBackData* data, IRVal* src, IRVal* dest);
 
-    Status::Statuses src_reg  (BackData* data, IRVal* src, IRVal* dest);
+    Status::Statuses src_reg  (IRBackData* data, IRVal* src, IRVal* dest);
 
-    Status::Statuses src_var  (BackData* data, const char* str_src, IRVal* dest);
+    Status::Statuses src_var  (IRBackData* data, IRVal* src, IRVal* dest);
 };
 
 #endif //< ##ifndef X86_64_MOV_H_

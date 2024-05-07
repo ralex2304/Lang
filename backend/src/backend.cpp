@@ -14,7 +14,7 @@ Status::Statuses back_process(const char* input_filename, const char* output_fil
     assert(input_filename);
     assert(output_filename);
 
-    BackData data = {};
+    IRBackData data = {};
     if (!data.ctor(output_filename))
         return Status::MEMORY_EXCEED;
 

@@ -13,7 +13,7 @@
 
 #include "ir_gen/ir_gen_objects.h"
 
-struct BackData {
+struct IRBackData {
     Tree tree = {};
     Vector vars = {};
 

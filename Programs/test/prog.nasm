@@ -95,12 +95,8 @@ ___ir_block_25:
                 add rsp, 8
                 mov qword [rcx], rdx
 ___ir_block_26:
-                sub rsp, 8
-                mov rdx, 0x0 ; 0
-                mov qword [rsp], rdx
 ___ir_block_27:
-                mov rdx, [rsp]
-                add rsp, 8
+                mov rdx, 0x0 ; 0
                 mov qword [rbp - 8 - 80], rdx
 ___ir_block_28:
 ___ir_block_29:
@@ -116,14 +112,11 @@ ___ir_block_31:
                 mov rdx, 0x3ff0000000000000 ; 1
                 mov qword [rsp], rdx
 ___ir_block_32:
-                movsd xmm0, [rsp + 8]
+                movq xmm0, [rsp + 8]
                 addsd xmm0, qword [rsp]
-                add rsp, 8
-                movsd qword [rsp], xmm0
+                add rsp, 16
+                movq qword [rbp - 8 - 80], xmm0
 ___ir_block_33:
-                mov rdx, [rsp]
-                add rsp, 8
-                mov qword [rbp - 8 - 80], rdx
 ___ir_block_34:
                 lea rcx, qword [rbp - 8 - 0]
 ___ir_block_35:
@@ -132,24 +125,16 @@ ___ir_block_35:
                 shl rdx, 3
                 sub rcx, rdx
 ___ir_block_36:
-                sub rsp, 8
-                mov rdx, qword [rcx]
-                mov qword [rsp], rdx
 ___ir_block_37:
-                sub rsp, 8
-                mov rdx, 0x4014000000000000 ; 5
-                mov qword [rsp], rdx
 ___ir_block_38:
                 ; operands comparison: op1 < op2
-                movsd xmm2, [rsp]
-                movsd xmm1, [rsp + 8]
-                movsd xmm3, xmm1
+                movq xmm1, qword [rcx]
+                mov rdx, 0x4014000000000000
+                movq xmm2, rdx
+                add rsp, 18446744073709551608
+                movq xmm3, xmm1
                 subsd xmm3, xmm2
-                movsd [rsp], xmm3
-                mov rdx, -1 >> 1
-                and qword [rsp], rdx
-                movsd xmm3, [rsp]
-                add rsp, 16
+                andpd xmm3, [DOUBLE_NEG_CONST]
                 ; xmm1 - op1; xmm2 - op2; xmm3 - fabs(op1 - op2)
 
                 comisd xmm3, [EPSILON] ; fabs(op1 - op2) {'<' | '>'} EPSILON
@@ -158,21 +143,18 @@ ___ir_block_38:
                 comisd xmm1, xmm2 ; op1 {'<' | '>'} op2
                 jnc ___compare_38_false
 
-                sub rsp, 8
                 mov rdx, 0x3ff0000000000000 ; 1
-                mov qword [rsp], rdx
                 jmp ___compare_38_end
 
 ___compare_38_false:
-                sub rsp, 8
                 mov rdx, 0x0 ; 0
-                mov qword [rsp], rdx
 ___compare_38_end:
+                mov qword [rsp], rdx
 
 ___ir_block_39:
                 mov rdx, -1 >> 1
                 and qword [rsp], rdx
-                movsd xmm1, qword [rsp]
+                movq xmm1, qword [rsp]
                 add rsp, 8
                 comisd xmm1, [EPSILON]
 ___ir_block_40:
@@ -189,12 +171,8 @@ ___ir_block_43:
                 shl rdx, 3
                 sub rcx, rdx
 ___ir_block_44:
-                sub rsp, 8
-                mov rdx, qword [rcx]
-                mov qword [rsp], rdx
 ___ir_block_45:
-                movsd xmm0, qword [rsp]
-                add rsp, 8
+                movq xmm0, qword [rcx]
                 call doubleio_out
 ___ir_block_46:
                 jmp ___ir_block_28
@@ -215,5 +193,8 @@ GLOBAL_SECTION: times 0 dq 0
 
 section .rodata
 
+align 8
 EPSILON: dq 0x3eb0c6f7a0b5ed8d ; 1e-06
+align 16
+DOUBLE_NEG_CONST: dq -1 >> 1, 0
 

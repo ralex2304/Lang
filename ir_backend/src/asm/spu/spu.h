@@ -6,10 +6,10 @@
 #include "utils/statuses.h"
 #include "config.h"
 
-Status::Statuses asm_spu_begin_ir_block(BackData* data, IRNode* block, size_t phys_y);
+Status::Statuses asm_spu_begin_ir_block(IRBackData* data, IRNode* block, size_t phys_y);
 
 #define IR_BLOCK(num_, name_, ...)  \
-            Status::Statuses asm_spu_##name_(BackData* data, IRNode* block, size_t phys_i);
+            Status::Statuses asm_spu_##name_(IRBackData* data, IRNode* block, size_t phys_i);
 
 #include "ir_blocks.h"
 

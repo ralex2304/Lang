@@ -4,7 +4,7 @@
 
 #include "error_printer/error_printer.h"
 
-Status::Statuses local_assign_arr_elem(BackData* data, TreeNode* var_node) {
+Status::Statuses local_assign_arr_elem(IRBackData* data, TreeNode* var_node) {
     assert(data);
     assert(var_node);
     assert(NODE_IS_OPER(var_node, OperNum::ARRAY_ELEM));
@@ -25,7 +25,7 @@ Status::Statuses local_assign_arr_elem(BackData* data, TreeNode* var_node) {
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses local_assign_var(BackData* data, TreeNode* var_node) {
+Status::Statuses local_assign_var(IRBackData* data, TreeNode* var_node) {
     assert(data);
     assert(var_node);
     assert(TYPE_IS_VAR(var_node));
@@ -96,7 +96,7 @@ Status::Statuses local_pop_var_table(Stack* scopes) {
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses local_push_arr_elem_val(BackData* data, size_t addr_offset, bool is_global) {
+Status::Statuses local_push_arr_elem_val(IRBackData* data, size_t addr_offset, bool is_global) {
     assert(data);
 
     STATUS_CHECK(ir_block_save_arr_elem_addr(&data->ir_d, addr_offset, is_global));
@@ -106,7 +106,7 @@ Status::Statuses local_push_arr_elem_val(BackData* data, size_t addr_offset, boo
     return Status::NORMAL_WORK;
 }
 
-IRScopeData* local_find_loop_scope_num(BackData* data) {
+IRScopeData* local_find_loop_scope_num(IRBackData* data) {
     assert(data);
 
     for (ssize_t i = data->scopes.size - 1; i > 0; i--) {
@@ -129,7 +129,7 @@ size_t local_count_addr_offset(Stack* scopes) {
     return ans;
 }
 
-Status::Statuses local_prepost_oper_var(BackData* data, const size_t addr_offset,
+Status::Statuses local_prepost_oper_var(IRBackData* data, const size_t addr_offset,
                                         const bool is_global, const OperNum oper) {
     assert(data);
     assert(oper);
@@ -144,7 +144,7 @@ Status::Statuses local_prepost_oper_var(BackData* data, const size_t addr_offset
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses local_prepost_oper_arr_elem(BackData* data, const size_t addr_offset,
+Status::Statuses local_prepost_oper_arr_elem(IRBackData* data, const size_t addr_offset,
                                              const bool is_global, const OperNum oper) {
     assert(data);
     assert(oper);
@@ -161,7 +161,7 @@ Status::Statuses local_prepost_oper_arr_elem(BackData* data, const size_t addr_o
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses local_prepost_oper_arr_elem_the_same(BackData* data, const OperNum oper) {
+Status::Statuses local_prepost_oper_arr_elem_the_same(IRBackData* data, const OperNum oper) {
     assert(data);
     assert(oper);
 

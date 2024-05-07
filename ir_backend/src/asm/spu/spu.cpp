@@ -22,7 +22,7 @@ register usage:
 static const char* jump_str_(const CmpType cmp_type);
 
 
-Status::Statuses asm_spu_begin_ir_block(BackData* data, [[maybe_unused]] IRNode* block, size_t phys_y) {
+Status::Statuses asm_spu_begin_ir_block(IRBackData* data, [[maybe_unused]] IRNode* block, size_t phys_y) {
     assert(data);
     assert(block);
 
@@ -31,14 +31,14 @@ Status::Statuses asm_spu_begin_ir_block(BackData* data, [[maybe_unused]] IRNode*
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_spu_NONE([[maybe_unused]] BackData* data, [[maybe_unused]] IRNode* block, size_t) {
+Status::Statuses asm_spu_NONE([[maybe_unused]] IRBackData* data, [[maybe_unused]] IRNode* block, size_t) {
     assert(data);
     assert(block);
 
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_spu_START(BackData* data, [[maybe_unused]] IRNode* block, size_t) {
+Status::Statuses asm_spu_START(IRBackData* data, [[maybe_unused]] IRNode* block, size_t) {
     assert(data);
     assert(block);
 
@@ -60,7 +60,7 @@ Status::Statuses asm_spu_START(BackData* data, [[maybe_unused]] IRNode* block, s
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_spu_END(BackData* data, [[maybe_unused]] IRNode* block, size_t) {
+Status::Statuses asm_spu_END(IRBackData* data, [[maybe_unused]] IRNode* block, size_t) {
     assert(data);
     assert(block);
 
@@ -69,7 +69,7 @@ Status::Statuses asm_spu_END(BackData* data, [[maybe_unused]] IRNode* block, siz
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_spu_BEGIN_FUNC_DEF(BackData* data, IRNode* block, size_t phys_i) {
+Status::Statuses asm_spu_BEGIN_FUNC_DEF(IRBackData* data, IRNode* block, size_t phys_i) {
     assert(data);
     assert(block);
 
@@ -80,7 +80,7 @@ Status::Statuses asm_spu_BEGIN_FUNC_DEF(BackData* data, IRNode* block, size_t ph
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_spu_END_FUNC_DEF(BackData* data, [[maybe_unused]]IRNode* block, size_t) {
+Status::Statuses asm_spu_END_FUNC_DEF(IRBackData* data, [[maybe_unused]]IRNode* block, size_t) {
     assert(data);
     assert(block);
 
@@ -91,7 +91,7 @@ Status::Statuses asm_spu_END_FUNC_DEF(BackData* data, [[maybe_unused]]IRNode* bl
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_spu_CALL_FUNC(BackData* data, IRNode* block, size_t) {
+Status::Statuses asm_spu_CALL_FUNC(IRBackData* data, IRNode* block, size_t) {
     assert(data);
     assert(block);
 
@@ -114,7 +114,7 @@ Status::Statuses asm_spu_CALL_FUNC(BackData* data, IRNode* block, size_t) {
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_spu_RET(BackData* data, [[maybe_unused]] IRNode* block, size_t) {
+Status::Statuses asm_spu_RET(IRBackData* data, [[maybe_unused]] IRNode* block, size_t) {
     assert(data);
     assert(block);
 
@@ -123,7 +123,7 @@ Status::Statuses asm_spu_RET(BackData* data, [[maybe_unused]] IRNode* block, siz
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_spu_INIT_MEM_FOR_GLOBALS(BackData* data, [[maybe_unused]] IRNode* block, size_t) {
+Status::Statuses asm_spu_INIT_MEM_FOR_GLOBALS(IRBackData* data, [[maybe_unused]] IRNode* block, size_t) {
     assert(data);
     assert(block);
 
@@ -132,7 +132,7 @@ Status::Statuses asm_spu_INIT_MEM_FOR_GLOBALS(BackData* data, [[maybe_unused]] I
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_spu_COUNT_ARR_ELEM_ADDR_CONST(BackData* data, IRNode* block, size_t) {
+Status::Statuses asm_spu_COUNT_ARR_ELEM_ADDR_CONST(IRBackData* data, IRNode* block, size_t) {
     assert(data);
     assert(block);
 
@@ -148,7 +148,7 @@ Status::Statuses asm_spu_COUNT_ARR_ELEM_ADDR_CONST(BackData* data, IRNode* block
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_spu_ARR_ELEM_ADDR_ADD_INDEX(BackData* data, IRNode* block, size_t) {
+Status::Statuses asm_spu_ARR_ELEM_ADDR_ADD_INDEX(IRBackData* data, IRNode* block, size_t) {
     assert(data);
     assert(block);
 
@@ -165,7 +165,7 @@ Status::Statuses asm_spu_ARR_ELEM_ADDR_ADD_INDEX(BackData* data, IRNode* block, 
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_spu_MOV(BackData* data, IRNode* block, size_t) {
+Status::Statuses asm_spu_MOV(IRBackData* data, IRNode* block, size_t) {
     assert(data);
     assert(block);
 
@@ -198,7 +198,7 @@ Status::Statuses asm_spu_MOV(BackData* data, IRNode* block, size_t) {
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_spu_SWAP(BackData* data, IRNode* block, size_t) {
+Status::Statuses asm_spu_SWAP(IRBackData* data, IRNode* block, size_t) {
     assert(data);
     assert(block);
 
@@ -237,7 +237,7 @@ static const char* jump_str_(const CmpType cmp_type) {
 }
 #undef CASE_
 
-Status::Statuses asm_spu_STORE_CMP_RES(BackData* data, IRNode* block, size_t phys_i) {
+Status::Statuses asm_spu_STORE_CMP_RES(IRBackData* data, IRNode* block, size_t phys_i) {
     assert(data);
     assert(block);
 
@@ -261,9 +261,12 @@ Status::Statuses asm_spu_STORE_CMP_RES(BackData* data, IRNode* block, size_t phy
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_spu_SET_FLAGS_CMP_WITH_ZERO(BackData* data, IRNode* block, size_t) {
+Status::Statuses asm_spu_SET_FLAGS_CMP_WITH_ZERO(IRBackData* data, IRNode* block, size_t) {
     assert(data);
     assert(block);
+
+    if (block->src[0].type != IRVal::STK)
+        ERR("SET_FLAGS_CMP_WITH_ZERO must have src[0] with type STK");
 
     // Do nothing. Jumps compare values from stack
 
@@ -279,7 +282,7 @@ Status::Statuses asm_spu_SET_FLAGS_CMP_WITH_ZERO(BackData* data, IRNode* block, 
             if (block->src[0].type != IRVal::STK || block->dest.type != IRVal::STK)     \
                 ERR("MATH_OPER (unary) must have src[0] and dest with type STK")
 
-Status::Statuses asm_spu_MATH_OPER(BackData* data, IRNode* block, size_t) {
+Status::Statuses asm_spu_MATH_OPER(IRBackData* data, IRNode* block, size_t) {
     assert(data);
     assert(block);
 
@@ -311,7 +314,7 @@ Status::Statuses asm_spu_MATH_OPER(BackData* data, IRNode* block, size_t) {
 #undef CHECK_BINARY_ARGS_
 #undef CHECK_UNARY_ARGS_
 
-Status::Statuses asm_spu_JUMP(BackData* data, IRNode* block, size_t) {
+Status::Statuses asm_spu_JUMP(IRBackData* data, IRNode* block, size_t) {
     assert(data);
     assert(block);
 
@@ -337,7 +340,7 @@ Status::Statuses asm_spu_JUMP(BackData* data, IRNode* block, size_t) {
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_spu_READ_DOUBLE(BackData* data, IRNode* block, size_t) {
+Status::Statuses asm_spu_READ_DOUBLE(IRBackData* data, IRNode* block, size_t) {
     assert(data);
     assert(block);
 
@@ -349,7 +352,7 @@ Status::Statuses asm_spu_READ_DOUBLE(BackData* data, IRNode* block, size_t) {
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_spu_PRINT_DOUBLE(BackData* data, IRNode* block, size_t) {
+Status::Statuses asm_spu_PRINT_DOUBLE(IRBackData* data, IRNode* block, size_t) {
     assert(data);
     assert(block);
 
@@ -361,7 +364,7 @@ Status::Statuses asm_spu_PRINT_DOUBLE(BackData* data, IRNode* block, size_t) {
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_spu_SET_FPS(BackData* data, IRNode* block, size_t) {
+Status::Statuses asm_spu_SET_FPS(IRBackData* data, IRNode* block, size_t) {
     assert(data);
     assert(block);
 
@@ -373,7 +376,7 @@ Status::Statuses asm_spu_SET_FPS(BackData* data, IRNode* block, size_t) {
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_spu_SHOW_VIDEO_FRAME(BackData* data, IRNode* block, size_t) {
+Status::Statuses asm_spu_SHOW_VIDEO_FRAME(IRBackData* data, IRNode* block, size_t) {
     assert(data);
     assert(block);
 

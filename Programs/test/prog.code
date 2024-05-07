@@ -119,31 +119,3 @@ ___compare_38_true:
 ___compare_38_end:
 
 ___ir_block_39:
-___ir_block_40:
-                push 0
-                je ___ir_block_47
-
-___ir_block_41:
-                push [rbx + 10]
-___ir_block_42:
-                push rbx + 0
-                pop rcx
-
-___ir_block_43:
-                push rcx
-                add
-                pop rcx
-___ir_block_44:
-                push [rcx]
-___ir_block_45:
-                out
-___ir_block_46:
-                jmp ___ir_block_28
-
-___ir_block_47:
-___ir_block_48:
-                ret
-; ------------------------- Function definition end -----------------------
-
-
-___ir_block_49:

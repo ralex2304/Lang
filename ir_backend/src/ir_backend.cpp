@@ -3,19 +3,21 @@
 #include <assert.h>
 #include "ir_backend_objects.h"
 #include "asm/traversal.h"
+#include "optimisations/optimisations.h"
 
 Status::Statuses ir_back_process(const char* input_filename, const char* output_filename,
                                  const char* lst_filename, const Arches arch) {
     assert(input_filename);
     assert(output_filename);
     //< lst_filename can be nullptr
-    assert(arch != Arches::NONE);
 
-    BackData data = {};
-    if (!data.ctor(input_filename, lst_filename))
+    IRBackData data = {};
+    if (!data.ctor(input_filename, lst_filename, arch))
         return Status::MEMORY_EXCEED;
 
-    STATUS_CHECK(ir_blocks_traversal(&data, arch), data.dtor());
+    STATUS_CHECK(ir_optimise(&data),         data.dtor());
+
+    STATUS_CHECK(ir_blocks_traversal(&data), data.dtor());
 
     if (!data.dtor())
         return Status::LIST_ERROR;

@@ -5,6 +5,8 @@
 
 LogFileData log_file = {"log"};
 
+// TODO clang compatiable args
+
 /**
  * @brief This array contains console options, their functions and descriptions
  */

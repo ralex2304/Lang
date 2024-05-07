@@ -12,34 +12,34 @@
 #include "blocks/ir_blocks_gen.h"
 #include "local/local.h"
 
-static Status::Statuses func_def_(BackData* data);
+static Status::Statuses func_def_(IRBackData* data);
 
-static Status::Statuses add_func_args_var_table_(BackData* data, TreeNode* cur_arg);
+static Status::Statuses add_func_args_var_table_(IRBackData* data, TreeNode* cur_arg);
 
-static Status::Statuses func_def_make_body_(BackData* data, TreeNode* root_cmd);
+static Status::Statuses func_def_make_body_(IRBackData* data, TreeNode* root_cmd);
 
-static Status::Statuses declare_global_var_or_func_(BackData* data, ScopeData* var_table,
+static Status::Statuses declare_global_var_or_func_(IRBackData* data, ScopeData* var_table,
                                                     TreeNode* def);
 
-static Status::Statuses declare_global_var_(BackData* data, ScopeData* var_table,
+static Status::Statuses declare_global_var_(IRBackData* data, ScopeData* var_table,
                                             TreeNode* def, Var* new_var);
 
-static Status::Statuses declare_global_array_(BackData* data, TreeNode* def, Var* new_var);
+static Status::Statuses declare_global_array_(IRBackData* data, TreeNode* def, Var* new_var);
 
-static Status::Statuses declare_global_func_(BackData* data, TreeNode* def);
+static Status::Statuses declare_global_func_(IRBackData* data, TreeNode* def);
 
-static Status::Statuses initialise_global_scope_(BackData* data);
+static Status::Statuses initialise_global_scope_(IRBackData* data);
 
-static Status::Statuses initialise_global_var_(BackData* data, TreeNode* expr, Var* var);
+static Status::Statuses initialise_global_var_(IRBackData* data, TreeNode* expr, Var* var);
 
-static Status::Statuses eval_global_expr_(BackData* data, TreeNode* expr);
+static Status::Statuses eval_global_expr_(IRBackData* data, TreeNode* expr);
 
-static Status::Statuses initialise_global_array_(BackData* data, TreeNode* values, Var* var);
+static Status::Statuses initialise_global_array_(IRBackData* data, TreeNode* values, Var* var);
 
 static size_t count_args_(TreeNode* arg);
 
 
-Status::Statuses generate_ir(BackData* data) {
+Status::Statuses generate_ir(IRBackData* data) {
     assert(data);
 
     ssize_t main_func_num = -1;
@@ -69,7 +69,7 @@ Status::Statuses generate_ir(BackData* data) {
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses func_def_(BackData* data) {
+static Status::Statuses func_def_(IRBackData* data) {
     assert(data);
 
     TreeNode* cur_cmd = data->tree.root;
@@ -111,7 +111,7 @@ static Status::Statuses func_def_(BackData* data) {
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses func_def_make_body_(BackData* data, TreeNode* root_cmd) {
+static Status::Statuses func_def_make_body_(IRBackData* data, TreeNode* root_cmd) {
     assert(data);
 
     if (!local_create_scope(&data->scopes))
@@ -124,7 +124,7 @@ static Status::Statuses func_def_make_body_(BackData* data, TreeNode* root_cmd) 
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses add_func_args_var_table_(BackData* data, TreeNode* cur_arg) {
+static Status::Statuses add_func_args_var_table_(IRBackData* data, TreeNode* cur_arg) {
     assert(data);
     // cur_arg can be nullptr
 
@@ -165,7 +165,7 @@ static Status::Statuses add_func_args_var_table_(BackData* data, TreeNode* cur_a
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses initialise_global_scope_(BackData* data) {
+static Status::Statuses initialise_global_scope_(IRBackData* data) {
     assert(data);
 
     assert(data->scopes.size == 0);
@@ -196,7 +196,7 @@ static Status::Statuses initialise_global_scope_(BackData* data) {
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses declare_global_var_or_func_(BackData* data, ScopeData* var_table,
+static Status::Statuses declare_global_var_or_func_(IRBackData* data, ScopeData* var_table,
                                                         TreeNode* def) {
     assert(data);
     assert(var_table);
@@ -234,7 +234,7 @@ static Status::Statuses declare_global_var_or_func_(BackData* data, ScopeData* v
     return Status::TREE_ERROR;
 }
 
-static Status::Statuses declare_global_var_(BackData* data, ScopeData* var_table,
+static Status::Statuses declare_global_var_(IRBackData* data, ScopeData* var_table,
                                                 TreeNode* def, Var* new_var) {
     assert(data);
     assert(var_table);
@@ -259,7 +259,7 @@ static Status::Statuses declare_global_var_(BackData* data, ScopeData* var_table
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses declare_global_array_(BackData* data, TreeNode* def, Var* new_var) {
+static Status::Statuses declare_global_array_(IRBackData* data, TreeNode* def, Var* new_var) {
     assert(data);
     assert(def);
     assert(new_var);
@@ -288,7 +288,7 @@ static Status::Statuses declare_global_array_(BackData* data, TreeNode* def, Var
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses declare_global_func_(BackData* data, TreeNode* def) {
+static Status::Statuses declare_global_func_(IRBackData* data, TreeNode* def) {
     assert(data);
     assert(def);
 
@@ -324,7 +324,7 @@ static size_t count_args_(TreeNode* arg) {
     return ans;
 }
 
-static Status::Statuses eval_global_expr_(BackData* data, TreeNode* expr) {
+static Status::Statuses eval_global_expr_(IRBackData* data, TreeNode* expr) {
     assert(data);
     assert(expr);
 
@@ -367,7 +367,7 @@ static Status::Statuses eval_global_expr_(BackData* data, TreeNode* expr) {
     return Status::TREE_ERROR;
 }
 
-static Status::Statuses initialise_global_var_(BackData* data, TreeNode* expr, Var* var) {
+static Status::Statuses initialise_global_var_(IRBackData* data, TreeNode* expr, Var* var) {
     assert(data);
     assert(expr);
     assert(var);
@@ -384,7 +384,7 @@ static Status::Statuses initialise_global_var_(BackData* data, TreeNode* expr, V
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses initialise_global_array_(BackData* data, TreeNode* values, Var* var) {
+static Status::Statuses initialise_global_array_(IRBackData* data, TreeNode* values, Var* var) {
     assert(data);
     assert(var);
 

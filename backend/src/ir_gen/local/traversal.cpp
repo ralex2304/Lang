@@ -12,69 +12,69 @@
 #include "../../Stack/stack.h"
 #include "../../scopes.h"
 
-static Status::Statuses traversal_var_(BackData* data, TreeNode* node, bool is_val_needed);
+static Status::Statuses traversal_var_(IRBackData* data, TreeNode* node, bool is_val_needed);
 
-static Status::Statuses add_num_var_(BackData* data, TreeNode* node, bool is_const);
+static Status::Statuses add_num_var_(IRBackData* data, TreeNode* node, bool is_const);
 
-static Status::Statuses check_var_for_assign_(BackData* data, TreeNode* node, Var* var = nullptr);
+static Status::Statuses check_var_for_assign_(IRBackData* data, TreeNode* node, Var* var = nullptr);
 
-static Status::Statuses provide_func_call_(BackData* data, TreeNode* node, bool is_val_needed);
+static Status::Statuses provide_func_call_(IRBackData* data, TreeNode* node, bool is_val_needed);
 
-static Status::Statuses get_arr_elem_val_(BackData* data, TreeNode* node, bool is_val_needed);
+static Status::Statuses get_arr_elem_val_(IRBackData* data, TreeNode* node, bool is_val_needed);
 
-static Status::Statuses array_definition_assignment_(BackData* data, TreeNode* node);
+static Status::Statuses array_definition_assignment_(IRBackData* data, TreeNode* node);
 
-static Status::Statuses add_array_(BackData* data, TreeNode* node, bool is_const);
+static Status::Statuses add_array_(IRBackData* data, TreeNode* node, bool is_const);
 
-static Status::Statuses eval_func_args_(BackData* data, TreeNode* cur_sep, size_t addr_offset,
+static Status::Statuses eval_func_args_(IRBackData* data, TreeNode* cur_sep, size_t addr_offset,
                                         ssize_t arg_cnt, DebugInfo* debug_info);
 
-static Status::Statuses binary_math_(BackData* data, TreeNode* node,
+static Status::Statuses binary_math_(IRBackData* data, TreeNode* node,
                                      const OperNum math_op, bool is_val_needed);
 
-static Status::Statuses unary_math_(BackData* data, TreeNode* node,
+static Status::Statuses unary_math_(IRBackData* data, TreeNode* node,
                                     const OperNum math_op, bool is_val_needed);
 
-static Status::Statuses make_set_fps_(BackData* data, TreeNode* val_node);
+static Status::Statuses make_set_fps_(IRBackData* data, TreeNode* val_node);
 
-static Status::Statuses make_if_(BackData* data, TreeNode* node);
+static Status::Statuses make_if_(IRBackData* data, TreeNode* node);
 
-static Status::Statuses make_do_if_(BackData* data, TreeNode* node);
+static Status::Statuses make_do_if_(IRBackData* data, TreeNode* node);
 
-static Status::Statuses make_if_else_(BackData* data, TreeNode* node);
+static Status::Statuses make_if_else_(IRBackData* data, TreeNode* node);
 
-static Status::Statuses make_while_(BackData* data, TreeNode* parent_node);
+static Status::Statuses make_while_(IRBackData* data, TreeNode* parent_node);
 
-static Status::Statuses make_do_while_(BackData* data, TreeNode* node);
+static Status::Statuses make_do_while_(IRBackData* data, TreeNode* node);
 
-static Status::Statuses make_while_else_(BackData* data, TreeNode* parent_node);
+static Status::Statuses make_while_else_(IRBackData* data, TreeNode* parent_node);
 
-static Status::Statuses make_continue_(BackData* data, TreeNode* node);
+static Status::Statuses make_continue_(IRBackData* data, TreeNode* node);
 
-static Status::Statuses make_break_(BackData* data, TreeNode* node);
+static Status::Statuses make_break_(IRBackData* data, TreeNode* node);
 
-static Status::Statuses make_prefix_oper_(BackData* data, TreeNode* node, const OperNum oper,
+static Status::Statuses make_prefix_oper_(IRBackData* data, TreeNode* node, const OperNum oper,
                                           bool is_val_needed);
 
-static Status::Statuses make_postfix_oper_(BackData* data, TreeNode* node, const OperNum oper,
+static Status::Statuses make_postfix_oper_(IRBackData* data, TreeNode* node, const OperNum oper,
                                            bool is_val_needed);
 
-static Status::Statuses make_prepost_init_var_(BackData* data, TreeNode* node,
+static Status::Statuses make_prepost_init_var_(IRBackData* data, TreeNode* node,
                                                bool* is_array_elem, TreeNode** var_node,
                                                Var** var, bool* is_global);
 
-static Status::Statuses make_prefix_oper_eval_(BackData* data, TreeNode* node,
+static Status::Statuses make_prefix_oper_eval_(IRBackData* data, TreeNode* node,
                                                const bool is_array_elem, const Var* var,
                                                const bool is_global, TreeNode* var_node,
                                                const OperNum oper);
 
-static Status::Statuses make_postfix_oper_eval_(BackData* data, TreeNode* node,
+static Status::Statuses make_postfix_oper_eval_(IRBackData* data, TreeNode* node,
                                                 const bool is_array_elem, const Var* var,
                                                 const bool is_global, TreeNode* var_node,
                                                 const OperNum oper, bool is_val_needed);
 
 
-Status::Statuses ir_command_traversal(BackData* data, TreeNode* node, bool is_val_needed) {
+Status::Statuses ir_command_traversal(IRBackData* data, TreeNode* node, bool is_val_needed) {
     assert(data);
 
     if (node == nullptr)
@@ -120,7 +120,7 @@ Status::Statuses ir_command_traversal(BackData* data, TreeNode* node, bool is_va
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses traversal_var_(BackData* data, TreeNode* node, bool is_val_needed) {
+static Status::Statuses traversal_var_(IRBackData* data, TreeNode* node, bool is_val_needed) {
     assert(data);
     assert(node);
     assert(TYPE_IS_VAR(node));
@@ -140,7 +140,7 @@ static Status::Statuses traversal_var_(BackData* data, TreeNode* node, bool is_v
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses add_num_var_(BackData* data, TreeNode* node, bool is_const) {
+static Status::Statuses add_num_var_(IRBackData* data, TreeNode* node, bool is_const) {
     assert(data);
     assert(node);
     assert(TYPE_IS_VAR(node));
@@ -167,7 +167,7 @@ static Status::Statuses add_num_var_(BackData* data, TreeNode* node, bool is_con
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses add_array_(BackData* data, TreeNode* node, bool is_const) {
+static Status::Statuses add_array_(IRBackData* data, TreeNode* node, bool is_const) {
     assert(data);
     assert(node);
     assert(NODE_IS_OPER(node, OperNum::VAR_SEPARATOR));
@@ -203,7 +203,7 @@ static Status::Statuses add_array_(BackData* data, TreeNode* node, bool is_const
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses check_var_for_assign_(BackData* data, TreeNode* node, Var* var) {
+static Status::Statuses check_var_for_assign_(IRBackData* data, TreeNode* node, Var* var) {
     assert(data);
 
     if (node == nullptr || !(TYPE_IS_VAR(node) || NODE_IS_OPER(node, OperNum::ARRAY_ELEM)))
@@ -225,7 +225,7 @@ static Status::Statuses check_var_for_assign_(BackData* data, TreeNode* node, Va
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses eval_func_args_(BackData* data, TreeNode* cur_sep, size_t addr_offset,
+static Status::Statuses eval_func_args_(IRBackData* data, TreeNode* cur_sep, size_t addr_offset,
                                         ssize_t arg_cnt, DebugInfo* debug_info) {
     assert(data);
     assert(debug_info);
@@ -250,7 +250,7 @@ static Status::Statuses eval_func_args_(BackData* data, TreeNode* cur_sep, size_
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses provide_func_call_(BackData* data, TreeNode* node, bool is_val_needed) {
+static Status::Statuses provide_func_call_(IRBackData* data, TreeNode* node, bool is_val_needed) {
     assert(data);
     assert(node);
 
@@ -275,7 +275,7 @@ static Status::Statuses provide_func_call_(BackData* data, TreeNode* node, bool 
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses get_arr_elem_val_(BackData* data, TreeNode* node, bool is_val_needed) {
+static Status::Statuses get_arr_elem_val_(IRBackData* data, TreeNode* node, bool is_val_needed) {
     assert(data);
     assert(node);
 
@@ -298,7 +298,7 @@ static Status::Statuses get_arr_elem_val_(BackData* data, TreeNode* node, bool i
 }
 
 
-static Status::Statuses array_definition_assignment_(BackData* data, TreeNode* node) {
+static Status::Statuses array_definition_assignment_(IRBackData* data, TreeNode* node) {
     assert(data);
     assert(node);
     assert(NODE_IS_OPER(node, OperNum::ARRAY_DEFINITION));
@@ -328,7 +328,7 @@ static Status::Statuses array_definition_assignment_(BackData* data, TreeNode* n
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses binary_math_(BackData* data, TreeNode* node,
+static Status::Statuses binary_math_(IRBackData* data, TreeNode* node,
                                          const OperNum math_op, bool is_val_needed) {
     assert(data);
     assert(node);
@@ -342,7 +342,7 @@ static Status::Statuses binary_math_(BackData* data, TreeNode* node,
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses unary_math_(BackData* data, TreeNode* node,
+static Status::Statuses unary_math_(IRBackData* data, TreeNode* node,
                                         const OperNum math_op, bool is_val_needed) {
     assert(data);
     assert(node);
@@ -357,7 +357,7 @@ static Status::Statuses unary_math_(BackData* data, TreeNode* node,
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses make_if_(BackData* data, TreeNode* node) {
+static Status::Statuses make_if_(IRBackData* data, TreeNode* node) {
     assert(data);
 
     IRScopeData* scope_data = nullptr;
@@ -374,7 +374,7 @@ static Status::Statuses make_if_(BackData* data, TreeNode* node) {
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses make_do_if_(BackData* data, TreeNode* node) {
+static Status::Statuses make_do_if_(IRBackData* data, TreeNode* node) {
     assert(data);
     assert(node);
 
@@ -390,7 +390,7 @@ static Status::Statuses make_do_if_(BackData* data, TreeNode* node) {
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses make_if_else_(BackData* data, TreeNode* node) {
+static Status::Statuses make_if_else_(IRBackData* data, TreeNode* node) {
     assert(data);
     assert(node);
 
@@ -414,7 +414,7 @@ static Status::Statuses make_if_else_(BackData* data, TreeNode* node) {
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses make_while_(BackData* data, TreeNode* parent_node) {
+static Status::Statuses make_while_(IRBackData* data, TreeNode* parent_node) {
     assert(data);
     assert(parent_node);
 
@@ -436,7 +436,7 @@ static Status::Statuses make_while_(BackData* data, TreeNode* parent_node) {
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses make_do_while_(BackData* data, TreeNode* node) {
+static Status::Statuses make_do_while_(IRBackData* data, TreeNode* node) {
     assert(data);
     assert(node);
 
@@ -461,7 +461,7 @@ static Status::Statuses make_do_while_(BackData* data, TreeNode* node) {
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses make_while_else_(BackData* data, TreeNode* parent_node) {
+static Status::Statuses make_while_else_(IRBackData* data, TreeNode* parent_node) {
     assert(data);
     assert(parent_node);
 
@@ -490,7 +490,7 @@ static Status::Statuses make_while_else_(BackData* data, TreeNode* parent_node) 
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses make_set_fps_(BackData* data, TreeNode* val_node) {
+static Status::Statuses make_set_fps_(IRBackData* data, TreeNode* val_node) {
     assert(data);
     assert(val_node);
 
@@ -502,7 +502,7 @@ static Status::Statuses make_set_fps_(BackData* data, TreeNode* val_node) {
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses make_continue_(BackData* data, TreeNode* node) {
+static Status::Statuses make_continue_(IRBackData* data, TreeNode* node) {
     assert(data);
 
     IRScopeData* scope_data = local_find_loop_scope_num(data);
@@ -515,7 +515,7 @@ static Status::Statuses make_continue_(BackData* data, TreeNode* node) {
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses make_break_(BackData* data, TreeNode* node) {
+static Status::Statuses make_break_(IRBackData* data, TreeNode* node) {
     assert(data);
 
     IRScopeData* scope_data = local_find_loop_scope_num(data);
@@ -528,7 +528,7 @@ static Status::Statuses make_break_(BackData* data, TreeNode* node) {
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses make_prefix_oper_(BackData* data, TreeNode* node,
+static Status::Statuses make_prefix_oper_(IRBackData* data, TreeNode* node,
                                               const OperNum oper, bool is_val_needed) {
     assert(data);
     assert(node);
@@ -567,7 +567,7 @@ static Status::Statuses make_prefix_oper_(BackData* data, TreeNode* node,
     return DAMAGED_TREE("Right child of prefix oper must be null, var or other prepost-opers");
 }
 
-static Status::Statuses make_prefix_oper_eval_(BackData* data, TreeNode* node,
+static Status::Statuses make_prefix_oper_eval_(IRBackData* data, TreeNode* node,
                                                    const bool is_array_elem, const Var* var,
                                                    const bool is_global, TreeNode* var_node,
                                                    const OperNum oper) {
@@ -591,7 +591,7 @@ static Status::Statuses make_prefix_oper_eval_(BackData* data, TreeNode* node,
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses make_postfix_oper_(BackData* data, TreeNode* node,
+static Status::Statuses make_postfix_oper_(IRBackData* data, TreeNode* node,
                                                const OperNum oper, bool is_val_needed) {
     assert(data);
     assert(node);
@@ -623,7 +623,7 @@ static Status::Statuses make_postfix_oper_(BackData* data, TreeNode* node,
     return DAMAGED_TREE("Right child of prefix oper must be null, var or other prepost-opers");
 }
 
-static Status::Statuses make_prepost_init_var_(BackData* data, TreeNode* node,
+static Status::Statuses make_prepost_init_var_(IRBackData* data, TreeNode* node,
                                                    bool* is_array_elem, TreeNode** var_node,
                                                    Var** var, bool* is_global) {
     assert(data);
@@ -647,7 +647,7 @@ static Status::Statuses make_prepost_init_var_(BackData* data, TreeNode* node,
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses make_postfix_oper_eval_(BackData* data, TreeNode* node,
+static Status::Statuses make_postfix_oper_eval_(IRBackData* data, TreeNode* node,
                                                     const bool is_array_elem, const Var* var,
                                                     const bool is_global, TreeNode* var_node,
                                                     const OperNum oper, bool is_val_needed) {

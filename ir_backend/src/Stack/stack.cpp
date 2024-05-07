@@ -305,10 +305,10 @@ void stk_dump(const Stack* stk, const VarCodeData call_data) {
             stk_log_printf(&log_file, "             ");
 
         stk_log_printf(&log_file, "[%*zu] ", index_len, i);
-        if (!stk->data[i].is_initialised)
+        if (stk->data[i] == Stack::POISON)
             stk_log_printf(&log_file, "(poison)\n");
         else
-            stk_log_printf(&log_file, "%zd" "\n", stk->data[i].vars.size());
+            stk_log_printf(&log_file, "%zd" "\n", stk->data[i]);
     }
 
 #ifdef CANARY_PROTECT
@@ -343,13 +343,13 @@ int stk_verify(Stack* stk) {
 
     if (is_data_valid) {
         for (ssize_t i = 0; i < stk->size; i++)
-            if (!stk->data[i].is_initialised) {
+            if (stk->data[i] == Stack::POISON) {
                 res |= stk->POISON_VAL_FOUND;
                 break;
             }
 
         for (ssize_t i = stk->size; i < stk->capacity; i++)
-            if (stk->data[i].is_initialised) {
+            if (stk->data[i] != Stack::POISON) {
                 res |= stk->NON_POISON_EMPTY;
                 break;
             }

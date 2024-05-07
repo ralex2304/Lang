@@ -3,8 +3,11 @@
 
 #include "List/list.h"
 #include "ir_reader/ir_reader.h"
+#include "config.h"
 
-struct BackData {
+bool is_irval_equal(IRVal* val1, IRVal* val2);
+
+struct IRBackData {
 
     List ir = {};
     char* ir_text = nullptr;
@@ -12,18 +15,23 @@ struct BackData {
     FILE* listing = nullptr;
     char* bin = nullptr;
 
-    bool ctor(const char* input_filename, const char* listing_filename) {
-        assert(input_filename);
+    Arches arch = Arches::NONE;
+
+    bool ctor(const char* input_filename_, const char* listing_filename_, const Arches arch_) {
+        assert(input_filename_);
 
         bool res = true;
 
-        res &= read_ir(&ir, &ir_text, input_filename) == Status::NORMAL_WORK;
+        res &= read_ir(&ir, &ir_text, input_filename_) == Status::NORMAL_WORK;
 
-        if (listing_filename != nullptr)
-            res &= file_open(&listing, listing_filename, "wb");
+        if (listing_filename_ != nullptr)
+            res &= file_open(&listing, listing_filename_, "wb");
 
         if (!res)
             FREE(ir_text);
+
+        assert(arch_ != Arches::NONE);
+        arch = arch_;
 
         return res;
     };
@@ -37,6 +45,8 @@ struct BackData {
 
         if (listing != nullptr)
             res &= file_close(listing);
+
+        arch = Arches::NONE;
 
         return res;
     };

@@ -101,126 +101,104 @@
     95 000000F5 4883C408                                add rsp, 8
     96 000000F9 488911                                  mov qword [rcx], rdx
     97                                  ___ir_block_26:
-    98 000000FC 4883EC08                                sub rsp, 8
-    99 00000100 BA00000000                              mov rdx, 0x0 ; 0
-   100 00000105 48891424                                mov qword [rsp], rdx
-   101                                  ___ir_block_27:
-   102 00000109 488B1424                                mov rdx, [rsp]
-   103 0000010D 4883C408                                add rsp, 8
-   104 00000111 488955A8                                mov qword [rbp - 8 - 80], rdx
-   105                                  ___ir_block_28:
-   106                                  ___ir_block_29:
-   107 00000115 4883EC08                                sub rsp, 8
-   108 00000119 488B55A8                                mov rdx, qword [rbp - 8 - 80]
-   109 0000011D 48891424                                mov qword [rsp], rdx
-   110                                  ___ir_block_30:
-   111 00000121 4883EC08                                sub rsp, 8
-   112 00000125 488B55A8                                mov rdx, qword [rbp - 8 - 80]
-   113 00000129 48891424                                mov qword [rsp], rdx
-   114                                  ___ir_block_31:
-   115 0000012D 4883EC08                                sub rsp, 8
-   116 00000131 48BA000000000000F0-                     mov rdx, 0x3ff0000000000000 ; 1
-   116 0000013A 3F                 
-   117 0000013B 48891424                                mov qword [rsp], rdx
-   118                                  ___ir_block_32:
-   119 0000013F F20F10442408                            movsd xmm0, [rsp + 8]
-   120 00000145 F20F580424                              addsd xmm0, qword [rsp]
-   121 0000014A 4883C408                                add rsp, 8
-   122 0000014E F20F110424                              movsd qword [rsp], xmm0
-   123                                  ___ir_block_33:
-   124 00000153 488B1424                                mov rdx, [rsp]
-   125 00000157 4883C408                                add rsp, 8
-   126 0000015B 488955A8                                mov qword [rbp - 8 - 80], rdx
-   127                                  ___ir_block_34:
-   128 0000015F 488D4DF8                                lea rcx, qword [rbp - 8 - 0]
-   129                                  ___ir_block_35:
-   130 00000163 F2480F2D1424                            cvtsd2si rdx, [rsp]
-   131 00000169 4883C408                                add rsp, 8
-   132 0000016D 48C1E203                                shl rdx, 3
-   133 00000171 4829D1                                  sub rcx, rdx
-   134                                  ___ir_block_36:
-   135 00000174 4883EC08                                sub rsp, 8
-   136 00000178 488B11                                  mov rdx, qword [rcx]
-   137 0000017B 48891424                                mov qword [rsp], rdx
-   138                                  ___ir_block_37:
-   139 0000017F 4883EC08                                sub rsp, 8
-   140 00000183 48BA00000000000014-                     mov rdx, 0x4014000000000000 ; 5
-   140 0000018C 40                 
-   141 0000018D 48891424                                mov qword [rsp], rdx
-   142                                  ___ir_block_38:
-   143                                                  ; operands comparison: op1 < op2
-   144 00000191 F20F101424                              movsd xmm2, [rsp]
-   145 00000196 F20F104C2408                            movsd xmm1, [rsp + 8]
-   146 0000019C F20F10D9                                movsd xmm3, xmm1
-   147 000001A0 F20F5CDA                                subsd xmm3, xmm2
-   148 000001A4 F20F111C24                              movsd [rsp], xmm3
-   149 000001A9 48BAFFFFFFFFFFFFFF-                     mov rdx, -1 >> 1
-   149 000001B2 7F                 
-   150 000001B3 48211424                                and qword [rsp], rdx
-   151 000001B7 F20F101C24                              movsd xmm3, [rsp]
-   152 000001BC 4883C410                                add rsp, 16
-   153                                                  ; xmm1 - op1; xmm2 - op2; xmm3 - fabs(op1 - op2)
-   154                                  
-   155 000001C0 660F2F1C25-                             comisd xmm3, [EPSILON] ; fabs(op1 - op2) {'<' | '>'} EPSILON
-   155 000001C5 [3B000000]         
-   156 000001C9 721A                                    jc ___compare_38_false
-   157                                  
-   158 000001CB 660F2FCA                                comisd xmm1, xmm2 ; op1 {'<' | '>'} op2
-   159 000001CF 7314                                    jnc ___compare_38_false
-   160                                  
-   161 000001D1 4883EC08                                sub rsp, 8
-   162 000001D5 48BA000000000000F0-                     mov rdx, 0x3ff0000000000000 ; 1
-   162 000001DE 3F                 
-   163 000001DF 48891424                                mov qword [rsp], rdx
-   164 000001E3 EB0D                                    jmp ___compare_38_end
-   165                                  
-   166                                  ___compare_38_false:
-   167 000001E5 4883EC08                                sub rsp, 8
-   168 000001E9 BA00000000                              mov rdx, 0x0 ; 0
-   169 000001EE 48891424                                mov qword [rsp], rdx
-   170                                  ___compare_38_end:
-   171                                  
-   172                                  ___ir_block_39:
-   173 000001F2 48BAFFFFFFFFFFFFFF-                     mov rdx, -1 >> 1
-   173 000001FB 7F                 
-   174 000001FC 48211424                                and qword [rsp], rdx
-   175 00000200 F20F100C24                              movsd xmm1, qword [rsp]
-   176 00000205 4883C408                                add rsp, 8
-   177 00000209 660F2F0C25-                             comisd xmm1, [EPSILON]
-   177 0000020E [3B000000]         
-   178                                  ___ir_block_40:
-   179 00000212 723F                                    jc ___ir_block_47
-   180                                  ___ir_block_41:
-   181 00000214 4883EC08                                sub rsp, 8
-   182 00000218 488B55A8                                mov rdx, qword [rbp - 8 - 80]
-   183 0000021C 48891424                                mov qword [rsp], rdx
-   184                                  ___ir_block_42:
-   185 00000220 488D4DF8                                lea rcx, qword [rbp - 8 - 0]
-   186                                  ___ir_block_43:
-   187 00000224 F2480F2D1424                            cvtsd2si rdx, [rsp]
-   188 0000022A 4883C408                                add rsp, 8
-   189 0000022E 48C1E203                                shl rdx, 3
-   190 00000232 4829D1                                  sub rcx, rdx
-   191                                  ___ir_block_44:
-   192 00000235 4883EC08                                sub rsp, 8
-   193 00000239 488B11                                  mov rdx, qword [rcx]
-   194 0000023C 48891424                                mov qword [rsp], rdx
-   195                                  ___ir_block_45:
-   196 00000240 F20F100424                              movsd xmm0, qword [rsp]
-   197 00000245 4883C408                                add rsp, 8
-   198 00000249 E87E010000                              call doubleio_out
-   199                                  ___ir_block_46:
-   200 0000024E E9C2FEFFFF                              jmp ___ir_block_28
-   201                                  ___ir_block_47:
-   202                                  ___ir_block_48:
-   203 00000253 C9                                      leave
-   204 00000254 660FEFC0                                pxor xmm0, xmm0
-   205 00000258 C3                                      ret
-   206                                  ; ------------------------- Function definition end -----------------------
-   207                                  
-   208                                  
-   209                                  ___ir_block_49:
-   210                                  %include "doubleiolib.nasm"
+    98                                  ___ir_block_27:
+    99 000000FC BA00000000                              mov rdx, 0x0 ; 0
+   100 00000101 488955A8                                mov qword [rbp - 8 - 80], rdx
+   101                                  ___ir_block_28:
+   102                                  ___ir_block_29:
+   103 00000105 4883EC08                                sub rsp, 8
+   104 00000109 488B55A8                                mov rdx, qword [rbp - 8 - 80]
+   105 0000010D 48891424                                mov qword [rsp], rdx
+   106                                  ___ir_block_30:
+   107 00000111 4883EC08                                sub rsp, 8
+   108 00000115 488B55A8                                mov rdx, qword [rbp - 8 - 80]
+   109 00000119 48891424                                mov qword [rsp], rdx
+   110                                  ___ir_block_31:
+   111 0000011D 4883EC08                                sub rsp, 8
+   112 00000121 48BA000000000000F0-                     mov rdx, 0x3ff0000000000000 ; 1
+   112 0000012A 3F                 
+   113 0000012B 48891424                                mov qword [rsp], rdx
+   114                                  ___ir_block_32:
+   115 0000012F F30F7E442408                            movq xmm0, [rsp + 8]
+   116 00000135 F20F580424                              addsd xmm0, qword [rsp]
+   117 0000013A 4883C410                                add rsp, 16
+   118 0000013E 660FD645A8                              movq qword [rbp - 8 - 80], xmm0
+   119                                  ___ir_block_33:
+   120                                  ___ir_block_34:
+   121 00000143 488D4DF8                                lea rcx, qword [rbp - 8 - 0]
+   122                                  ___ir_block_35:
+   123 00000147 F2480F2D1424                            cvtsd2si rdx, [rsp]
+   124 0000014D 4883C408                                add rsp, 8
+   125 00000151 48C1E203                                shl rdx, 3
+   126 00000155 4829D1                                  sub rcx, rdx
+   127                                  ___ir_block_36:
+   128                                  ___ir_block_37:
+   129                                  ___ir_block_38:
+   130                                                  ; operands comparison: op1 < op2
+   131 00000158 F30F7E09                                movq xmm1, qword [rcx]
+   132 0000015C 48BA00000000000014-                     mov rdx, 0x4014000000000000
+   132 00000165 40                 
+   133 00000166 66480F6ED2                              movq xmm2, rdx
+   134 0000016B 4883C4F8                                add rsp, 18446744073709551608
+   135 0000016F F30F7ED9                                movq xmm3, xmm1
+   136 00000173 F20F5CDA                                subsd xmm3, xmm2
+   137 00000177 660F541C25-                             andpd xmm3, [DOUBLE_NEG_CONST]
+   137 0000017C [50000000]         
+   138                                                  ; xmm1 - op1; xmm2 - op2; xmm3 - fabs(op1 - op2)
+   139                                  
+   140 00000180 660F2F1C25-                             comisd xmm3, [EPSILON] ; fabs(op1 - op2) {'<' | '>'} EPSILON
+   140 00000185 [40000000]         
+   141 00000189 7212                                    jc ___compare_38_false
+   142                                  
+   143 0000018B 660F2FCA                                comisd xmm1, xmm2 ; op1 {'<' | '>'} op2
+   144 0000018F 730C                                    jnc ___compare_38_false
+   145                                  
+   146 00000191 48BA000000000000F0-                     mov rdx, 0x3ff0000000000000 ; 1
+   146 0000019A 3F                 
+   147 0000019B EB05                                    jmp ___compare_38_end
+   148                                  
+   149                                  ___compare_38_false:
+   150 0000019D BA00000000                              mov rdx, 0x0 ; 0
+   151                                  ___compare_38_end:
+   152 000001A2 48891424                                mov qword [rsp], rdx
+   153                                  
+   154                                  ___ir_block_39:
+   155 000001A6 48BAFFFFFFFFFFFFFF-                     mov rdx, -1 >> 1
+   155 000001AF 7F                 
+   156 000001B0 48211424                                and qword [rsp], rdx
+   157 000001B4 F30F7E0C24                              movq xmm1, qword [rsp]
+   158 000001B9 4883C408                                add rsp, 8
+   159 000001BD 660F2F0C25-                             comisd xmm1, [EPSILON]
+   159 000001C2 [40000000]         
+   160                                  ___ir_block_40:
+   161 000001C6 722F                                    jc ___ir_block_47
+   162                                  ___ir_block_41:
+   163 000001C8 4883EC08                                sub rsp, 8
+   164 000001CC 488B55A8                                mov rdx, qword [rbp - 8 - 80]
+   165 000001D0 48891424                                mov qword [rsp], rdx
+   166                                  ___ir_block_42:
+   167 000001D4 488D4DF8                                lea rcx, qword [rbp - 8 - 0]
+   168                                  ___ir_block_43:
+   169 000001D8 F2480F2D1424                            cvtsd2si rdx, [rsp]
+   170 000001DE 4883C408                                add rsp, 8
+   171 000001E2 48C1E203                                shl rdx, 3
+   172 000001E6 4829D1                                  sub rcx, rdx
+   173                                  ___ir_block_44:
+   174                                  ___ir_block_45:
+   175 000001E9 F30F7E01                                movq xmm0, qword [rcx]
+   176 000001ED E87E010000                              call doubleio_out
+   177                                  ___ir_block_46:
+   178 000001F2 E90EFFFFFF                              jmp ___ir_block_28
+   179                                  ___ir_block_47:
+   180                                  ___ir_block_48:
+   181 000001F7 C9                                      leave
+   182 000001F8 660FEFC0                                pxor xmm0, xmm0
+   183 000001FC C3                                      ret
+   184                                  ; ------------------------- Function definition end -----------------------
+   185                                  
+   186                                  
+   187                                  ___ir_block_49:
+   188                                  %include "doubleiolib.nasm"
      1                              <1> section .text
      2                              <1> 
      3                              <1> ;-------------------------------------------------
@@ -232,29 +210,29 @@
      9                              <1> ;-------------------------------------------------
     10                              <1> doubleio_in:
     11                              <1> 
-    12 00000259 B801000000          <1>                 mov rax, 0x01               ; sys_write
-    13 0000025E BF01000000          <1>                 mov rdi, 0x01               ; stdout
-    14 00000263 488D3425[18000000]  <1>                 lea rsi, [EnterDoubleStr]   ; string
-    15 0000026B BA0E000000          <1>                 mov rdx, EnterDoubleStrLen  ; string len
-    16 00000270 0F05                <1>                 syscall
+    12 000001FD B801000000          <1>                 mov rax, 0x01               ; sys_write
+    13 00000202 BF01000000          <1>                 mov rdi, 0x01               ; stdout
+    14 00000207 488D3425[18000000]  <1>                 lea rsi, [EnterDoubleStr]   ; string
+    15 0000020F BA0E000000          <1>                 mov rdx, EnterDoubleStrLen  ; string len
+    16 00000214 0F05                <1>                 syscall
     17                              <1> 
-    18 00000272 488B3C25[80000000]  <1>                 mov rdi, [ReadBufferLen]
-    19 0000027A 48393C25[88000000]  <1>                 cmp [ReadBufferPos], rdi
-    20 00000282 7230                <1>                 jb .bufIsNotEmpty
+    18 00000216 488B3C25[80000000]  <1>                 mov rdi, [ReadBufferLen]
+    19 0000021E 48393C25[88000000]  <1>                 cmp [ReadBufferPos], rdi
+    20 00000226 7230                <1>                 jb .bufIsNotEmpty
     21                              <1> 
-    22 00000284 B800000000          <1>                 mov rax, 0x00               ; sys_read
-    23 00000289 BF00000000          <1>                 mov rdi, 0x00               ; stdin
-    24 0000028E 488D3425[40000000]  <1>                 lea rsi, [ReadBuffer]       ; buffer
-    25 00000296 BA40000000          <1>                 mov rdx, BufCapacity        ; buffer size
-    26 0000029B 0F05                <1>                 syscall
+    22 00000228 B800000000          <1>                 mov rax, 0x00               ; sys_read
+    23 0000022D BF00000000          <1>                 mov rdi, 0x00               ; stdin
+    24 00000232 488D3425[40000000]  <1>                 lea rsi, [ReadBuffer]       ; buffer
+    25 0000023A BA40000000          <1>                 mov rdx, BufCapacity        ; buffer size
+    26 0000023F 0F05                <1>                 syscall
     27                              <1> 
-    28 0000029D 4889C7              <1>                 mov rdi, rax
-    29 000002A0 48893C25[80000000]  <1>                 mov qword [ReadBufferLen], rdi
-    30 000002A8 48C70425[88000000]- <1>                 mov qword [ReadBufferPos], 0
-    30 000002B0 00000000            <1>
+    28 00000241 4889C7              <1>                 mov rdi, rax
+    29 00000244 48893C25[80000000]  <1>                 mov qword [ReadBufferLen], rdi
+    30 0000024C 48C70425[88000000]- <1>                 mov qword [ReadBufferPos], 0
+    30 00000254 00000000            <1>
     31                              <1> 
     32                              <1> .bufIsNotEmpty:
-    33 000002B4 488B3425[88000000]  <1>                 mov rsi, [ReadBufferPos]
+    33 00000258 488B3425[88000000]  <1>                 mov rsi, [ReadBufferPos]
     34                              <1> 
     35                              <1>                 ; rdi  - buf len
     36                              <1>                 ; rsi  - buf pos
@@ -265,120 +243,120 @@
     41                              <1>                 ; r11  = 10
     42                              <1>                 ; rax  - number
     43                              <1> 
-    44 000002BC 4D31C0              <1>                 xor r8, r8
-    45 000002BF 4D31C9              <1>                 xor r9, r9
-    46 000002C2 4D31D2              <1>                 xor r10, r10
-    47 000002C5 4831DB              <1>                 xor rbx, rbx
-    48 000002C8 4831C0              <1>                 xor rax, rax
-    49 000002CB 41BB0A000000        <1>                 mov r11, 10
+    44 00000260 4D31C0              <1>                 xor r8, r8
+    45 00000263 4D31C9              <1>                 xor r9, r9
+    46 00000266 4D31D2              <1>                 xor r10, r10
+    47 00000269 4831DB              <1>                 xor rbx, rbx
+    48 0000026C 4831C0              <1>                 xor rax, rax
+    49 0000026F 41BB0A000000        <1>                 mov r11, 10
     50                              <1> 
-    51 000002D1 4839FE              <1>                 cmp rsi, rdi ; pos >= len
-    52 000002D4 0F83CB000000        <1>                 jae .error
+    51 00000275 4839FE              <1>                 cmp rsi, rdi ; pos >= len
+    52 00000278 0F83CB000000        <1>                 jae .error
     53                              <1> 
-    54 000002DA 80BE[40000000]2D    <1>                 cmp byte ReadBuffer[rsi], '-'
-    55 000002E1 7511                <1>                 jne .isPositive
-    56 000002E3 41B801000000        <1>                 mov r8, 1
-    57 000002E9 48FFC6              <1>                 inc rsi
-    58 000002EC 48FF0425[88000000]  <1>                 inc qword [ReadBufferPos] ; is needed for empty input check
+    54 0000027E 80BE[40000000]2D    <1>                 cmp byte ReadBuffer[rsi], '-'
+    55 00000285 7511                <1>                 jne .isPositive
+    56 00000287 41B801000000        <1>                 mov r8, 1
+    57 0000028D 48FFC6              <1>                 inc rsi
+    58 00000290 48FF0425[88000000]  <1>                 inc qword [ReadBufferPos] ; is needed for empty input check
     59                              <1> 
     60                              <1> .isPositive:
-    61 000002F4 EB0D                <1>                 jmp .whileClause
+    61 00000298 EB0D                <1>                 jmp .whileClause
     62                              <1> .whileBody:
-    63 000002F6 49F7E3              <1>                 mul r11
-    64 000002F9 488D43D0            <1>                 lea rax, [rbx - '0']
+    63 0000029A 49F7E3              <1>                 mul r11
+    64 0000029D 488D43D0            <1>                 lea rax, [rbx - '0']
     65                              <1> 
-    66 000002FD 4D01CA              <1>                 add r10, r9 ; inc exp10
-    67 00000300 48FFC6              <1>                 inc rsi
+    66 000002A1 4D01CA              <1>                 add r10, r9 ; inc exp10
+    67 000002A4 48FFC6              <1>                 inc rsi
     68                              <1> 
     69                              <1> .whileClause:
-    70 00000303 4839FE              <1>                 cmp rsi, rdi ; pos >= len
-    71 00000306 7352                <1>                 jae .endBuf
+    70 000002A7 4839FE              <1>                 cmp rsi, rdi ; pos >= len
+    71 000002AA 7352                <1>                 jae .endBuf
     72                              <1> 
-    73 00000308 8A9E[40000000]      <1>                 mov bl, ReadBuffer[rsi] ; bl - cur symbol
+    73 000002AC 8A9E[40000000]      <1>                 mov bl, ReadBuffer[rsi] ; bl - cur symbol
     74                              <1> 
-    75 0000030E 80FB30              <1>                 cmp bl, '0'
-    76 00000311 7207                <1>                 jb .notDigit
+    75 000002B2 80FB30              <1>                 cmp bl, '0'
+    76 000002B5 7207                <1>                 jb .notDigit
     77                              <1> 
-    78 00000313 80FB39              <1>                 cmp bl, '9'
-    79 00000316 7702                <1>                 ja .notDigit
+    78 000002B7 80FB39              <1>                 cmp bl, '9'
+    79 000002BA 7702                <1>                 ja .notDigit
     80                              <1> 
-    81 00000318 EBDC                <1>                 jmp .whileBody
+    81 000002BC EBDC                <1>                 jmp .whileBody
     82                              <1> 
     83                              <1> .notDigit:
-    84 0000031A 80FB2E              <1>                 cmp bl, '.'
-    85 0000031D 7407                <1>                 je .floatingPoint
+    84 000002BE 80FB2E              <1>                 cmp bl, '.'
+    85 000002C1 7407                <1>                 je .floatingPoint
     86                              <1> 
-    87 0000031F 80FB0A              <1>                 cmp bl, 0x0a
-    88 00000322 741A                <1>                 je .endLine
+    87 000002C3 80FB0A              <1>                 cmp bl, 0x0a
+    88 000002C6 741A                <1>                 je .endLine
     89                              <1> 
-    90 00000324 EB7F                <1>                 jmp .error
+    90 000002C8 EB7F                <1>                 jmp .error
     91                              <1> 
     92                              <1> .floatingPoint:
-    93 00000326 4D85C9              <1>                 test r9, r9
-    94 00000329 757A                <1>                 jne .error ; several floating points in one number
+    93 000002CA 4D85C9              <1>                 test r9, r9
+    94 000002CD 757A                <1>                 jne .error ; several floating points in one number
     95                              <1> 
-    96 0000032B 41B901000000        <1>                 mov r9, 1
-    97 00000331 48FFC6              <1>                 inc rsi
-    98 00000334 48FF0425[88000000]  <1>                 inc qword [ReadBufferPos] ; is needed for empty input check
+    96 000002CF 41B901000000        <1>                 mov r9, 1
+    97 000002D5 48FFC6              <1>                 inc rsi
+    98 000002D8 48FF0425[88000000]  <1>                 inc qword [ReadBufferPos] ; is needed for empty input check
     99                              <1> 
-   100 0000033C EBC5                <1>                 jmp .whileClause
+   100 000002E0 EBC5                <1>                 jmp .whileClause
    101                              <1> 
    102                              <1> .endLine:
-   103 0000033E 48393425[88000000]  <1>                 cmp [ReadBufferPos], rsi
-   104 00000346 745D                <1>                 je .error ; empty input
+   103 000002E2 48393425[88000000]  <1>                 cmp [ReadBufferPos], rsi
+   104 000002EA 745D                <1>                 je .error ; empty input
    105                              <1> 
-   106 00000348 48FFC6              <1>                 inc rsi
-   107 0000034B 4839FE              <1>                 cmp rsi, rdi
-   108 0000034E 740A                <1>                 je .endBuf
+   106 000002EC 48FFC6              <1>                 inc rsi
+   107 000002EF 4839FE              <1>                 cmp rsi, rdi
+   108 000002F2 740A                <1>                 je .endBuf
    109                              <1> 
-   110 00000350 48893425[88000000]  <1>                 mov qword [ReadBufferPos], rsi
-   111 00000358 EB22                <1>                 jmp .writeAns
+   110 000002F4 48893425[88000000]  <1>                 mov qword [ReadBufferPos], rsi
+   111 000002FC EB22                <1>                 jmp .writeAns
    112                              <1> 
    113                              <1> .endBuf:
-   114 0000035A 48393425[88000000]  <1>                 cmp [ReadBufferPos], rsi
-   115 00000362 7441                <1>                 je .error ; empty input
+   114 000002FE 48393425[88000000]  <1>                 cmp [ReadBufferPos], rsi
+   115 00000306 7441                <1>                 je .error ; empty input
    116                              <1> 
-   117 00000364 48C70425[80000000]- <1>                 mov qword [ReadBufferLen], 0
-   117 0000036C 00000000            <1>
-   118 00000370 48C70425[88000000]- <1>                 mov qword [ReadBufferPos], 0
-   118 00000378 00000000            <1>
+   117 00000308 48C70425[80000000]- <1>                 mov qword [ReadBufferLen], 0
+   117 00000310 00000000            <1>
+   118 00000314 48C70425[88000000]- <1>                 mov qword [ReadBufferPos], 0
+   118 0000031C 00000000            <1>
    119                              <1> 
    120                              <1> .writeAns:
-   121 0000037C 4D85C0              <1>                 test r8, r8
-   122 0000037F 7403                <1>                 je .isPositive2
+   121 00000320 4D85C0              <1>                 test r8, r8
+   122 00000323 7403                <1>                 je .isPositive2
    123                              <1> 
-   124 00000381 48F7D8              <1>                 neg rax
+   124 00000325 48F7D8              <1>                 neg rax
    125                              <1> 
    126                              <1> .isPositive2:
-   127 00000384 F2480F2AC0          <1>                 cvtsi2sd xmm0, rax
+   127 00000328 F2480F2AC0          <1>                 cvtsi2sd xmm0, rax
    128                              <1> 
-   129 00000389 B801000000          <1>                 mov rax, 1
+   129 0000032D B801000000          <1>                 mov rax, 1
    130                              <1> 
-   131 0000038E EB06                <1>                 jmp .forExpClause
+   131 00000332 EB06                <1>                 jmp .forExpClause
    132                              <1> .forExpBody:
-   133 00000390 49FFCA              <1>                 dec r10
-   134 00000393 49F7E3              <1>                 mul r11
+   133 00000334 49FFCA              <1>                 dec r10
+   134 00000337 49F7E3              <1>                 mul r11
    135                              <1> 
    136                              <1> .forExpClause:
-   137 00000396 4D85D2              <1>                 test r10, r10
-   138 00000399 75F5                <1>                 jne .forExpBody
+   137 0000033A 4D85D2              <1>                 test r10, r10
+   138 0000033D 75F5                <1>                 jne .forExpBody
    139                              <1> 
-   140 0000039B F2480F2AC8          <1>                 cvtsi2sd xmm1, rax
+   140 0000033F F2480F2AC8          <1>                 cvtsi2sd xmm1, rax
    141                              <1> 
-   142 000003A0 F20F5EC1            <1>                 divsd xmm0, xmm1
+   142 00000344 F20F5EC1            <1>                 divsd xmm0, xmm1
    143                              <1> 
-   144 000003A4 C3                  <1>                 ret
+   144 00000348 C3                  <1>                 ret
    145                              <1> 
    146                              <1> .error:
-   147 000003A5 B801000000          <1>                 mov rax, 0x01           ; sys_write
-   148 000003AA BF01000000          <1>                 mov rdi, 0x01           ; stdout
-   149 000003AF 488D3425[26000000]  <1>                 lea rsi, [InputError]   ; string
-   150 000003B7 BA15000000          <1>                 mov rdx, InputErrorLen  ; string len
-   151 000003BC 0F05                <1>                 syscall
+   147 00000349 B801000000          <1>                 mov rax, 0x01           ; sys_write
+   148 0000034E BF01000000          <1>                 mov rdi, 0x01           ; stdout
+   149 00000353 488D3425[26000000]  <1>                 lea rsi, [InputError]   ; string
+   150 0000035B BA15000000          <1>                 mov rdx, InputErrorLen  ; string len
+   151 00000360 0F05                <1>                 syscall
    152                              <1> 
-   153 000003BE B83C000000          <1>                 mov rax, 0x3c           ; exit
-   154 000003C3 48C7C7FFFFFFFF      <1>                 mov rdi, -1             ; error code
-   155 000003CA 0F05                <1>                 syscall
+   153 00000362 B83C000000          <1>                 mov rax, 0x3c           ; exit
+   154 00000367 48C7C7FFFFFFFF      <1>                 mov rdi, -1             ; error code
+   155 0000036E 0F05                <1>                 syscall
    156                              <1> ;-------------------------------------------------
    157                              <1> 
    158                              <1> ;-------------------------------------------------
@@ -390,83 +368,83 @@
    164                              <1> ;-------------------------------------------------
    165                              <1> doubleio_out:
    166                              <1> 
-   167 000003CC 4C8D2C25[3F000000]  <1>                 lea r13, [WriteBuffer + BufCapacity - 1]         ; r13 - output str pointer
+   167 00000370 4C8D2C25[3F000000]  <1>                 lea r13, [WriteBuffer + BufCapacity - 1]         ; r13 - output str pointer
    168                              <1> 
-   169 000003D4 41C645000A          <1>                 mov byte [r13], 0x0a ; \n
-   170 000003D9 49FFCD              <1>                 dec r13
+   169 00000378 41C645000A          <1>                 mov byte [r13], 0x0a ; \n
+   170 0000037D 49FFCD              <1>                 dec r13
    171                              <1> 
-   172 000003DC 66480F7EC3          <1>                 movq rbx, xmm0                              ; rbx - raw xmm0
-   173 000003E1 4885DB              <1>                 test rbx, rbx
-   174 000003E4 790C                <1>                 jns .isPositive ; xmm0 >= 0
+   172 00000380 66480F7EC3          <1>                 movq rbx, xmm0                              ; rbx - raw xmm0
+   173 00000385 4885DB              <1>                 test rbx, rbx
+   174 00000388 790C                <1>                 jns .isPositive ; xmm0 >= 0
    175                              <1> 
-   176 000003E6 F30F7EC8            <1>                 movq xmm1, xmm0
-   177 000003EA 660FEFC0            <1>                 pxor xmm0, xmm0
-   178 000003EE F20F5CC1            <1>                 subsd xmm0, xmm1
+   176 0000038A F30F7EC8            <1>                 movq xmm1, xmm0
+   177 0000038E 660FEFC0            <1>                 pxor xmm0, xmm0
+   178 00000392 F20F5CC1            <1>                 subsd xmm0, xmm1
    179                              <1> .isPositive:
    180                              <1> 
-   181 000003F2 F24C0F2CD8          <1>                 cvttsd2si r11, xmm0 ; convert float to int  ; r11 - int part
-   182 000003F7 F2490F2ACB          <1>                 cvtsi2sd xmm1, r11
-   183 000003FC F20F5CC1            <1>                 subsd xmm0, xmm1
-   184 00000400 F20F590425-         <1>                 mulsd xmm0, [double_1e6]
-   184 00000405 [10000000]          <1>
-   185 00000409 F2480F2CC0          <1>                 cvttsd2si rax, xmm0                         ; rax - non-int part
+   181 00000396 F24C0F2CD8          <1>                 cvttsd2si r11, xmm0 ; convert float to int  ; r11 - int part
+   182 0000039B F2490F2ACB          <1>                 cvtsi2sd xmm1, r11
+   183 000003A0 F20F5CC1            <1>                 subsd xmm0, xmm1
+   184 000003A4 F20F590425-         <1>                 mulsd xmm0, [double_1e6]
+   184 000003A9 [10000000]          <1>
+   185 000003AD F2480F2CC0          <1>                 cvttsd2si rax, xmm0                         ; rax - non-int part
    186                              <1> 
    187                              <1>                 ; convert non-int part
-   188 0000040E 41BC0A000000        <1>                 mov r12d, 10    ; base
-   189 00000414 B906000000          <1>                 mov rcx, 6      ; width
+   188 000003B2 41BC0A000000        <1>                 mov r12d, 10    ; base
+   189 000003B8 B906000000          <1>                 mov rcx, 6      ; width
    190                              <1> .flWhileBody:
-   191 00000419 4831D2              <1>                 xor rdx, rdx
-   192 0000041C 41F7F4              <1>                 div r12d
+   191 000003BD 4831D2              <1>                 xor rdx, rdx
+   192 000003C0 41F7F4              <1>                 div r12d
    193                              <1>                 ; eax = div
    194                              <1>                 ; edx = mod
    195                              <1> 
-   196 0000041F 8A92[00000000]      <1>                 mov dl, HexTable[rdx]
-   197 00000425 41885500            <1>                 mov byte [r13], dl
-   198 00000429 49FFCD              <1>                 dec r13
-   199 0000042C 48FFC9              <1>                 dec rcx
+   196 000003C3 8A92[00000000]      <1>                 mov dl, HexTable[rdx]
+   197 000003C9 41885500            <1>                 mov byte [r13], dl
+   198 000003CD 49FFCD              <1>                 dec r13
+   199 000003D0 48FFC9              <1>                 dec rcx
    200                              <1> 
-   201 0000042F 4885C9              <1>                 test rcx,rcx
-   202 00000432 75E5                <1>                 jne .flWhileBody
+   201 000003D3 4885C9              <1>                 test rcx,rcx
+   202 000003D6 75E5                <1>                 jne .flWhileBody
    203                              <1> 
-   204 00000434 41C645002E          <1>                 mov byte [r13], '.'
-   205 00000439 49FFCD              <1>                 dec r13
+   204 000003D8 41C645002E          <1>                 mov byte [r13], '.'
+   205 000003DD 49FFCD              <1>                 dec r13
    206                              <1> 
-   207 0000043C 4C89D8              <1>                 mov rax, r11                                ; rax - int part
+   207 000003E0 4C89D8              <1>                 mov rax, r11                                ; rax - int part
    208                              <1> 
    209                              <1>                 ; convert int part
    210                              <1> .intWhileBody:
-   211 0000043F 4831D2              <1>                 xor rdx, rdx
-   212 00000442 41F7F4              <1>                 div r12d
+   211 000003E3 4831D2              <1>                 xor rdx, rdx
+   212 000003E6 41F7F4              <1>                 div r12d
    213                              <1>                 ; eax = div
    214                              <1>                 ; edx = mod
    215                              <1> 
-   216 00000445 8A92[00000000]      <1>                 mov dl, HexTable[rdx]
-   217 0000044B 41885500            <1>                 mov byte [r13], dl
-   218 0000044F 49FFCD              <1>                 dec r13
+   216 000003E9 8A92[00000000]      <1>                 mov dl, HexTable[rdx]
+   217 000003EF 41885500            <1>                 mov byte [r13], dl
+   218 000003F3 49FFCD              <1>                 dec r13
    219                              <1> 
-   220 00000452 85C0                <1>                 test eax, eax
-   221 00000454 75E9                <1>                 jne .intWhileBody
+   220 000003F6 85C0                <1>                 test eax, eax
+   221 000003F8 75E9                <1>                 jne .intWhileBody
    222                              <1> 
-   223 00000456 4885DB              <1>                 test rbx, rbx
-   224 00000459 7908                <1>                 jns .isPositive2 ; xmm0 >= 0
+   223 000003FA 4885DB              <1>                 test rbx, rbx
+   224 000003FD 7908                <1>                 jns .isPositive2 ; xmm0 >= 0
    225                              <1> 
-   226 0000045B 41C645002D          <1>                 mov byte [r13], '-'
-   227 00000460 49FFCD              <1>                 dec r13
+   226 000003FF 41C645002D          <1>                 mov byte [r13], '-'
+   227 00000404 49FFCD              <1>                 dec r13
    228                              <1> .isPositive2:
    229                              <1> 
-   230 00000463 49BB-               <1>                 mov r11, WriteBuffer + BufCapacity - 1
-   230 00000465 [3F00000000000000]  <1>
-   231 0000046D 4D29EB              <1>                 sub r11, r13
+   230 00000407 49BB-               <1>                 mov r11, WriteBuffer + BufCapacity - 1
+   230 00000409 [3F00000000000000]  <1>
+   231 00000411 4D29EB              <1>                 sub r11, r13
    232                              <1> 
-   233 00000470 49FFC5              <1>                 inc r13
+   233 00000414 49FFC5              <1>                 inc r13
    234                              <1> 
-   235 00000473 B801000000          <1>                 mov rax, 0x01   ; sys_write
-   236 00000478 BF01000000          <1>                 mov rdi, 0x01   ; stdout
-   237 0000047D 4C89EE              <1>                 mov rsi, r13    ; buffer
-   238 00000480 4C89DA              <1>                 mov rdx, r11    ; buffer size
-   239 00000483 0F05                <1>                 syscall
+   235 00000417 B801000000          <1>                 mov rax, 0x01   ; sys_write
+   236 0000041C BF01000000          <1>                 mov rdi, 0x01   ; stdout
+   237 00000421 4C89EE              <1>                 mov rsi, r13    ; buffer
+   238 00000424 4C89DA              <1>                 mov rdx, r11    ; buffer size
+   239 00000427 0F05                <1>                 syscall
    240                              <1> 
-   241 00000485 C3                  <1>                 ret
+   241 00000429 C3                  <1>                 ret
    242                              <1> ;-------------------------------------------------
    243                              <1> 
    244                              <1> section .data
@@ -493,12 +471,16 @@
    262 0000002F 75742E204578697469- <1>
    262 00000038 6E670A              <1>
    263                              <1> InputErrorLen       equ $ - InputError
-   211                                  
-   212                                  section .data
-   213                                  
-   214                                  GLOBAL_SECTION: times 0 dq 0
-   215                                  
-   216                                  section .rodata
-   217                                  
-   218 0000003B 8DEDB5A0F7C6B03E        EPSILON: dq 0x3eb0c6f7a0b5ed8d ; 1e-06
-   219                                  
+   189                                  
+   190                                  section .data
+   191                                  
+   192                                  GLOBAL_SECTION: times 0 dq 0
+   193                                  
+   194                                  section .rodata
+   195                                  
+   196 0000003B 90<rep 5h>              align 8
+   197 00000040 8DEDB5A0F7C6B03E        EPSILON: dq 0x3eb0c6f7a0b5ed8d ; 1e-06
+   198 00000048 90<rep 8h>              align 16
+   199 00000050 FFFFFFFFFFFFFF7F00-     DOUBLE_NEG_CONST: dq -1 >> 1, 0
+   199 00000059 00000000000000     
+   200                                  

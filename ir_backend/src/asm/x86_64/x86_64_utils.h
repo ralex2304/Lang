@@ -17,10 +17,10 @@
                     return Status::FILE_ERROR;                                      \
             } while (0)
 
-#define ERR(msg_, ...)                                                              \
-            do {                                                                    \
-                fprintf(stderr, "IR block data error: " msg_ "\n", ## __VA_ARGS__); \
-                return Status::LIST_ERROR;                                          \
+#define ERR(msg_, ...)                                                                          \
+            do {                                                                                \
+                fprintf(stderr, "IR block data error (x86-64): " msg_ "\n", ## __VA_ARGS__);    \
+                return Status::LIST_ERROR;                                                      \
             } while (0)
 
 #define STR_VAR(str_, format_, ...)                                         \
