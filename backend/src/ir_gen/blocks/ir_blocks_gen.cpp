@@ -37,7 +37,10 @@ static Status::Statuses dest_addr_fixup_(List* ir, Vector* array, size_t addr);
 Status::Statuses ir_block_start(IrData* ir_d) {
     assert(ir_d);
 
-    ADD_IR_BLOCK(.type = IRNodeType::START);
+    size_t start_index = 0;
+    ADD_IR_BLOCK_GET_INDEX(&start_index, .type = IRNodeType::START);
+
+    ir_d->start_block_index = start_index;
 
     return Status::NORMAL_WORK;
 }
@@ -94,9 +97,8 @@ Status::Statuses ir_block_end_func_definition(IrData* ir_d, const size_t frame_s
 Status::Statuses ir_block_init_mem_for_global_vars(IrData* ir_d, size_t size) {
     assert(ir_d);
 
-    IRVal global_vars_number = {.type = IRVal::INT_CONST, .num = {.k_int = (long)size}};
-
-    ADD_IR_BLOCK(.type = IRNodeType::INIT_MEM_FOR_GLOBALS, .src = {global_vars_number, {}});
+    ir_d->ir.arr[ir_d->start_block_index].elem.src[0] = {.type = IRVal::INT_CONST,
+                                                         .num = {.k_int = (long)size}};
 
     return Status::NORMAL_WORK;
 }

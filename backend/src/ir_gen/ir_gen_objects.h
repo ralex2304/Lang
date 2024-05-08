@@ -13,6 +13,7 @@ struct IrData {
 
     List ir = {};
 
+    size_t start_block_index = 0;
     size_t cur_func_def = 0;
 
     DebugInfo debug_info = {};

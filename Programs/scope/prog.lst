@@ -1,374 +1,378 @@
      1                                  ___ir_block_1:
-     2                                  ; Program start
-     3                                  
-     4                                  section .text
-     5                                  
-     6                                  extern printf
-     7                                  extern scanf
-     8                                  global _start
-     9                                  
-    10                                  _start:
-    11 00000000 C8000000                                enter 0, 0
-    12                                  ___ir_block_2:
-    13 00000004 E80D000000                              call ___func_4
-    14                                                  ; func call end
-    15                                  
-    16                                  ___ir_block_3:
-    17 00000009 C9                                      leave
-    18 0000000A B83C000000                              mov rax, 0x3c
-    19 0000000F F2480F2CF8                              cvttsd2si rdi, xmm0
-    20 00000014 0F05                                    syscall
-    21                                  
-    22                                  ___ir_block_4:
-    23                                  ; =========================== Function definition =========================
-    24                                  ___func_4:
-    25 00000016 C8100000                                enter 16, 0
-    26                                  
-    27                                  ___ir_block_5:
-    28                                  ___ir_block_6:
-    29 0000001A 48BA00000000000014-                     mov rdx, 0x4014000000000000 ; 5
-    29 00000023 40                 
-    30 00000024 488955F8                                mov qword [rbp - 8 - 0], rdx
-    31                                  ___ir_block_7:
-    32                                  ___ir_block_8:
-    33 00000028 F30F7E45F8                              movq xmm0, qword [rbp - 8 - 0]
-    34 0000002D E8F9010000                              call doubleio_out
-    35                                  ___ir_block_9:
-    36                                  ___ir_block_10:
-    37 00000032 48BA00000000000024-                     mov rdx, 0x4024000000000000 ; 10
-    37 0000003B 40                 
-    38 0000003C 488955F0                                mov qword [rbp - 8 - 8], rdx
-    39                                  ___ir_block_11:
-    40                                  ___ir_block_12:
-    41 00000040 F30F7E45F0                              movq xmm0, qword [rbp - 8 - 8]
-    42 00000045 E8E1010000                              call doubleio_out
-    43                                  ___ir_block_13:
-    44 0000004A 4883EC08                                sub rsp, 8
-    45 0000004E 48BA00000000000024-                     mov rdx, 0x4024000000000000 ; 10
-    45 00000057 40                 
-    46 00000058 48891424                                mov qword [rsp], rdx
-    47                                  ___ir_block_14:
-    48 0000005C 4883EC08                                sub rsp, 8
-    49 00000060 488B55F0                                mov rdx, qword [rbp - 8 - 8]
-    50 00000064 48891424                                mov qword [rsp], rdx
-    51                                  ___ir_block_15:
-    52 00000068 F30F7E4C2408                            movq xmm1, [rsp + 8]
-    53 0000006E F30F7E1424                              movq xmm2, qword [rsp]
-    54 00000073 660FD6542408                            movq [rsp + 8], xmm2
-    55 00000079 660FD60C24                              movq qword [rsp], xmm1
-    56                                  ___ir_block_16:
-    57 0000007E F30F7E442408                            movq xmm0, [rsp + 8]
-    58 00000084 F20F580424                              addsd xmm0, qword [rsp]
-    59 00000089 4883C410                                add rsp, 16
-    60 0000008D 660FD645F0                              movq qword [rbp - 8 - 8], xmm0
-    61                                  ___ir_block_17:
-    62                                  ___ir_block_18:
-    63                                  ___ir_block_19:
-    64 00000092 F30F7E45F0                              movq xmm0, qword [rbp - 8 - 8]
-    65 00000097 E88F010000                              call doubleio_out
-    66                                  ___ir_block_20:
-    67                                  ___ir_block_21:
-    68 0000009C F30F7E45F8                              movq xmm0, qword [rbp - 8 - 0]
-    69 000000A1 E885010000                              call doubleio_out
-    70                                  ___ir_block_22:
-    71                                  ___ir_block_23:
-    72 000000A6 BA00000000                              mov qword rdx, 0x0 ; 0
-    73 000000AB 66480F6EC2                              movq xmm0, rdx
-    74                                  ___ir_block_24:
-    75 000000B0 C9                                      leave
-    76 000000B1 C3                                      ret
-    77                                  
-    78                                  ___ir_block_25:
-    79 000000B2 C9                                      leave
-    80 000000B3 660FEFC0                                pxor xmm0, xmm0
-    81 000000B7 C3                                      ret
-    82                                  ; ------------------------- Function definition end -----------------------
-    83                                  
-    84                                  
-    85                                  ___ir_block_26:
-    86                                  %include "doubleiolib.nasm"
-     1                              <1> section .text
-     2                              <1> 
-     3                              <1> ;-------------------------------------------------
-     4                              <1> ; read double
-     5                              <1> ;
-     6                              <1> ; Destr:    rax, rbx, rdx, rdi, rsi, r8, r9, r10, r11, xmm1
-     7                              <1> ;
-     8                              <1> ; Ret:      xmm0
-     9                              <1> ;-------------------------------------------------
-    10                              <1> doubleio_in:
-    11                              <1> 
-    12 000000B8 B801000000          <1>                 mov rax, 0x01               ; sys_write
-    13 000000BD BF01000000          <1>                 mov rdi, 0x01               ; stdout
-    14 000000C2 488D3425[18000000]  <1>                 lea rsi, [EnterDoubleStr]   ; string
-    15 000000CA BA0E000000          <1>                 mov rdx, EnterDoubleStrLen  ; string len
-    16 000000CF 0F05                <1>                 syscall
-    17                              <1> 
-    18 000000D1 488B3C25[80000000]  <1>                 mov rdi, [ReadBufferLen]
-    19 000000D9 48393C25[88000000]  <1>                 cmp [ReadBufferPos], rdi
-    20 000000E1 7230                <1>                 jb .bufIsNotEmpty
-    21                              <1> 
-    22 000000E3 B800000000          <1>                 mov rax, 0x00               ; sys_read
-    23 000000E8 BF00000000          <1>                 mov rdi, 0x00               ; stdin
-    24 000000ED 488D3425[40000000]  <1>                 lea rsi, [ReadBuffer]       ; buffer
-    25 000000F5 BA40000000          <1>                 mov rdx, BufCapacity        ; buffer size
-    26 000000FA 0F05                <1>                 syscall
-    27                              <1> 
-    28 000000FC 4889C7              <1>                 mov rdi, rax
-    29 000000FF 48893C25[80000000]  <1>                 mov qword [ReadBufferLen], rdi
-    30 00000107 48C70425[88000000]- <1>                 mov qword [ReadBufferPos], 0
-    30 0000010F 00000000            <1>
-    31                              <1> 
-    32                              <1> .bufIsNotEmpty:
-    33 00000113 488B3425[88000000]  <1>                 mov rsi, [ReadBufferPos]
+     2                                  %include "doubleiolib.nasm"
+     1                              <1> section .rodata
+     2 00000000 494F4C4942474F54    <1> GOT_SIGNATURE:  dq "IOLIBGOT"
+     3 00000008 0000000000000000    <1> GOT:            dq TEXT_BEGIN - doubleio_in
+     4 00000010 8DFEFFFFFFFFFFFF    <1>                 dq TEXT_BEGIN - doubleio_out
+     5                              <1> 
+     6                              <1> section .text
+     7                              <1> 
+     8                              <1> TEXT_BEGIN:
+     9                              <1> 
+    10                              <1> ;-------------------------------------------------
+    11                              <1> ; read double
+    12                              <1> ;
+    13                              <1> ; Destr:    rax, rbx, rdx, rdi, rsi, r8, r9, r10, r11, xmm1
+    14                              <1> ;
+    15                              <1> ; Ret:      xmm0
+    16                              <1> ;-------------------------------------------------
+    17                              <1> doubleio_in:
+    18                              <1> 
+    19 00000000 B801000000          <1>                 mov rax, 0x01               ; sys_write
+    20 00000005 BF01000000          <1>                 mov rdi, 0x01               ; stdout
+    21 0000000A 488D3425[30000000]  <1>                 lea rsi, [EnterDoubleStr]   ; string
+    22 00000012 BA0E000000          <1>                 mov rdx, EnterDoubleStrLen  ; string len
+    23 00000017 0F05                <1>                 syscall
+    24                              <1> 
+    25 00000019 488B3C25[80000000]  <1>                 mov rdi, [ReadBufferLen]
+    26 00000021 48393C25[88000000]  <1>                 cmp [ReadBufferPos], rdi
+    27 00000029 7230                <1>                 jb .bufIsNotEmpty
+    28                              <1> 
+    29 0000002B B800000000          <1>                 mov rax, 0x00               ; sys_read
+    30 00000030 BF00000000          <1>                 mov rdi, 0x00               ; stdin
+    31 00000035 488D3425[40000000]  <1>                 lea rsi, [ReadBuffer]       ; buffer
+    32 0000003D BA40000000          <1>                 mov rdx, BufCapacity        ; buffer size
+    33 00000042 0F05                <1>                 syscall
     34                              <1> 
-    35                              <1>                 ; rdi  - buf len
-    36                              <1>                 ; rsi  - buf pos
-    37                              <1>                 ; rbx  - cur symbol
-    38                              <1>                 ; r8   - is negative
-    39                              <1>                 ; r9   - is after floating point
-    40                              <1>                 ; r10  - exp10
-    41                              <1>                 ; r11  = 10
-    42                              <1>                 ; rax  - number
-    43                              <1> 
-    44 0000011B 4D31C0              <1>                 xor r8, r8
-    45 0000011E 4D31C9              <1>                 xor r9, r9
-    46 00000121 4D31D2              <1>                 xor r10, r10
-    47 00000124 4831DB              <1>                 xor rbx, rbx
-    48 00000127 4831C0              <1>                 xor rax, rax
-    49 0000012A 41BB0A000000        <1>                 mov r11, 10
+    35 00000044 4889C7              <1>                 mov rdi, rax
+    36 00000047 48893C25[80000000]  <1>                 mov qword [ReadBufferLen], rdi
+    37 0000004F 48C70425[88000000]- <1>                 mov qword [ReadBufferPos], 0
+    37 00000057 00000000            <1>
+    38                              <1> 
+    39                              <1> .bufIsNotEmpty:
+    40 0000005B 488B3425[88000000]  <1>                 mov rsi, [ReadBufferPos]
+    41                              <1> 
+    42                              <1>                 ; rdi  - buf len
+    43                              <1>                 ; rsi  - buf pos
+    44                              <1>                 ; rbx  - cur symbol
+    45                              <1>                 ; r8   - is negative
+    46                              <1>                 ; r9   - is after floating point
+    47                              <1>                 ; r10  - exp10
+    48                              <1>                 ; r11  = 10
+    49                              <1>                 ; rax  - number
     50                              <1> 
-    51 00000130 4839FE              <1>                 cmp rsi, rdi ; pos >= len
-    52 00000133 0F83CB000000        <1>                 jae .error
-    53                              <1> 
-    54 00000139 80BE[40000000]2D    <1>                 cmp byte ReadBuffer[rsi], '-'
-    55 00000140 7511                <1>                 jne .isPositive
-    56 00000142 41B801000000        <1>                 mov r8, 1
-    57 00000148 48FFC6              <1>                 inc rsi
-    58 0000014B 48FF0425[88000000]  <1>                 inc qword [ReadBufferPos] ; is needed for empty input check
-    59                              <1> 
-    60                              <1> .isPositive:
-    61 00000153 EB0D                <1>                 jmp .whileClause
-    62                              <1> .whileBody:
-    63 00000155 49F7E3              <1>                 mul r11
-    64 00000158 488D43D0            <1>                 lea rax, [rbx - '0']
-    65                              <1> 
-    66 0000015C 4D01CA              <1>                 add r10, r9 ; inc exp10
-    67 0000015F 48FFC6              <1>                 inc rsi
-    68                              <1> 
-    69                              <1> .whileClause:
-    70 00000162 4839FE              <1>                 cmp rsi, rdi ; pos >= len
-    71 00000165 7352                <1>                 jae .endBuf
+    51 00000063 4D31C0              <1>                 xor r8, r8
+    52 00000066 4D31C9              <1>                 xor r9, r9
+    53 00000069 4D31D2              <1>                 xor r10, r10
+    54 0000006C 4831DB              <1>                 xor rbx, rbx
+    55 0000006F 4831C0              <1>                 xor rax, rax
+    56 00000072 41BB0A000000        <1>                 mov r11, 10
+    57                              <1> 
+    58 00000078 4839FE              <1>                 cmp rsi, rdi ; pos >= len
+    59 0000007B 0F83CB000000        <1>                 jae .error
+    60                              <1> 
+    61 00000081 80BE[40000000]2D    <1>                 cmp byte ReadBuffer[rsi], '-'
+    62 00000088 7511                <1>                 jne .isPositive
+    63 0000008A 41B801000000        <1>                 mov r8, 1
+    64 00000090 48FFC6              <1>                 inc rsi
+    65 00000093 48FF0425[88000000]  <1>                 inc qword [ReadBufferPos] ; is needed for empty input check
+    66                              <1> 
+    67                              <1> .isPositive:
+    68 0000009B EB0D                <1>                 jmp .whileClause
+    69                              <1> .whileBody:
+    70 0000009D 49F7E3              <1>                 mul r11
+    71 000000A0 488D43D0            <1>                 lea rax, [rbx - '0']
     72                              <1> 
-    73 00000167 8A9E[40000000]      <1>                 mov bl, ReadBuffer[rsi] ; bl - cur symbol
-    74                              <1> 
-    75 0000016D 80FB30              <1>                 cmp bl, '0'
-    76 00000170 7207                <1>                 jb .notDigit
-    77                              <1> 
-    78 00000172 80FB39              <1>                 cmp bl, '9'
-    79 00000175 7702                <1>                 ja .notDigit
-    80                              <1> 
-    81 00000177 EBDC                <1>                 jmp .whileBody
-    82                              <1> 
-    83                              <1> .notDigit:
-    84 00000179 80FB2E              <1>                 cmp bl, '.'
-    85 0000017C 7407                <1>                 je .floatingPoint
-    86                              <1> 
-    87 0000017E 80FB0A              <1>                 cmp bl, 0x0a
-    88 00000181 741A                <1>                 je .endLine
+    73 000000A4 4D01CA              <1>                 add r10, r9 ; inc exp10
+    74 000000A7 48FFC6              <1>                 inc rsi
+    75                              <1> 
+    76                              <1> .whileClause:
+    77 000000AA 4839FE              <1>                 cmp rsi, rdi ; pos >= len
+    78 000000AD 7352                <1>                 jae .endBuf
+    79                              <1> 
+    80 000000AF 8A9E[40000000]      <1>                 mov bl, ReadBuffer[rsi] ; bl - cur symbol
+    81                              <1> 
+    82 000000B5 80FB30              <1>                 cmp bl, '0'
+    83 000000B8 7207                <1>                 jb .notDigit
+    84                              <1> 
+    85 000000BA 80FB39              <1>                 cmp bl, '9'
+    86 000000BD 7702                <1>                 ja .notDigit
+    87                              <1> 
+    88 000000BF EBDC                <1>                 jmp .whileBody
     89                              <1> 
-    90 00000183 EB7F                <1>                 jmp .error
-    91                              <1> 
-    92                              <1> .floatingPoint:
-    93 00000185 4D85C9              <1>                 test r9, r9
-    94 00000188 757A                <1>                 jne .error ; several floating points in one number
-    95                              <1> 
-    96 0000018A 41B901000000        <1>                 mov r9, 1
-    97 00000190 48FFC6              <1>                 inc rsi
-    98 00000193 48FF0425[88000000]  <1>                 inc qword [ReadBufferPos] ; is needed for empty input check
-    99                              <1> 
-   100 0000019B EBC5                <1>                 jmp .whileClause
-   101                              <1> 
-   102                              <1> .endLine:
-   103 0000019D 48393425[88000000]  <1>                 cmp [ReadBufferPos], rsi
-   104 000001A5 745D                <1>                 je .error ; empty input
-   105                              <1> 
-   106 000001A7 48FFC6              <1>                 inc rsi
-   107 000001AA 4839FE              <1>                 cmp rsi, rdi
-   108 000001AD 740A                <1>                 je .endBuf
-   109                              <1> 
-   110 000001AF 48893425[88000000]  <1>                 mov qword [ReadBufferPos], rsi
-   111 000001B7 EB22                <1>                 jmp .writeAns
+    90                              <1> .notDigit:
+    91 000000C1 80FB2E              <1>                 cmp bl, '.'
+    92 000000C4 7407                <1>                 je .floatingPoint
+    93                              <1> 
+    94 000000C6 80FB0A              <1>                 cmp bl, 0x0a
+    95 000000C9 741A                <1>                 je .endLine
+    96                              <1> 
+    97 000000CB EB7F                <1>                 jmp .error
+    98                              <1> 
+    99                              <1> .floatingPoint:
+   100 000000CD 4D85C9              <1>                 test r9, r9
+   101 000000D0 757A                <1>                 jne .error ; several floating points in one number
+   102                              <1> 
+   103 000000D2 41B901000000        <1>                 mov r9, 1
+   104 000000D8 48FFC6              <1>                 inc rsi
+   105 000000DB 48FF0425[88000000]  <1>                 inc qword [ReadBufferPos] ; is needed for empty input check
+   106                              <1> 
+   107 000000E3 EBC5                <1>                 jmp .whileClause
+   108                              <1> 
+   109                              <1> .endLine:
+   110 000000E5 48393425[88000000]  <1>                 cmp [ReadBufferPos], rsi
+   111 000000ED 745D                <1>                 je .error ; empty input
    112                              <1> 
-   113                              <1> .endBuf:
-   114 000001B9 48393425[88000000]  <1>                 cmp [ReadBufferPos], rsi
-   115 000001C1 7441                <1>                 je .error ; empty input
+   113 000000EF 48FFC6              <1>                 inc rsi
+   114 000000F2 4839FE              <1>                 cmp rsi, rdi
+   115 000000F5 740A                <1>                 je .endBuf
    116                              <1> 
-   117 000001C3 48C70425[80000000]- <1>                 mov qword [ReadBufferLen], 0
-   117 000001CB 00000000            <1>
-   118 000001CF 48C70425[88000000]- <1>                 mov qword [ReadBufferPos], 0
-   118 000001D7 00000000            <1>
+   117 000000F7 48893425[88000000]  <1>                 mov qword [ReadBufferPos], rsi
+   118 000000FF EB22                <1>                 jmp .writeAns
    119                              <1> 
-   120                              <1> .writeAns:
-   121 000001DB 4D85C0              <1>                 test r8, r8
-   122 000001DE 7403                <1>                 je .isPositive2
+   120                              <1> .endBuf:
+   121 00000101 48393425[88000000]  <1>                 cmp [ReadBufferPos], rsi
+   122 00000109 7441                <1>                 je .error ; empty input
    123                              <1> 
-   124 000001E0 48F7D8              <1>                 neg rax
-   125                              <1> 
-   126                              <1> .isPositive2:
-   127 000001E3 F2480F2AC0          <1>                 cvtsi2sd xmm0, rax
-   128                              <1> 
-   129 000001E8 B801000000          <1>                 mov rax, 1
+   124 0000010B 48C70425[80000000]- <1>                 mov qword [ReadBufferLen], 0
+   124 00000113 00000000            <1>
+   125 00000117 48C70425[88000000]- <1>                 mov qword [ReadBufferPos], 0
+   125 0000011F 00000000            <1>
+   126                              <1> 
+   127                              <1> .writeAns:
+   128 00000123 4D85C0              <1>                 test r8, r8
+   129 00000126 7403                <1>                 je .isPositive2
    130                              <1> 
-   131 000001ED EB06                <1>                 jmp .forExpClause
-   132                              <1> .forExpBody:
-   133 000001EF 49FFCA              <1>                 dec r10
-   134 000001F2 49F7E3              <1>                 mul r11
+   131 00000128 48F7D8              <1>                 neg rax
+   132                              <1> 
+   133                              <1> .isPositive2:
+   134 0000012B F2480F2AC0          <1>                 cvtsi2sd xmm0, rax
    135                              <1> 
-   136                              <1> .forExpClause:
-   137 000001F5 4D85D2              <1>                 test r10, r10
-   138 000001F8 75F5                <1>                 jne .forExpBody
-   139                              <1> 
-   140 000001FA F2480F2AC8          <1>                 cvtsi2sd xmm1, rax
-   141                              <1> 
-   142 000001FF F20F5EC1            <1>                 divsd xmm0, xmm1
-   143                              <1> 
-   144 00000203 C3                  <1>                 ret
-   145                              <1> 
-   146                              <1> .error:
-   147 00000204 B801000000          <1>                 mov rax, 0x01           ; sys_write
-   148 00000209 BF01000000          <1>                 mov rdi, 0x01           ; stdout
-   149 0000020E 488D3425[26000000]  <1>                 lea rsi, [InputError]   ; string
-   150 00000216 BA15000000          <1>                 mov rdx, InputErrorLen  ; string len
-   151 0000021B 0F05                <1>                 syscall
+   136 00000130 B801000000          <1>                 mov rax, 1
+   137                              <1> 
+   138 00000135 EB06                <1>                 jmp .forExpClause
+   139                              <1> .forExpBody:
+   140 00000137 49FFCA              <1>                 dec r10
+   141 0000013A 49F7E3              <1>                 mul r11
+   142                              <1> 
+   143                              <1> .forExpClause:
+   144 0000013D 4D85D2              <1>                 test r10, r10
+   145 00000140 75F5                <1>                 jne .forExpBody
+   146                              <1> 
+   147 00000142 F2480F2AC8          <1>                 cvtsi2sd xmm1, rax
+   148                              <1> 
+   149 00000147 F20F5EC1            <1>                 divsd xmm0, xmm1
+   150                              <1> 
+   151 0000014B C3                  <1>                 ret
    152                              <1> 
-   153 0000021D B83C000000          <1>                 mov rax, 0x3c           ; exit
-   154 00000222 48C7C7FFFFFFFF      <1>                 mov rdi, -1             ; error code
-   155 00000229 0F05                <1>                 syscall
-   156                              <1> ;-------------------------------------------------
-   157                              <1> 
-   158                              <1> ;-------------------------------------------------
-   159                              <1> ; print double
-   160                              <1> ;
-   161                              <1> ; Args:     xmm0 - number
-   162                              <1> ;
-   163                              <1> ; Destr:    rax, rbx, rcx, rdx, rdi, rsi, r11, r12, r13, xmm0, xmm1
-   164                              <1> ;-------------------------------------------------
-   165                              <1> doubleio_out:
-   166                              <1> 
-   167 0000022B 4C8D2C25[3F000000]  <1>                 lea r13, [WriteBuffer + BufCapacity - 1]         ; r13 - output str pointer
-   168                              <1> 
-   169 00000233 41C645000A          <1>                 mov byte [r13], 0x0a ; \n
-   170 00000238 49FFCD              <1>                 dec r13
-   171                              <1> 
-   172 0000023B 66480F7EC3          <1>                 movq rbx, xmm0                              ; rbx - raw xmm0
-   173 00000240 4885DB              <1>                 test rbx, rbx
-   174 00000243 790C                <1>                 jns .isPositive ; xmm0 >= 0
+   153                              <1> .error:
+   154 0000014C B801000000          <1>                 mov rax, 0x01           ; sys_write
+   155 00000151 BF01000000          <1>                 mov rdi, 0x01           ; stdout
+   156 00000156 488D3425[3E000000]  <1>                 lea rsi, [InputError]   ; string
+   157 0000015E BA15000000          <1>                 mov rdx, InputErrorLen  ; string len
+   158 00000163 0F05                <1>                 syscall
+   159                              <1> 
+   160 00000165 B83C000000          <1>                 mov rax, 0x3c           ; exit
+   161 0000016A 48C7C7FFFFFFFF      <1>                 mov rdi, -1             ; error code
+   162 00000171 0F05                <1>                 syscall
+   163                              <1> ;-------------------------------------------------
+   164                              <1> 
+   165                              <1> ;-------------------------------------------------
+   166                              <1> ; print double
+   167                              <1> ;
+   168                              <1> ; Args:     xmm0 - number
+   169                              <1> ;
+   170                              <1> ; Destr:    rax, rbx, rcx, rdx, rdi, rsi, r11, r12, r13, xmm0, xmm1
+   171                              <1> ;-------------------------------------------------
+   172                              <1> doubleio_out:
+   173                              <1> 
+   174 00000173 4C8D2C25[3F000000]  <1>                 lea r13, [WriteBuffer + BufCapacity - 1]         ; r13 - output str pointer
    175                              <1> 
-   176 00000245 F30F7EC8            <1>                 movq xmm1, xmm0
-   177 00000249 660FEFC0            <1>                 pxor xmm0, xmm0
-   178 0000024D F20F5CC1            <1>                 subsd xmm0, xmm1
-   179                              <1> .isPositive:
-   180                              <1> 
-   181 00000251 F24C0F2CD8          <1>                 cvttsd2si r11, xmm0 ; convert float to int  ; r11 - int part
-   182 00000256 F2490F2ACB          <1>                 cvtsi2sd xmm1, r11
-   183 0000025B F20F5CC1            <1>                 subsd xmm0, xmm1
-   184 0000025F F20F590425-         <1>                 mulsd xmm0, [double_1e6]
-   184 00000264 [10000000]          <1>
-   185 00000268 F2480F2CC0          <1>                 cvttsd2si rax, xmm0                         ; rax - non-int part
-   186                              <1> 
-   187                              <1>                 ; convert non-int part
-   188 0000026D 41BC0A000000        <1>                 mov r12d, 10    ; base
-   189 00000273 B906000000          <1>                 mov rcx, 6      ; width
-   190                              <1> .flWhileBody:
-   191 00000278 4831D2              <1>                 xor rdx, rdx
-   192 0000027B 41F7F4              <1>                 div r12d
-   193                              <1>                 ; eax = div
-   194                              <1>                 ; edx = mod
-   195                              <1> 
-   196 0000027E 8A92[00000000]      <1>                 mov dl, HexTable[rdx]
-   197 00000284 41885500            <1>                 mov byte [r13], dl
-   198 00000288 49FFCD              <1>                 dec r13
-   199 0000028B 48FFC9              <1>                 dec rcx
-   200                              <1> 
-   201 0000028E 4885C9              <1>                 test rcx,rcx
-   202 00000291 75E5                <1>                 jne .flWhileBody
-   203                              <1> 
-   204 00000293 41C645002E          <1>                 mov byte [r13], '.'
-   205 00000298 49FFCD              <1>                 dec r13
-   206                              <1> 
-   207 0000029B 4C89D8              <1>                 mov rax, r11                                ; rax - int part
-   208                              <1> 
-   209                              <1>                 ; convert int part
-   210                              <1> .intWhileBody:
-   211 0000029E 4831D2              <1>                 xor rdx, rdx
-   212 000002A1 41F7F4              <1>                 div r12d
-   213                              <1>                 ; eax = div
-   214                              <1>                 ; edx = mod
+   176 0000017B 41C645000A          <1>                 mov byte [r13], 0x0a ; \n
+   177 00000180 49FFCD              <1>                 dec r13
+   178                              <1> 
+   179 00000183 66480F7EC3          <1>                 movq rbx, xmm0                              ; rbx - raw xmm0
+   180 00000188 4885DB              <1>                 test rbx, rbx
+   181 0000018B 790C                <1>                 jns .isPositive ; xmm0 >= 0
+   182                              <1> 
+   183 0000018D F30F7EC8            <1>                 movq xmm1, xmm0
+   184 00000191 660FEFC0            <1>                 pxor xmm0, xmm0
+   185 00000195 F20F5CC1            <1>                 subsd xmm0, xmm1
+   186                              <1> .isPositive:
+   187                              <1> 
+   188 00000199 F24C0F2CD8          <1>                 cvttsd2si r11, xmm0 ; convert float to int  ; r11 - int part
+   189 0000019E F2490F2ACB          <1>                 cvtsi2sd xmm1, r11
+   190 000001A3 F20F5CC1            <1>                 subsd xmm0, xmm1
+   191 000001A7 F20F590425-         <1>                 mulsd xmm0, [double_1e6]
+   191 000001AC [28000000]          <1>
+   192 000001B0 F2480F2CC0          <1>                 cvttsd2si rax, xmm0                         ; rax - non-int part
+   193                              <1> 
+   194                              <1>                 ; convert non-int part
+   195 000001B5 41BC0A000000        <1>                 mov r12d, 10    ; base
+   196 000001BB B906000000          <1>                 mov rcx, 6      ; width
+   197                              <1> .flWhileBody:
+   198 000001C0 4831D2              <1>                 xor rdx, rdx
+   199 000001C3 41F7F4              <1>                 div r12d
+   200                              <1>                 ; eax = div
+   201                              <1>                 ; edx = mod
+   202                              <1> 
+   203 000001C6 8A92[18000000]      <1>                 mov dl, HexTable[rdx]
+   204 000001CC 41885500            <1>                 mov byte [r13], dl
+   205 000001D0 49FFCD              <1>                 dec r13
+   206 000001D3 48FFC9              <1>                 dec rcx
+   207                              <1> 
+   208 000001D6 4885C9              <1>                 test rcx,rcx
+   209 000001D9 75E5                <1>                 jne .flWhileBody
+   210                              <1> 
+   211 000001DB 41C645002E          <1>                 mov byte [r13], '.'
+   212 000001E0 49FFCD              <1>                 dec r13
+   213                              <1> 
+   214 000001E3 4C89D8              <1>                 mov rax, r11                                ; rax - int part
    215                              <1> 
-   216 000002A4 8A92[00000000]      <1>                 mov dl, HexTable[rdx]
-   217 000002AA 41885500            <1>                 mov byte [r13], dl
-   218 000002AE 49FFCD              <1>                 dec r13
-   219                              <1> 
-   220 000002B1 85C0                <1>                 test eax, eax
-   221 000002B3 75E9                <1>                 jne .intWhileBody
+   216                              <1>                 ; convert int part
+   217                              <1> .intWhileBody:
+   218 000001E6 4831D2              <1>                 xor rdx, rdx
+   219 000001E9 41F7F4              <1>                 div r12d
+   220                              <1>                 ; eax = div
+   221                              <1>                 ; edx = mod
    222                              <1> 
-   223 000002B5 4885DB              <1>                 test rbx, rbx
-   224 000002B8 7908                <1>                 jns .isPositive2 ; xmm0 >= 0
-   225                              <1> 
-   226 000002BA 41C645002D          <1>                 mov byte [r13], '-'
-   227 000002BF 49FFCD              <1>                 dec r13
-   228                              <1> .isPositive2:
+   223 000001EC 8A92[18000000]      <1>                 mov dl, HexTable[rdx]
+   224 000001F2 41885500            <1>                 mov byte [r13], dl
+   225 000001F6 49FFCD              <1>                 dec r13
+   226                              <1> 
+   227 000001F9 85C0                <1>                 test eax, eax
+   228 000001FB 75E9                <1>                 jne .intWhileBody
    229                              <1> 
-   230 000002C2 49BB-               <1>                 mov r11, WriteBuffer + BufCapacity - 1
-   230 000002C4 [3F00000000000000]  <1>
-   231 000002CC 4D29EB              <1>                 sub r11, r13
+   230 000001FD 4885DB              <1>                 test rbx, rbx
+   231 00000200 7908                <1>                 jns .isPositive2 ; xmm0 >= 0
    232                              <1> 
-   233 000002CF 49FFC5              <1>                 inc r13
-   234                              <1> 
-   235 000002D2 B801000000          <1>                 mov rax, 0x01   ; sys_write
-   236 000002D7 BF01000000          <1>                 mov rdi, 0x01   ; stdout
-   237 000002DC 4C89EE              <1>                 mov rsi, r13    ; buffer
-   238 000002DF 4C89DA              <1>                 mov rdx, r11    ; buffer size
-   239 000002E2 0F05                <1>                 syscall
-   240                              <1> 
-   241 000002E4 C3                  <1>                 ret
-   242                              <1> ;-------------------------------------------------
-   243                              <1> 
-   244                              <1> section .data
-   245                              <1> 
-   246                              <1> BufCapacity equ 64
+   233 00000202 41C645002D          <1>                 mov byte [r13], '-'
+   234 00000207 49FFCD              <1>                 dec r13
+   235                              <1> .isPositive2:
+   236                              <1> 
+   237 0000020A 49BB-               <1>                 mov r11, WriteBuffer + BufCapacity - 1
+   237 0000020C [3F00000000000000]  <1>
+   238 00000214 4D29EB              <1>                 sub r11, r13
+   239                              <1> 
+   240 00000217 49FFC5              <1>                 inc r13
+   241                              <1> 
+   242 0000021A B801000000          <1>                 mov rax, 0x01   ; sys_write
+   243 0000021F BF01000000          <1>                 mov rdi, 0x01   ; stdout
+   244 00000224 4C89EE              <1>                 mov rsi, r13    ; buffer
+   245 00000227 4C89DA              <1>                 mov rdx, r11    ; buffer size
+   246 0000022A 0F05                <1>                 syscall
    247                              <1> 
-   248 00000000 00<rep 40h>         <1> WriteBuffer:   times BufCapacity db 0
-   249                              <1> 
-   250 00000040 00<rep 40h>         <1> ReadBuffer:     times BufCapacity db 0
-   251 00000080 0000000000000000    <1> ReadBufferLen:  dq 0
-   252 00000088 0000000000000000    <1> ReadBufferPos:  dq 0
-   253                              <1> 
-   254                              <1> section .rodata
-   255                              <1> 
-   256 00000000 303132333435363738- <1> HexTable:       db "0123456789abcdef"
-   256 00000009 39616263646566      <1>
-   257 00000010 0000000080842E41    <1> double_1e6:     dq 0x412e848000000000
-   258                              <1> 
-   259 00000018 456E74657220646F75- <1> EnterDoubleStr:     db "Enter double: "
-   259 00000021 626C653A20          <1>
-   260                              <1> EnterDoubleStrLen   equ $ - EnterDoubleStr
-   261                              <1> 
-   262 00000026 57726F6E6720696E70- <1> InputError:         db "Wrong input. Exiting", 0x0a
-   262 0000002F 75742E204578697469- <1>
-   262 00000038 6E670A              <1>
-   263                              <1> InputErrorLen       equ $ - InputError
-    87                                  
-    88                                  section .data
-    89                                  
-    90                                  GLOBAL_SECTION: times 0 dq 0
-    91                                  
-    92                                  section .rodata
-    93                                  
-    94 0000003B 90<rep 5h>              align 8
-    95 00000040 8DEDB5A0F7C6B03E        EPSILON: dq 0x3eb0c6f7a0b5ed8d ; 1e-06
-    96 00000048 90<rep 8h>              align 16
-    97 00000050 FFFFFFFFFFFFFF7F00-     DOUBLE_NEG_CONST: dq -1 >> 1, 0
-    97 00000059 00000000000000     
-    98                                  
+   248 0000022C C3                  <1>                 ret
+   249                              <1> ;-------------------------------------------------
+   250                              <1> 
+   251                              <1> section .data
+   252                              <1> 
+   253                              <1> BufCapacity equ 64
+   254                              <1> 
+   255 00000000 00<rep 40h>         <1> WriteBuffer:   times BufCapacity db 0
+   256                              <1> 
+   257 00000040 00<rep 40h>         <1> ReadBuffer:     times BufCapacity db 0
+   258 00000080 0000000000000000    <1> ReadBufferLen:  dq 0
+   259 00000088 0000000000000000    <1> ReadBufferPos:  dq 0
+   260                              <1> 
+   261                              <1> section .rodata
+   262                              <1> 
+   263 00000018 303132333435363738- <1> HexTable:       db "0123456789abcdef"
+   263 00000021 39616263646566      <1>
+   264 00000028 0000000080842E41    <1> double_1e6:     dq 0x412e848000000000
+   265                              <1> 
+   266 00000030 456E74657220646F75- <1> EnterDoubleStr:     db "Enter double: "
+   266 00000039 626C653A20          <1>
+   267                              <1> EnterDoubleStrLen   equ $ - EnterDoubleStr
+   268                              <1> 
+   269 0000003E 57726F6E6720696E70- <1> InputError:         db "Wrong input. Exiting", 0x0a
+   269 00000047 75742E204578697469- <1>
+   269 00000050 6E670A              <1>
+   270                              <1> InputErrorLen       equ $ - InputError
+     3                                  
+     4                                  section .data
+     5                                  
+     6                                  GLOBAL_SECTION: times 0 dq 0
+     7                                  
+     8                                  section .rodata
+     9                                  
+    10 00000053 90<rep 5h>              align 8
+    11 00000058 8DEDB5A0F7C6B03E        EPSILON: dq 0x3eb0c6f7a0b5ed8d ; 1e-06
+    12                                  align 16
+    13 00000060 FFFFFFFFFFFFFF7F00-     DOUBLE_NEG_CONST: dq -1 >> 1, 0
+    13 00000069 00000000000000     
+    14                                  
+    15                                  ; Program start
+    16                                  
+    17                                  section .text
+    18                                  
+    19                                  global _start
+    20                                  
+    21                                  _start:
+    22 0000022D C8000000                                enter 0, 0
+    23                                  ___ir_block_2:
+    24 00000231 E80D000000                              call ___func_4
+    25                                                  ; func call end
+    26                                  
+    27                                  ___ir_block_3:
+    28 00000236 C9                                      leave
+    29 00000237 B83C000000                              mov rax, 0x3c
+    30 0000023C F2480F2CF8                              cvttsd2si rdi, xmm0
+    31 00000241 0F05                                    syscall
+    32                                  
+    33                                  ___ir_block_4:
+    34                                  ; =========================== Function definition =========================
+    35                                  ___func_4:
+    36 00000243 C8100000                                enter 16, 0
+    37                                  
+    38                                  ___ir_block_5:
+    39                                  ___ir_block_6:
+    40 00000247 48BA00000000000014-                     mov rdx, 0x4014000000000000 ; 5
+    40 00000250 40                 
+    41 00000251 488955F8                                mov qword [rbp - 8 - 0], rdx
+    42                                  ___ir_block_7:
+    43                                  ___ir_block_8:
+    44 00000255 F30F7E45F8                              movq xmm0, qword [rbp - 8 - 0]
+    45 0000025A E814FFFFFF                              call doubleio_out
+    46                                  ___ir_block_9:
+    47                                  ___ir_block_10:
+    48 0000025F 48BA00000000000024-                     mov rdx, 0x4024000000000000 ; 10
+    48 00000268 40                 
+    49 00000269 488955F0                                mov qword [rbp - 8 - 8], rdx
+    50                                  ___ir_block_11:
+    51                                  ___ir_block_12:
+    52 0000026D F30F7E45F0                              movq xmm0, qword [rbp - 8 - 8]
+    53 00000272 E8FCFEFFFF                              call doubleio_out
+    54                                  ___ir_block_13:
+    55 00000277 4883EC08                                sub rsp, 8
+    56 0000027B 48BA00000000000024-                     mov rdx, 0x4024000000000000 ; 10
+    56 00000284 40                 
+    57 00000285 48891424                                mov qword [rsp], rdx
+    58                                  ___ir_block_14:
+    59 00000289 4883EC08                                sub rsp, 8
+    60 0000028D 488B55F0                                mov rdx, qword [rbp - 8 - 8]
+    61 00000291 48891424                                mov qword [rsp], rdx
+    62                                  ___ir_block_15:
+    63 00000295 F30F7E4C2408                            movq xmm1, [rsp + 8]
+    64 0000029B F30F7E1424                              movq xmm2, qword [rsp]
+    65 000002A0 660FD6542408                            movq [rsp + 8], xmm2
+    66 000002A6 660FD60C24                              movq qword [rsp], xmm1
+    67                                  ___ir_block_16:
+    68 000002AB F30F7E442408                            movq xmm0, [rsp + 8]
+    69 000002B1 F20F580424                              addsd xmm0, qword [rsp]
+    70 000002B6 4883C410                                add rsp, 16
+    71 000002BA 660FD645F0                              movq qword [rbp - 8 - 8], xmm0
+    72                                  ___ir_block_17:
+    73                                  ___ir_block_18:
+    74                                  ___ir_block_19:
+    75 000002BF F30F7E45F0                              movq xmm0, qword [rbp - 8 - 8]
+    76 000002C4 E8AAFEFFFF                              call doubleio_out
+    77                                  ___ir_block_20:
+    78                                  ___ir_block_21:
+    79 000002C9 F30F7E45F8                              movq xmm0, qword [rbp - 8 - 0]
+    80 000002CE E8A0FEFFFF                              call doubleio_out
+    81                                  ___ir_block_22:
+    82                                  ___ir_block_23:
+    83 000002D3 BA00000000                              mov qword rdx, 0x0 ; 0
+    84 000002D8 66480F6EC2                              movq xmm0, rdx
+    85                                  ___ir_block_24:
+    86 000002DD C9                                      leave
+    87 000002DE C3                                      ret
+    88                                  
+    89                                  ___ir_block_25:
+    90 000002DF C9                                      leave
+    91 000002E0 660FEFC0                                pxor xmm0, xmm0
+    92 000002E4 C3                                      ret
+    93                                  ; ------------------------- Function definition end -----------------------
+    94                                  
+    95                                  

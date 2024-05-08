@@ -55,8 +55,6 @@ static Status::Statuses push_pop_opt_block_parse_src_(IRBackData* data, ssize_t 
     bool is_changing = true;
     STATUS_CHECK(is_data_changing_between_ir_blocks_(data, push_block_i, pop_block_i, &is_changing));
 
-    fprintf(stderr, "blocks: %zd -> %zd - %d\n", push_block_i, pop_block_i, is_changing);
-
     if (!is_changing)
         STATUS_CHECK(push_pop_opt_change_blocks_(data, push_block_i, pop_block_i, src_num));
 

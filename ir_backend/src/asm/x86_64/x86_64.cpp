@@ -52,12 +52,25 @@ Status::Statuses asm_x86_64_START(IRBackData* data, [[maybe_unused]] IRNode* blo
     assert(data);
     assert(block);
 
+    if (block->src[0].type != IRVal::INT_CONST)
+        ERR("START must have src[0] with type INT_CONST");
+
+    LST_NO_TAB("%%include \"doubleiolib.nasm\"\n\n");
+
+    LST_NO_TAB("section .data\n\n");
+
+    LST_NO_TAB("GLOBAL_SECTION: times %ld dq 0\n\n", block->src[0].num.k_int * 8);
+
+    LST_NO_TAB("section .rodata\n\n");
+
+    LST_NO_TAB("align 8\n");
+    LST_NO_TAB("EPSILON: dq 0x%lx ; %lg\n", X86_64_Mov::get_bin_double(ASM_EPSILON), ASM_EPSILON);
+    LST_NO_TAB("align 16\n");
+    LST_NO_TAB("DOUBLE_NEG_CONST: dq -1 >> 1, 0\n\n");
+
     LST_NO_TAB("; Program start\n\n");
 
     LST_NO_TAB("section .text\n\n");
-
-    LST_NO_TAB("extern printf\n");
-    LST_NO_TAB("extern scanf\n");
 
     LST_NO_TAB("global _start\n\n");
     LST_NO_TAB("_start:\n");
@@ -129,29 +142,6 @@ Status::Statuses asm_x86_64_RET(IRBackData* data, [[maybe_unused]] IRNode* block
 
     LST("leave\n");
     LST("ret\n\n");
-
-    return Status::NORMAL_WORK;
-}
-
-Status::Statuses asm_x86_64_INIT_MEM_FOR_GLOBALS(IRBackData* data, IRNode* block, size_t) {
-    assert(data);
-    assert(block);
-
-    if (block->src[0].type != IRVal::INT_CONST)
-        ERR("INIT_MEM_FOR_GLOBALS must have src[0] with type INT_CONST");
-
-    LST_NO_TAB("%%include \"doubleiolib.nasm\"\n\n");
-
-    LST_NO_TAB("section .data\n\n");
-
-    LST_NO_TAB("GLOBAL_SECTION: times %ld dq 0\n\n", block->src[0].num.k_int * 8);
-
-    LST_NO_TAB("section .rodata\n\n");
-
-    LST_NO_TAB("align 8\n");
-    LST_NO_TAB("EPSILON: dq 0x%lx ; %lg\n", X86_64_Mov::get_bin_double(ASM_EPSILON), ASM_EPSILON);
-    LST_NO_TAB("align 16\n");
-    LST_NO_TAB("DOUBLE_NEG_CONST: dq -1 >> 1, 0\n\n");
 
     return Status::NORMAL_WORK;
 }

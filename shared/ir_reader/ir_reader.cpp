@@ -187,7 +187,6 @@ static Status::Statuses read_ir_subtype_(char** text, IRNode* node) {
         case IRNodeType::END_FUNC_DEF:
         case IRNodeType::CALL_FUNC:
         case IRNodeType::RET:
-        case IRNodeType::INIT_MEM_FOR_GLOBALS:
         case IRNodeType::COUNT_ARR_ELEM_ADDR_CONST:
         case IRNodeType::ARR_ELEM_ADDR_ADD_INDEX:
         case IRNodeType::MOV:

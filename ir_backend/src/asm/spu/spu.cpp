@@ -123,15 +123,6 @@ Status::Statuses asm_spu_RET(IRBackData* data, [[maybe_unused]] IRNode* block, s
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_spu_INIT_MEM_FOR_GLOBALS(IRBackData* data, [[maybe_unused]] IRNode* block, size_t) {
-    assert(data);
-    assert(block);
-
-    // Do nothing. Global vars are on stack
-
-    return Status::NORMAL_WORK;
-}
-
 Status::Statuses asm_spu_COUNT_ARR_ELEM_ADDR_CONST(IRBackData* data, IRNode* block, size_t) {
     assert(data);
     assert(block);
