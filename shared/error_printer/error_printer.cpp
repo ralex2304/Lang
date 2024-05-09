@@ -52,16 +52,21 @@ Status::Statuses warning(DebugInfo info, const char* format, ...) {
 static Status::Statuses print_message_(DebugInfo info, const char* color, const char* msg_type,
                                        const char* format, va_list* arg_list) {
     assert(format);
-    assert(info.filename);
     assert(arg_list);
     assert(msg_type);
     assert(color);
+
+    if (info.filename == nullptr) {
+        STATUS_CHECK(print_message_without_src_(&info, color, msg_type, format, arg_list));
+        return Status::NORMAL_WORK;
+    }
 
     char* src_text = nullptr;
     long src_text_len = -1;
     Status::Statuses src_text_res = file_open_read_close(info.filename, &src_text, &src_text_len);
     if (src_text_res == Status::FILE_ERROR) {
-        STATUS_CHECK(print_message_without_src_(&info, color, msg_type, format, arg_list), FREE(src_text));
+        FREE(src_text);
+        STATUS_CHECK(print_message_without_src_(&info, color, msg_type, format, arg_list));
         return Status::NORMAL_WORK;
 
     } else if (src_text_res != Status::NORMAL_WORK) {
