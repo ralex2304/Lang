@@ -37,6 +37,24 @@ Status::Statuses file_open_read_close(const char* filename, char** buf, long* si
     return Status::NORMAL_WORK;
 }
 
+Status::Statuses file_open_write_bytes_close(const char* filename, char* buf, const size_t size) {
+    assert(filename);
+    assert(buf);
+
+    FILE* file = nullptr;
+
+    if (!file_open(&file, filename, "wb"))
+        return Status::FILE_ERROR;
+
+    if (!file_write_bytes(file, buf, size))
+        return Status::FILE_ERROR;
+
+    if (!file_close(file))
+        return Status::FILE_ERROR;
+
+    return Status::NORMAL_WORK;
+}
+
 bool file_open(FILE** file, const char* filename, const char* mode) {
     assert(file);
     assert(filename);
@@ -72,6 +90,18 @@ bool file_read(FILE* file, char* buf, long file_len) {
     size_t readed = fread(buf, sizeof(char), (size_t)file_len, file);
     if (readed != (size_t)file_len || ferror(file)) {
         perror("File read error");
+        return false;
+    }
+
+    return true;
+}
+
+bool file_write_bytes(FILE* file, const void* data, size_t len) {
+    assert(file);
+    assert(data);
+
+    if (fwrite(data, 1, len, file) != len) {
+        perror("File write error");
         return false;
     }
 

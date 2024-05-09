@@ -16,6 +16,16 @@
 Status::Statuses file_open_read_close(const char* filename, char** buf, long* size = nullptr);
 
 /**
+ * @brief Opens, writes bytes and closes file
+ *
+ * @param filename
+ * @param buf
+ * @param size
+ * @return Status::Statuses
+ */
+Status::Statuses file_open_write_bytes_close(const char* filename, char* buf, const size_t size);
+
+/**
  * @brief Opens file
  *
  * @param file
@@ -44,6 +54,17 @@ long file_get_len(FILE* file);
  * @return false
  */
 bool file_read(FILE* file, char* buf, long file_len);
+
+/**
+ * @brief Writes data to file
+ *
+ * @param file
+ * @param data
+ * @param len data size in bytes
+ * @return true
+ * @return false
+ */
+bool file_write_bytes(FILE* file, const void* data, size_t len);
 
 /**
  * @brief Closes file
