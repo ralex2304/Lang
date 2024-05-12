@@ -13,6 +13,8 @@ main: build frontend middleend backend ir_backend run
 
 PROG_PATH = Programs/$(prog)
 
+IOLIB_PATH = Programs/doubleiolib
+
 frontend:
 	@LANG=ru_RU.CP1251 luit ./frontend/./main -i $(PROG_PATH)/prog.snb -o $(PROG_PATH)/prog.tre
 
@@ -22,18 +24,19 @@ middleend:
 backend:
 	@LANG=ru_RU.CP1251 luit ./backend/./main -i $(PROG_PATH)/prog.treopt -o $(PROG_PATH)/prog.ir
 
-ir_backend:
+ir_backend: $(IOLIB_PATH).o
 	@LANG=ru_RU.CP1251 luit ./ir_backend/./main -i $(PROG_PATH)/prog.ir -S $(PROG_PATH)/prog.nasm -o $(PROG_PATH)/prog -m x86_64
 
-run: #asm
+run: asm
 	@./$(PROG_PATH)/prog
 
 asm:
-	@nasm -f elf64 -g -F dwarf -l $(PROG_PATH)/prog.lst -I Programs/ $(PROG_PATH)/prog.nasm -o $(PROG_PATH)/prog.o
-	@ld -g -no-pie -o $(PROG_PATH)/prog $(PROG_PATH)/prog.o
+	@nasm -f elf64 -g -F dwarf -l $(PROG_PATH)/prog.lst -I Programs/ $(PROG_PATH)/prog.nasm -o $(PROG_PATH)/lstprog.o
+	@ld -g -no-pie -o $(PROG_PATH)/lstprog $(PROG_PATH)/lstprog.o
 #@g++ $(CFLAGS_SANITIZER) -g -F dwarf -no-pie -o $(PROG_PATH)/prog $(PROG_PATH)/prog.o
 
-
+$(IOLIB_PATH).o: $(IOLIB_PATH).nasm
+	@nasm -f elf64 $(IOLIB_PATH).nasm -o $(IOLIB_PATH).o
 
 build: build_front build_middle build_back build_ir_back
 

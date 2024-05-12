@@ -20,5 +20,6 @@
 /*/build
 /Programs/*/*.o
 /Programs/*/prog
+/Programs/*/lstprog
 /compile_commands.json
 /.cache

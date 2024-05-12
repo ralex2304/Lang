@@ -1,4 +1,4 @@
-     1                                  ___ir_block_1:
+     1                                  ___ir_block_1:                            ; offs: 0x120
      2                                  %include "doubleiolib.nasm"
      1                              <1> section .text
      2                              <1> 
@@ -295,191 +295,221 @@
     20                                  
     21                                  _start:
     22 0000022D C8000000                                enter 0, 0
-    23                                  ___ir_block_2:
+    23                                  ___ir_block_2:                            ; offs: 0x403231
     24 00000231 E80D000000                              call ___func_4
     25                                                  ; func call end
     26                                  
-    27                                  ___ir_block_3:
+    27                                  ___ir_block_3:                            ; offs: 0x403236
     28 00000236 C9                                      leave
     29 00000237 B83C000000                              mov rax, 0x3c
     30 0000023C F2480F2CF8                              cvttsd2si rdi, xmm0
     31 00000241 0F05                                    syscall
     32                                  
-    33                                  ___ir_block_4:
+    33                                  ___ir_block_4:                            ; offs: 0x403248
     34                                  ; =========================== Function definition =========================
     35                                  ___func_4:
     36 00000243 C8580000                                enter 88, 0
-    37                                  
-    38                                  ___ir_block_5:
-    39 00000247 4883EC08                                sub rsp, 8
-    40 0000024B BA00000000                              mov rdx, 0x0 ; 0
-    41 00000250 48891424                                mov qword [rsp], rdx
-    42                                  ___ir_block_6:
+    37                                  ___ir_block_5:                            ; offs: 0x40324c
+    38 00000247 4883EC08                                sub rsp, 8
+    39 0000024B BA00000000                              mov rdx, 0x0
+    40 00000250 48891424                                mov qword [rsp], rdx
+    41                                  
+    42                                  ___ir_block_6:                            ; offs: 0x403261
     43 00000254 488D4DF8                                lea rcx, qword [rbp - 8 - 0]
-    44                                  ___ir_block_7:
+    44                                  ___ir_block_7:                            ; offs: 0x403268
     45 00000258 488B1424                                mov rdx, [rsp]
-    46 0000025C 4883C408                                add rsp, 8
-    47 00000260 488911                                  mov qword [rcx], rdx
-    48                                  ___ir_block_8:
-    49 00000263 4883EC08                                sub rsp, 8
-    50 00000267 48BA000000000000F0-                     mov rdx, 0x3ff0000000000000 ; 1
-    50 00000270 3F                 
-    51 00000271 48891424                                mov qword [rsp], rdx
-    52                                  ___ir_block_9:
-    53 00000275 488D4DF0                                lea rcx, qword [rbp - 8 - 8]
-    54                                  ___ir_block_10:
-    55 00000279 488B1424                                mov rdx, [rsp]
-    56 0000027D 4883C408                                add rsp, 8
-    57 00000281 488911                                  mov qword [rcx], rdx
-    58                                  ___ir_block_11:
-    59 00000284 4883EC08                                sub rsp, 8
-    60 00000288 48BA00000000000000-                     mov rdx, 0x4000000000000000 ; 2
-    60 00000291 40                 
-    61 00000292 48891424                                mov qword [rsp], rdx
-    62                                  ___ir_block_12:
-    63 00000296 488D4DE8                                lea rcx, qword [rbp - 8 - 16]
-    64                                  ___ir_block_13:
-    65 0000029A 488B1424                                mov rdx, [rsp]
-    66 0000029E 4883C408                                add rsp, 8
-    67 000002A2 488911                                  mov qword [rcx], rdx
-    68                                  ___ir_block_14:
-    69 000002A5 4883EC08                                sub rsp, 8
-    70 000002A9 48BA00000000000008-                     mov rdx, 0x4008000000000000 ; 3
-    70 000002B2 40                 
-    71 000002B3 48891424                                mov qword [rsp], rdx
-    72                                  ___ir_block_15:
-    73 000002B7 488D4DE0                                lea rcx, qword [rbp - 8 - 24]
-    74                                  ___ir_block_16:
-    75 000002BB 488B1424                                mov rdx, [rsp]
-    76 000002BF 4883C408                                add rsp, 8
-    77 000002C3 488911                                  mov qword [rcx], rdx
-    78                                  ___ir_block_17:
-    79 000002C6 4883EC08                                sub rsp, 8
-    80 000002CA 48BA00000000000010-                     mov rdx, 0x4010000000000000 ; 4
-    80 000002D3 40                 
-    81 000002D4 48891424                                mov qword [rsp], rdx
-    82                                  ___ir_block_18:
-    83 000002D8 488D4DD8                                lea rcx, qword [rbp - 8 - 32]
-    84                                  ___ir_block_19:
-    85 000002DC 488B1424                                mov rdx, [rsp]
-    86 000002E0 4883C408                                add rsp, 8
-    87 000002E4 488911                                  mov qword [rcx], rdx
-    88                                  ___ir_block_20:
-    89 000002E7 4883EC08                                sub rsp, 8
-    90 000002EB 48BA00000000000014-                     mov rdx, 0x4014000000000000 ; 5
-    90 000002F4 40                 
-    91 000002F5 48891424                                mov qword [rsp], rdx
-    92                                  ___ir_block_21:
-    93 000002F9 488D4DD0                                lea rcx, qword [rbp - 8 - 40]
-    94                                  ___ir_block_22:
-    95 000002FD 488B1424                                mov rdx, [rsp]
-    96 00000301 4883C408                                add rsp, 8
-    97 00000305 488911                                  mov qword [rcx], rdx
-    98                                  ___ir_block_23:
-    99 00000308 4883EC08                                sub rsp, 8
-   100 0000030C 48BA00000000000018-                     mov rdx, 0x4018000000000000 ; 6
-   100 00000315 40                 
-   101 00000316 48891424                                mov qword [rsp], rdx
-   102                                  ___ir_block_24:
-   103 0000031A 488D4DC8                                lea rcx, qword [rbp - 8 - 48]
-   104                                  ___ir_block_25:
-   105 0000031E 488B1424                                mov rdx, [rsp]
-   106 00000322 4883C408                                add rsp, 8
-   107 00000326 488911                                  mov qword [rcx], rdx
-   108                                  ___ir_block_26:
-   109                                  ___ir_block_27:
-   110 00000329 BA00000000                              mov rdx, 0x0 ; 0
-   111 0000032E 488955A8                                mov qword [rbp - 8 - 80], rdx
-   112                                  ___ir_block_28:
-   113                                  ___ir_block_29:
-   114 00000332 4883EC08                                sub rsp, 8
-   115 00000336 488B55A8                                mov rdx, qword [rbp - 8 - 80]
-   116 0000033A 48891424                                mov qword [rsp], rdx
-   117                                  ___ir_block_30:
-   118 0000033E 4883EC08                                sub rsp, 8
-   119 00000342 488B55A8                                mov rdx, qword [rbp - 8 - 80]
-   120 00000346 48891424                                mov qword [rsp], rdx
-   121                                  ___ir_block_31:
-   122 0000034A 4883EC08                                sub rsp, 8
-   123 0000034E 48BA000000000000F0-                     mov rdx, 0x3ff0000000000000 ; 1
-   123 00000357 3F                 
-   124 00000358 48891424                                mov qword [rsp], rdx
-   125                                  ___ir_block_32:
-   126 0000035C F30F7E442408                            movq xmm0, [rsp + 8]
-   127 00000362 F20F580424                              addsd xmm0, qword [rsp]
-   128 00000367 4883C410                                add rsp, 16
-   129 0000036B 660FD645A8                              movq qword [rbp - 8 - 80], xmm0
-   130                                  ___ir_block_33:
-   131                                  ___ir_block_34:
-   132 00000370 488D4DF8                                lea rcx, qword [rbp - 8 - 0]
-   133                                  ___ir_block_35:
-   134 00000374 F2480F2D1424                            cvtsd2si rdx, [rsp]
-   135 0000037A 4883C408                                add rsp, 8
-   136 0000037E 48C1E203                                shl rdx, 3
-   137 00000382 4829D1                                  sub rcx, rdx
-   138                                  ___ir_block_36:
-   139                                  ___ir_block_37:
-   140                                  ___ir_block_38:
-   141                                                  ; operands comparison: op1 < op2
-   142 00000385 F30F7E09                                movq xmm1, qword [rcx]
-   143 00000389 48BA00000000000014-                     mov rdx, 0x4014000000000000
-   143 00000392 40                 
-   144 00000393 66480F6ED2                              movq xmm2, rdx
-   145 00000398 4883C4F8                                add rsp, 18446744073709551608
-   146 0000039C F30F7ED9                                movq xmm3, xmm1
-   147 000003A0 F20F5CDA                                subsd xmm3, xmm2
-   148 000003A4 660F541C25-                             andpd xmm3, [DOUBLE_NEG_CONST]
-   148 000003A9 [50000000]         
-   149                                                  ; xmm1 - op1; xmm2 - op2; xmm3 - fabs(op1 - op2)
+    46                                  
+    47 0000025C 4883C408                                add rsp, 8
+    48 00000260 488911                                  mov qword [rcx], rdx
+    49                                  
+    50                                  ___ir_block_8:                            ; offs: 0x403276
+    51 00000263 4883EC08                                sub rsp, 8
+    52 00000267 48BA000000000000F0-                     mov rdx, 0x3ff0000000000000
+    52 00000270 3F                 
+    53 00000271 48891424                                mov qword [rsp], rdx
+    54                                  
+    55                                  ___ir_block_9:                            ; offs: 0x40328b
+    56 00000275 488D4DF0                                lea rcx, qword [rbp - 8 - 8]
+    57                                  ___ir_block_10:                            ; offs: 0x403292
+    58 00000279 488B1424                                mov rdx, [rsp]
+    59                                  
+    60 0000027D 4883C408                                add rsp, 8
+    61 00000281 488911                                  mov qword [rcx], rdx
+    62                                  
+    63                                  ___ir_block_11:                            ; offs: 0x4032a0
+    64 00000284 4883EC08                                sub rsp, 8
+    65 00000288 48BA00000000000000-                     mov rdx, 0x4000000000000000
+    65 00000291 40                 
+    66 00000292 48891424                                mov qword [rsp], rdx
+    67                                  
+    68                                  ___ir_block_12:                            ; offs: 0x4032b5
+    69 00000296 488D4DE8                                lea rcx, qword [rbp - 8 - 16]
+    70                                  ___ir_block_13:                            ; offs: 0x4032bc
+    71 0000029A 488B1424                                mov rdx, [rsp]
+    72                                  
+    73 0000029E 4883C408                                add rsp, 8
+    74 000002A2 488911                                  mov qword [rcx], rdx
+    75                                  
+    76                                  ___ir_block_14:                            ; offs: 0x4032ca
+    77 000002A5 4883EC08                                sub rsp, 8
+    78 000002A9 48BA00000000000008-                     mov rdx, 0x4008000000000000
+    78 000002B2 40                 
+    79 000002B3 48891424                                mov qword [rsp], rdx
+    80                                  
+    81                                  ___ir_block_15:                            ; offs: 0x4032df
+    82 000002B7 488D4DE0                                lea rcx, qword [rbp - 8 - 24]
+    83                                  ___ir_block_16:                            ; offs: 0x4032e6
+    84 000002BB 488B1424                                mov rdx, [rsp]
+    85                                  
+    86 000002BF 4883C408                                add rsp, 8
+    87 000002C3 488911                                  mov qword [rcx], rdx
+    88                                  
+    89                                  ___ir_block_17:                            ; offs: 0x4032f4
+    90 000002C6 4883EC08                                sub rsp, 8
+    91 000002CA 48BA00000000000010-                     mov rdx, 0x4010000000000000
+    91 000002D3 40                 
+    92 000002D4 48891424                                mov qword [rsp], rdx
+    93                                  
+    94                                  ___ir_block_18:                            ; offs: 0x403309
+    95 000002D8 488D4DD8                                lea rcx, qword [rbp - 8 - 32]
+    96                                  ___ir_block_19:                            ; offs: 0x403310
+    97 000002DC 488B1424                                mov rdx, [rsp]
+    98                                  
+    99 000002E0 4883C408                                add rsp, 8
+   100 000002E4 488911                                  mov qword [rcx], rdx
+   101                                  
+   102                                  ___ir_block_20:                            ; offs: 0x40331e
+   103 000002E7 4883EC08                                sub rsp, 8
+   104 000002EB 48BA00000000000014-                     mov rdx, 0x4014000000000000
+   104 000002F4 40                 
+   105 000002F5 48891424                                mov qword [rsp], rdx
+   106                                  
+   107                                  ___ir_block_21:                            ; offs: 0x403333
+   108 000002F9 488D4DD0                                lea rcx, qword [rbp - 8 - 40]
+   109                                  ___ir_block_22:                            ; offs: 0x40333a
+   110 000002FD 488B1424                                mov rdx, [rsp]
+   111                                  
+   112 00000301 4883C408                                add rsp, 8
+   113 00000305 488911                                  mov qword [rcx], rdx
+   114                                  
+   115                                  ___ir_block_23:                            ; offs: 0x403348
+   116 00000308 4883EC08                                sub rsp, 8
+   117 0000030C 48BA00000000000018-                     mov rdx, 0x4018000000000000
+   117 00000315 40                 
+   118 00000316 48891424                                mov qword [rsp], rdx
+   119                                  
+   120                                  ___ir_block_24:                            ; offs: 0x40335d
+   121 0000031A 488D4DC8                                lea rcx, qword [rbp - 8 - 48]
+   122                                  ___ir_block_25:                            ; offs: 0x403364
+   123 0000031E 488B1424                                mov rdx, [rsp]
+   124                                  
+   125 00000322 4883C408                                add rsp, 8
+   126 00000326 488911                                  mov qword [rcx], rdx
+   127                                  
+   128                                  ___ir_block_26:                            ; offs: 0x403372
+   129                                  ___ir_block_27:                            ; offs: 0x403372
+   130 00000329 BA00000000                              mov rdx, 0x0
+   131 0000032E 488955A8                                mov qword [rbp - 8 - 80], rdx
+   132                                  
+   133                                  ___ir_block_28:                            ; offs: 0x403383
+   134                                  ___ir_block_29:                            ; offs: 0x403383
+   135 00000332 4883EC08                                sub rsp, 8
+   136 00000336 488B55A8                                mov rdx, qword [rbp - 8 - 80]
+   137                                  
+   138 0000033A 48891424                                mov qword [rsp], rdx
+   139                                  
+   140                                  ___ir_block_30:                            ; offs: 0x403395
+   141 0000033E 4883EC08                                sub rsp, 8
+   142 00000342 488B55A8                                mov rdx, qword [rbp - 8 - 80]
+   143                                  
+   144 00000346 48891424                                mov qword [rsp], rdx
+   145                                  
+   146                                  ___ir_block_31:                            ; offs: 0x4033a7
+   147 0000034A 4883EC08                                sub rsp, 8
+   148 0000034E 48BA000000000000F0-                     mov rdx, 0x3ff0000000000000
+   148 00000357 3F                 
+   149 00000358 48891424                                mov qword [rsp], rdx
    150                                  
-   151 000003AD 660F2F1C25-                             comisd xmm3, [EPSILON] ; fabs(op1 - op2) {'<' | '>'} EPSILON
-   151 000003B2 [40000000]         
-   152 000003B6 7212                                    jc ___compare_38_false
-   153                                  
-   154 000003B8 660F2FCA                                comisd xmm1, xmm2 ; op1 {'<' | '>'} op2
-   155 000003BC 730C                                    jnc ___compare_38_false
-   156                                  
-   157 000003BE 48BA000000000000F0-                     mov rdx, 0x3ff0000000000000 ; 1
-   157 000003C7 3F                 
-   158 000003C8 EB05                                    jmp ___compare_38_end
-   159                                  
-   160                                  ___compare_38_false:
-   161 000003CA BA00000000                              mov rdx, 0x0 ; 0
-   162                                  ___compare_38_end:
-   163 000003CF 48891424                                mov qword [rsp], rdx
-   164                                  
-   165                                  ___ir_block_39:
-   166 000003D3 48BAFFFFFFFFFFFFFF-                     mov rdx, -1 >> 1
-   166 000003DC 7F                 
-   167 000003DD 48211424                                and qword [rsp], rdx
-   168 000003E1 F30F7E0C24                              movq xmm1, qword [rsp]
-   169 000003E6 4883C408                                add rsp, 8
-   170 000003EA 660F2F0C25-                             comisd xmm1, [EPSILON]
-   170 000003EF [40000000]         
-   171                                  ___ir_block_40:
-   172 000003F3 722F                                    jc ___ir_block_47
-   173                                  ___ir_block_41:
-   174 000003F5 4883EC08                                sub rsp, 8
-   175 000003F9 488B55A8                                mov rdx, qword [rbp - 8 - 80]
-   176 000003FD 48891424                                mov qword [rsp], rdx
-   177                                  ___ir_block_42:
-   178 00000401 488D4DF8                                lea rcx, qword [rbp - 8 - 0]
-   179                                  ___ir_block_43:
-   180 00000405 F2480F2D1424                            cvtsd2si rdx, [rsp]
-   181 0000040B 4883C408                                add rsp, 8
-   182 0000040F 48C1E203                                shl rdx, 3
-   183 00000413 4829D1                                  sub rcx, rdx
-   184                                  ___ir_block_44:
-   185                                  ___ir_block_45:
-   186 00000416 F30F7E01                                movq xmm0, qword [rcx]
-   187 0000041A E854FDFFFF                              call doubleio_out
-   188                                  ___ir_block_46:
-   189 0000041F E90EFFFFFF                              jmp ___ir_block_28
-   190                                  ___ir_block_47:
-   191                                  ___ir_block_48:
-   192 00000424 C9                                      leave
-   193 00000425 660FEFC0                                pxor xmm0, xmm0
-   194 00000429 C3                                      ret
-   195                                  ; ------------------------- Function definition end -----------------------
-   196                                  
-   197                                  
+   151                                  ___ir_block_32:                            ; offs: 0x4033bc
+   152 0000035C F30F7E442408                            movq xmm0, [rsp + 8]
+   153 00000362 F20F580424                              addsd xmm0, qword [rsp]
+   154 00000367 4883C410                                add rsp, 16
+   155 0000036B 660FD645A8                              movq qword [rbp - 8 - 80], xmm0
+   156                                  ___ir_block_33:                            ; offs: 0x4033d9
+   157                                  ___ir_block_34:                            ; offs: 0x4033d9
+   158 00000370 488D4DF8                                lea rcx, qword [rbp - 8 - 0]
+   159                                  ___ir_block_35:                            ; offs: 0x4033e0
+   160 00000374 F2480F2D1424                            cvtsd2si rdx, [rsp]
+   161 0000037A 4883C408                                add rsp, 8
+   162 0000037E 48C1E203                                shl rdx, 3
+   163 00000382 4829D1                                  sub rcx, rdx
+   164                                  ___ir_block_36:                            ; offs: 0x4033f4
+   165                                  ___ir_block_37:                            ; offs: 0x4033f4
+   166                                  ___ir_block_38:                            ; offs: 0x4033f4
+   167                                                  ; operands comparison: op1 < op2
+   168 00000385 F30F7E09                                movq xmm1, qword [rcx]
+   169 00000389 48BA00000000000014-                     mov rdx, 0x4014000000000000
+   169 00000392 40                 
+   170 00000393 66480F6ED2                              movq xmm2, rdx
+   171 00000398 4883C4F8                                add rsp, -8
+   172 0000039C F30F7ED9                                movq xmm3, xmm1
+   173 000003A0 F20F5CDA                                subsd xmm3, xmm2
+   174 000003A4 660F541C25-                             andpd xmm3, [DOUBLE_NEG_CONST]
+   174 000003A9 [50000000]         
+   175                                                  ; xmm1 - op1; xmm2 - op2; xmm3 - fabs(op1 - op2)
+   176                                  
+   177 000003AD 660F2F1C25-                             comisd xmm3, [EPSILON]
+   177 000003B2 [40000000]         
+   178                                                  ; fabs(op1 - op2) {'<' | '>'} EPSILON
+   179 000003B6 7212                                    jc ___compare_38_false
+   180                                  
+   181 000003B8 660F2FCA                                comisd xmm1, xmm2
+   182                                                  ; op1 {'<' | '>'} op2
+   183 000003BC 730C                                    jnc ___compare_38_false
+   184                                  
+   185 000003BE 48BA000000000000F0-                     mov rdx, 0x3ff0000000000000
+   185 000003C7 3F                 
+   186 000003C8 EB05                                    jmp ___compare_38_end
+   187                                  
+   188                                  ___compare_38_false:
+   189 000003CA BA00000000                              mov rdx, 0x0
+   190                                  ___compare_38_end:
+   191 000003CF 48891424                                mov qword [rsp], rdx
+   192                                  
+   193                                  ___ir_block_39:                            ; offs: 0x403455
+   194 000003D3 48BAFFFFFFFFFFFFFF-                     mov rdx, 0x7fffffffffffffff
+   194 000003DC 7F                 
+   195 000003DD 48211424                                and qword [rsp], rdx
+   196 000003E1 F30F7E0C24                              movq xmm1, qword [rsp]
+   197 000003E6 4883C408                                add rsp, 8
+   198 000003EA 660F2F0C25-                             comisd xmm1, [EPSILON]
+   198 000003EF [40000000]         
+   199                                  ___ir_block_40:                            ; offs: 0x403478
+   200 000003F3 722F                                    jc ___ir_block_47
+   201                                  ___ir_block_41:                            ; offs: 0x40347e
+   202 000003F5 4883EC08                                sub rsp, 8
+   203 000003F9 488B55A8                                mov rdx, qword [rbp - 8 - 80]
+   204                                  
+   205 000003FD 48891424                                mov qword [rsp], rdx
+   206                                  
+   207                                  ___ir_block_42:                            ; offs: 0x403490
+   208 00000401 488D4DF8                                lea rcx, qword [rbp - 8 - 0]
+   209                                  ___ir_block_43:                            ; offs: 0x403497
+   210 00000405 F2480F2D1424                            cvtsd2si rdx, [rsp]
+   211 0000040B 4883C408                                add rsp, 8
+   212 0000040F 48C1E203                                shl rdx, 3
+   213 00000413 4829D1                                  sub rcx, rdx
+   214                                  ___ir_block_44:                            ; offs: 0x4034ab
+   215                                  ___ir_block_45:                            ; offs: 0x4034ab
+   216 00000416 F30F7E01                                movq xmm0, qword [rcx]
+   217 0000041A E854FDFFFF                              call doubleio_out
+   218                                  ___ir_block_46:                            ; offs: 0x4034b4
+   219 0000041F E90EFFFFFF                              jmp ___ir_block_28
+   220                                  ___ir_block_47:                            ; offs: 0x4034b9
+   221                                  ___ir_block_48:                            ; offs: 0x4034b9
+   222 00000424 C9                                      leave
+   223 00000425 660FEFC0                                pxor xmm0, xmm0
+   224 00000429 C3                                      ret
+   225                                  ; ------------------------- Function definition end -----------------------
+   226                                  
+   227                                  

@@ -23,9 +23,13 @@
                 return Status::LIST_ERROR;                                                      \
             } while (0)
 
-#define STR_VAR(str_, format_, ...)                                         \
-            if (snprintf(str_, STR_MAXLEN, format_, ## __VA_ARGS__) < 0)    \
-                return Status::OUTPUT_ERROR
+#define STR_VAR(str_, format_, ...)                                             \
+            do {                                                                \
+                if (data->listing == nullptr) break;                            \
+                if (snprintf(str_, STR_MAXLEN, format_, ## __VA_ARGS__) < 0)    \
+                    return Status::OUTPUT_ERROR;                                \
+            } while (0)
+
 
 static const size_t STR_MAXLEN = 64;
 

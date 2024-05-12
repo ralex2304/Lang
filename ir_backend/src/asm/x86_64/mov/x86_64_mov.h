@@ -19,7 +19,8 @@ namespace X86_64_Mov {
         return res;
     }
 
-    Status::Statuses get_modrm_operand(Operand* oper, ElfData* elf, IRVal* val, const char* err_msg);
+    Status::Statuses get_modrm_operand(IRBackData* data, Operand* oper, ElfData* elf,
+                                       IRVal* val, const char* err_msg);
 
     // srcs:
     Status::Statuses src_const(IRBackData* data, ElfData* elf, IRVal* src, IRVal* dest);

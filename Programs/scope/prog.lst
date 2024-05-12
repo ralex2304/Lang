@@ -1,4 +1,4 @@
-     1                                  ___ir_block_1:
+     1                                  ___ir_block_1:                            ; offs: 0x120
      2                                  %include "doubleiolib.nasm"
      1                              <1> section .text
      2                              <1> 
@@ -295,79 +295,82 @@
     20                                  
     21                                  _start:
     22 0000022D C8000000                                enter 0, 0
-    23                                  ___ir_block_2:
+    23                                  ___ir_block_2:                            ; offs: 0x403231
     24 00000231 E80D000000                              call ___func_4
     25                                                  ; func call end
     26                                  
-    27                                  ___ir_block_3:
+    27                                  ___ir_block_3:                            ; offs: 0x403236
     28 00000236 C9                                      leave
     29 00000237 B83C000000                              mov rax, 0x3c
     30 0000023C F2480F2CF8                              cvttsd2si rdi, xmm0
     31 00000241 0F05                                    syscall
     32                                  
-    33                                  ___ir_block_4:
+    33                                  ___ir_block_4:                            ; offs: 0x403248
     34                                  ; =========================== Function definition =========================
     35                                  ___func_4:
     36 00000243 C8100000                                enter 16, 0
-    37                                  
-    38                                  ___ir_block_5:
-    39                                  ___ir_block_6:
-    40 00000247 48BA00000000000014-                     mov rdx, 0x4014000000000000 ; 5
-    40 00000250 40                 
-    41 00000251 488955F8                                mov qword [rbp - 8 - 0], rdx
-    42                                  ___ir_block_7:
-    43                                  ___ir_block_8:
+    37                                  ___ir_block_5:                            ; offs: 0x40324c
+    38                                  ___ir_block_6:                            ; offs: 0x40324c
+    39 00000247 48BA00000000000014-                     mov rdx, 0x4014000000000000
+    39 00000250 40                 
+    40 00000251 488955F8                                mov qword [rbp - 8 - 0], rdx
+    41                                  
+    42                                  ___ir_block_7:                            ; offs: 0x40325d
+    43                                  ___ir_block_8:                            ; offs: 0x40325d
     44 00000255 F30F7E45F8                              movq xmm0, qword [rbp - 8 - 0]
     45 0000025A E814FFFFFF                              call doubleio_out
-    46                                  ___ir_block_9:
-    47                                  ___ir_block_10:
-    48 0000025F 48BA00000000000024-                     mov rdx, 0x4024000000000000 ; 10
+    46                                  ___ir_block_9:                            ; offs: 0x40326a
+    47                                  ___ir_block_10:                            ; offs: 0x40326a
+    48 0000025F 48BA00000000000024-                     mov rdx, 0x4024000000000000
     48 00000268 40                 
     49 00000269 488955F0                                mov qword [rbp - 8 - 8], rdx
-    50                                  ___ir_block_11:
-    51                                  ___ir_block_12:
-    52 0000026D F30F7E45F0                              movq xmm0, qword [rbp - 8 - 8]
-    53 00000272 E8FCFEFFFF                              call doubleio_out
-    54                                  ___ir_block_13:
-    55 00000277 4883EC08                                sub rsp, 8
-    56 0000027B 48BA00000000000024-                     mov rdx, 0x4024000000000000 ; 10
-    56 00000284 40                 
-    57 00000285 48891424                                mov qword [rsp], rdx
-    58                                  ___ir_block_14:
-    59 00000289 4883EC08                                sub rsp, 8
-    60 0000028D 488B55F0                                mov rdx, qword [rbp - 8 - 8]
-    61 00000291 48891424                                mov qword [rsp], rdx
-    62                                  ___ir_block_15:
-    63 00000295 F30F7E4C2408                            movq xmm1, [rsp + 8]
-    64 0000029B F30F7E1424                              movq xmm2, qword [rsp]
-    65 000002A0 660FD6542408                            movq [rsp + 8], xmm2
-    66 000002A6 660FD60C24                              movq qword [rsp], xmm1
-    67                                  ___ir_block_16:
-    68 000002AB F30F7E442408                            movq xmm0, [rsp + 8]
-    69 000002B1 F20F580424                              addsd xmm0, qword [rsp]
-    70 000002B6 4883C410                                add rsp, 16
-    71 000002BA 660FD645F0                              movq qword [rbp - 8 - 8], xmm0
-    72                                  ___ir_block_17:
-    73                                  ___ir_block_18:
-    74                                  ___ir_block_19:
-    75 000002BF F30F7E45F0                              movq xmm0, qword [rbp - 8 - 8]
-    76 000002C4 E8AAFEFFFF                              call doubleio_out
-    77                                  ___ir_block_20:
-    78                                  ___ir_block_21:
-    79 000002C9 F30F7E45F8                              movq xmm0, qword [rbp - 8 - 0]
-    80 000002CE E8A0FEFFFF                              call doubleio_out
-    81                                  ___ir_block_22:
-    82                                  ___ir_block_23:
-    83 000002D3 BA00000000                              mov rdx, 0x0 ; 0
-    84 000002D8 66480F6EC2                              movq xmm0, rdx
-    85                                  ___ir_block_24:
-    86 000002DD C9                                      leave
-    87 000002DE C3                                      ret
-    88                                  
-    89                                  ___ir_block_25:
-    90 000002DF C9                                      leave
-    91 000002E0 660FEFC0                                pxor xmm0, xmm0
-    92 000002E4 C3                                      ret
-    93                                  ; ------------------------- Function definition end -----------------------
-    94                                  
-    95                                  
+    50                                  
+    51                                  ___ir_block_11:                            ; offs: 0x40327b
+    52                                  ___ir_block_12:                            ; offs: 0x40327b
+    53 0000026D F30F7E45F0                              movq xmm0, qword [rbp - 8 - 8]
+    54 00000272 E8FCFEFFFF                              call doubleio_out
+    55                                  ___ir_block_13:                            ; offs: 0x403288
+    56 00000277 4883EC08                                sub rsp, 8
+    57 0000027B 48BA00000000000024-                     mov rdx, 0x4024000000000000
+    57 00000284 40                 
+    58 00000285 48891424                                mov qword [rsp], rdx
+    59                                  
+    60                                  ___ir_block_14:                            ; offs: 0x40329d
+    61 00000289 4883EC08                                sub rsp, 8
+    62 0000028D 488B55F0                                mov rdx, qword [rbp - 8 - 8]
+    63                                  
+    64 00000291 48891424                                mov qword [rsp], rdx
+    65                                  
+    66                                  ___ir_block_15:                            ; offs: 0x4032af
+    67 00000295 F30F7E4C2408                            movq xmm1, [rsp + 8]
+    68 0000029B F30F7E1424                              movq xmm2, qword [rsp]
+    69 000002A0 660FD6542408                            movq [rsp + 8], xmm2
+    70 000002A6 660FD60C24                              movq qword [rsp], xmm1
+    71                                  ___ir_block_16:                            ; offs: 0x4032cb
+    72 000002AB F30F7E442408                            movq xmm0, [rsp + 8]
+    73 000002B1 F20F580424                              addsd xmm0, qword [rsp]
+    74 000002B6 4883C410                                add rsp, 16
+    75 000002BA 660FD645F0                              movq qword [rbp - 8 - 8], xmm0
+    76                                  ___ir_block_17:                            ; offs: 0x4032e8
+    77                                  ___ir_block_18:                            ; offs: 0x4032e8
+    78                                  ___ir_block_19:                            ; offs: 0x4032e8
+    79 000002BF F30F7E45F0                              movq xmm0, qword [rbp - 8 - 8]
+    80 000002C4 E8AAFEFFFF                              call doubleio_out
+    81                                  ___ir_block_20:                            ; offs: 0x4032f5
+    82                                  ___ir_block_21:                            ; offs: 0x4032f5
+    83 000002C9 F30F7E45F8                              movq xmm0, qword [rbp - 8 - 0]
+    84 000002CE E8A0FEFFFF                              call doubleio_out
+    85                                  ___ir_block_22:                            ; offs: 0x403302
+    86                                  ___ir_block_23:                            ; offs: 0x403302
+    87 000002D3 BA00000000                              mov rdx, 0x0
+    88 000002D8 66480F6EC2                              movq xmm0, rdx
+    89                                  ___ir_block_24:                            ; offs: 0x403311
+    90 000002DD C9                                      leave
+    91 000002DE C3                                      ret
+    92                                  ___ir_block_25:                            ; offs: 0x403313
+    93 000002DF C9                                      leave
+    94 000002E0 660FEFC0                                pxor xmm0, xmm0
+    95 000002E4 C3                                      ret
+    96                                  ; ------------------------- Function definition end -----------------------
+    97                                  
+    98                                  

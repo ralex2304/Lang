@@ -1,7 +1,8 @@
 #include "../x86_64.h"
 #include "x86_64_mov.h"
 
-Status::Statuses X86_64_Mov::get_modrm_operand(Operand* oper, ElfData* elf, IRVal* val, const char* err_msg) {
+Status::Statuses X86_64_Mov::get_modrm_operand(IRBackData* data, Operand* oper, ElfData* elf,
+                                               IRVal* val, const char* err_msg) {
     assert(oper);
     assert(elf);
     assert(val);
@@ -63,21 +64,20 @@ Status::Statuses X86_64_Mov::src_const(IRBackData* data, ElfData* elf, IRVal* sr
     const uint64_t k_double = get_bin_double(src->num.k_double);
 
     if (dest->type == IRVal::REG) {
-        MOV_REG_IMM64(RDX, k_double);           LST("mov rdx, 0x%lx ; %lg\n", k_double, src->num.k_double);
-        MOVQ_XMM_REG(XMM + dest->num.reg, RDX); LST("movq xmm%zu, rdx\n", dest->num.reg);
+        MOV_REG_IMM64(RDX, k_double);
+        MOVQ_XMM_REG(XMM + (uint8_t)dest->num.reg, RDX);
         return Status::NORMAL_WORK;
     }
 
     Operand dest_op = {};
-    STATUS_CHECK(get_modrm_operand(&dest_op, elf, dest,
+    STATUS_CHECK(get_modrm_operand(data, &dest_op, elf, dest,
                  "MOV must have dest with type STK, REG, LOCAL_VAR, GLOBAL_VAR, ARG_VAR or ARR_VAR"));
 
-    if (dest->type == IRVal::STK) {
-        SUB_REG_IMM(RSP, 8);                    LST("sub rsp, 8\n");
-    }
+    if (dest->type == IRVal::STK)
+        SUB_REG_IMM(RSP, 8);
 
-    MOV_REG_IMM64(RDX, k_double);               LST("mov rdx, 0x%lx ; %lg\n", k_double, src->num.k_double);
-    MOV_RMOP_REG(dest_op, RDX);                 LST("mov %s, rdx\n", dest_op.str);
+    MOV_REG_IMM64(RDX, k_double);
+    MOV_RMOP_REG(dest_op, RDX);
 
     return Status::NORMAL_WORK;
 }
@@ -92,24 +92,23 @@ Status::Statuses X86_64_Mov::src_var(IRBackData* data, ElfData* elf, IRVal* src,
         ERR("MOV: src and dest are identic. Operation is meaningless");
 
     Operand src_op = {};
-    STATUS_CHECK(get_modrm_operand(&src_op, elf, src, "X86_64_Mov::src_var() internal error: "
+    STATUS_CHECK(get_modrm_operand(data, &src_op, elf, src, "X86_64_Mov::src_var() internal error: "
                                                       "src is not var type"));
 
     if (dest->type == IRVal::REG) {
-        MOVQ_XMM_RMOP(XMM + dest->num.reg, src_op); LST("movq xmm%zu, %s\n", dest->num.reg, src_op.str);
+        MOVQ_XMM_RMOP(XMM + (int8_t)dest->num.reg, src_op);
         return Status::NORMAL_WORK;
     }
 
     Operand dest_op = {};
-    STATUS_CHECK(get_modrm_operand(&dest_op, elf, dest,
+    STATUS_CHECK(get_modrm_operand(data, &dest_op, elf, dest,
                  "MOV must have dest with type STK, REG, LOCAL_VAR, GLOBAL_VAR, ARG_VAR or ARR_VAR"));
 
-    if (dest->type == IRVal::STK) {
-        SUB_REG_IMM(RSP, 8);                        LST("sub rsp, 8\n");
-    }
+    if (dest->type == IRVal::STK)
+        SUB_REG_IMM(RSP, 8);
 
-    MOV_REG_RMOP(RDX, src_op);                      LST("mov rdx, %s\n", src_op.str);
-    MOV_RMOP_REG(dest_op, RDX);                     LST("mov %s, rdx\n", dest_op.str);
+    MOV_REG_RMOP(RDX, src_op);
+    MOV_RMOP_REG(dest_op, RDX);
 
     return Status::NORMAL_WORK;
 }
@@ -126,20 +125,20 @@ Status::Statuses X86_64_Mov::src_stk(IRBackData* data, ElfData* elf, IRVal* src,
 
     if (dest->type == IRVal::REG) {
         Operand stk = RMOP_STK();
-        MOVQ_XMM_RMOP(XMM + dest->num.reg, stk);    LST("movq xmm%zu, [rsp]\n", dest->num.reg);
-        ADD_REG_IMM(RSP, 8);                        LST("add rsp, 8\n");
+        MOVQ_XMM_RMOP(XMM + (uint8_t)dest->num.reg, stk);
+        ADD_REG_IMM(RSP, 8);
         return Status::NORMAL_WORK;
     }
 
     Operand dest_op = {};
-    STATUS_CHECK(get_modrm_operand(&dest_op, elf, dest,
+    STATUS_CHECK(get_modrm_operand(data, &dest_op, elf, dest,
                  "MOV must have dest with type STK, REG, LOCAL_VAR, GLOBAL_VAR, ARG_VAR or ARR_VAR"));
 
     Operand stk = RMOP_STK();
-    MOV_REG_RMOP(RDX, stk);                 LST("mov rdx, [rsp]\n");
+    MOV_REG_RMOP(RDX, stk);
 
-    ADD_REG_IMM(RSP, 8);                    LST("add rsp, 8\n");
-    MOV_RMOP_REG(dest_op, RDX);             LST("mov %s, rdx\n", dest_op.str);
+    ADD_REG_IMM(RSP, 8);
+    MOV_RMOP_REG(dest_op, RDX);
 
     return Status::NORMAL_WORK;
 }
@@ -155,21 +154,19 @@ Status::Statuses X86_64_Mov::src_reg(IRBackData* data, ElfData* elf, IRVal* src,
         if (dest->num.reg == src->num.reg)
             ERR("MOV: src.reg == dest.reg is meaningless");
 
-            MOVQ_XMM_XMM(XMM + dest->num.reg, XMM + src->num.reg);
-                                                LST("movq xmm%zu, xmm%zu\n", dest->num.reg, src->num.reg);
+        MOVQ_XMM_XMM(XMM + (uint8_t)dest->num.reg, XMM + (uint8_t)src->num.reg);
         return Status::NORMAL_WORK;
     }
 
     Operand dest_op = {};
 
-    STATUS_CHECK(get_modrm_operand(&dest_op, elf, dest,
+    STATUS_CHECK(get_modrm_operand(data, &dest_op, elf, dest,
                  "MOV must have dest with type STK, REG, LOCAL_VAR, GLOBAL_VAR, ARG_VAR or ARR_VAR"));
 
-    if (dest->type == IRVal::STK) {
-        SUB_REG_IMM(RSP, 8);                    LST("sub rsp, 8\n");
-    }
+    if (dest->type == IRVal::STK)
+        SUB_REG_IMM(RSP, 8);
 
-    MOVQ_RMOP_XMM(dest_op, XMM + src->num.reg); LST("movq %s, xmm%zu\n", dest_op.str, src->num.reg);
+    MOVQ_RMOP_XMM(dest_op, XMM + (uint8_t)src->num.reg);
 
     return Status::NORMAL_WORK;
 }

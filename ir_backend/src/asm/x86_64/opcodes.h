@@ -9,8 +9,6 @@
 #include "elf/elf_gen.h"
 
 struct Operand {
-    char str[STR_MAXLEN + 1] = {};
-
     struct {
         unsigned char mod:2;
         unsigned char reg:3;
@@ -27,6 +25,8 @@ struct Operand {
 
     bool is_disp32_used = false;
     uint32_t disp32     = 0;
+
+    char str[STR_MAXLEN + 1] = {};
 };
 
 #define WRAPPER(...)            \
@@ -163,121 +163,128 @@ inline Status::Statuses write_rmop(ElfData* elf, Operand op) {
             } while (0)
 
 #define RMOP_STK()      {.modrm = {.mod = 0, .rm = 4}, .is_sib_used = true, \
-                         .sib   = {.scale = 0, .index = 4, .base = RSP}}
+                         .sib   = {.scale = 0, .index = 4, .base = RSP}, .str = "[rsp]"}
 
 #define RMOP_REG(reg_)  {.modrm = {.mod = 3, .rm = (unsigned char)(reg_)}}
 
 // commands
-//     |             name              |  prefix   |  opcode   |  arguments
+//     |             name                  | opcode            | arguments                                 | listing
 
-#define REL_CALL_FIXUP_OFFS                            1
-#define REL_CALL(abs_addr_)     WRAPPER(            HEX1(0xe8); HEX4(abs_addr_ - (CUR_OFFS() + 4))      )
+#define REL_CALL_FIXUP_OFFS                    1
+#define REL_CALL(abs_addr_)         WRAPPER(HEX1(0xe8);         HEX4(abs_addr_ - (CUR_OFFS() + 4));         )
 
-#define REL_JMP_FIXUP_OFFS                             1
-#define REL_JMP(abs_addr_)      WRAPPER(            HEX1(0xe9); HEX4(abs_addr_ - (CUR_OFFS() + 4))      )
+#define REL_JMP_FIXUP_OFFS                     1
+#define REL_JMP(abs_addr_)          WRAPPER(HEX1(0xe9);         HEX4(abs_addr_ - (CUR_OFFS() + 4));         )
 
-#define REL_JC_FIXUP_OFFS                              2
-#define REL_JC(abs_addr_)       WRAPPER(            HEX2(0x820f); HEX4(abs_addr_ - (CUR_OFFS() + 4))    )
+#define REL_JC_FIXUP_OFFS                      2
+#define REL_JC(abs_addr_)           WRAPPER(HEX2(0x820f);       HEX4(abs_addr_ - (CUR_OFFS() + 4));         )
 
-#define REL_JNC_FIXUP_OFFS                             2
-#define REL_JNC(abs_addr_)      WRAPPER(            HEX2(0x830f); HEX4(abs_addr_ - (CUR_OFFS() + 4))    )
+#define REL_JNC_FIXUP_OFFS                     2
+#define REL_JNC(abs_addr_)          WRAPPER(HEX2(0x830f);       HEX4(abs_addr_ - (CUR_OFFS() + 4));         )
 
-#define ENTER_IMM16_0(imm_)     WRAPPER(            HEX1(0xc8); HEX2((uint16_t)imm_); HEX1(0x00)        )
-#define LEAVE()                 WRAPPER(            HEX1(0xc9);                                         )
-#define RET()                   WRAPPER(            HEX1(0xc3);                                         )
-#define SYSCALL()               WRAPPER(            HEX2(0x050f);                                       )
-#define SYSCALL_EXIT_CODE       0x3c
+#define ENTER_IMM16_0(imm_)         WRAPPER(HEX1(0xc8);         HEX2((uint16_t)imm_); HEX1(0x00);           LST("enter %d, 0\n", imm_); )
+#define LEAVE()                     WRAPPER(HEX1(0xc9);                                                     LST("leave\n");             )
+#define RET()                       WRAPPER(HEX1(0xc3);                                                     LST("ret\n");               )
+#define SYSCALL()                   WRAPPER(HEX2(0x050f);                                                   LST("syscall\n\n");         )
 
-#define LEA_MODRM_OFFS(modrm_, offs_)                                                                   \
-                                WRAPPER(            HEX1(REX_W); HEX1(0x8d);                            \
-                                                                HEX1(modrm_); HEX4(offs_)               )
+#define LEA_MODRM_OFFS(modrm_, offs_)                                                                       \
+                                    WRAPPER(HEX1(REX_W); HEX1(0x8d);                                        \
+                                                                HEX1(modrm_); HEX4(offs_);                  )
 
-#define LEA_MODRM_ABS(modrm_, sib_, offs_)                                                              \
-                                WRAPPER(            HEX1(REX_W); HEX1(0x8d);                            \
-                                                                HEX1(modrm_); HEX1(sib_); HEX4(offs_)   )
+#define LEA_MODRM_ABS(modrm_, sib_, offs_)                                                                  \
+                                    WRAPPER(HEX1(REX_W); HEX1(0x8d);                                        \
+                                                                HEX1(modrm_); HEX1(sib_); HEX4(offs_);      )
 
-#define ADD_REG_IMM(reg_, imm_) WRAPPER(            HEX1(REX_W); HEX1(0x81);                            \
-                                                                HEX1(MODRM_REG_EXT(reg_, 0)); HEX4(imm_))
+#define ADD_REG_IMM(reg_, imm_)     WRAPPER(HEX1(REX_W); HEX1(0x81);                                        \
+                                                                HEX1(MODRM_REG_EXT(reg_, 0)); HEX4(imm_);   LST("add %s, %d\n",         \
+                                                                                                                sreg(reg_), imm_);      )
 
-#define ADD_REG_REG(reg1_, reg2_)                                                                       \
-                                WRAPPER(            HEX1(REX_W); HEX1(0x01);                            \
-                                                                HEX1(MODRM_REG_REG(reg1_, reg2_))       )
+#define ADD_REG_REG(reg1_, reg2_)   WRAPPER(HEX1(REX_W); HEX1(0x01);                                        \
+                                                                HEX1(MODRM_REG_REG(reg1_, reg2_));          LST("add %s, %s\n",             \
+                                                                                                                sreg(reg1_), sreg(reg2_));  )
 
-#define SUB_REG_IMM(reg_, imm_) WRAPPER(            HEX1(REX_W); HEX1(0x81);                            \
-                                                                HEX1(MODRM_REG_EXT(reg_, 5)); HEX4(imm_))
+#define SUB_REG_IMM(reg_, imm_)     WRAPPER(HEX1(REX_W); HEX1(0x81);                                        \
+                                                                HEX1(MODRM_REG_EXT(reg_, 5)); HEX4(imm_);   LST("sub %s, %d\n",         \
+                                                                                                                sreg(reg_), imm_);      )
 
-#define SUB_REG_REG(reg1_, reg2_)                                                                       \
-                                WRAPPER(            HEX1(REX_W); HEX1(0x29);                            \
-                                                                HEX1(MODRM_REG_REG(reg1_, reg2_))       )
+#define SUB_REG_REG(reg1_, reg2_)   WRAPPER(HEX1(REX_W); HEX1(0x29);                                        \
+                                                                HEX1(MODRM_REG_REG(reg1_, reg2_));          LST("sub %s, %s\n",             \
+                                                                                                                sreg(reg1_), sreg(reg2_));  )
 
-#define MATH_REG_RMOP(code_, reg_, rmop_)                                                               \
-                                WRAPPER(            HEX2(0x0ff2); HEX1(code_);                          \
-                                                    REG_RMOP(reg_, rmop_)                               )
+#define MATH_REG_RMOP(code_, str_code_, reg_, rmop_)                                                        \
+                                    WRAPPER(HEX2(0x0ff2); HEX1(code_);                                      \
+                                                                REG_RMOP(reg_, rmop_);                      LST("%s xmm%d, %s\n", str_code_,\
+                                                                                                                reg_, rmop_.str);           )
 
-#define BITW_RMOP_REG(code_, rmop_, reg_)                                                               \
-                                WRAPPER(            HEX1(REX_W); HEX1(code_);                           \
-                                                                REG_RMOP(reg_, rmop_)                   )
+#define BITW_RMOP_REG(code_, code_str_, rmop_, reg_)                                                        \
+                                    WRAPPER(HEX1(REX_W); HEX1(code_);                                       \
+                                                                REG_RMOP(reg_, rmop_);                      LST("%s %s, %s\n", code_str_,   \
+                                                                                                                rmop_.str, sreg(reg_));     )
 
-#define PXOR_REG_REG(reg1_, reg2_)                                                                      \
-                                WRAPPER(            HEX3(0xef0f66);                                     \
-                                                                HEX1(MODRM_REG_REG(reg2_, reg1_))       )
+#define PXOR_REG_REG(reg1_, reg2_)  WRAPPER(HEX3(0xef0f66);                                                 \
+                                                                HEX1(MODRM_REG_REG(reg2_, reg1_));          LST("pxor xmm%d, xmm%d\n",  \
+                                                                                                                reg1_, reg2_);          )
 
-#define SHL_REG_IMM(reg_, imm_) WRAPPER(            HEX1(REX_W); HEX1(0xc1);                            \
-                                                                HEX1(MODRM_REG_EXT(reg_, 4)); HEX1(imm_))
+#define SHL_REG_IMM(reg_, imm_)     WRAPPER(HEX1(REX_W); HEX1(0xc1);                                        \
+                                                                HEX1(MODRM_REG_EXT(reg_, 4)); HEX1(imm_);   LST("shl %s, %d\n",         \
+                                                                                                                sreg(reg_), imm_);      )
 
-#define AND_REG_REG(reg1_, reg2_)                                                                       \
-                                WRAPPER(            HEX1(REX_W); HEX1(0x21);                            \
-                                                                HEX1(MODRM_REG_REG(reg1_, reg2_))       )
+#define AND_REG_REG(reg1_, reg2_)   WRAPPER(HEX1(REX_W); HEX1(0x21);                                        \
+                                                                HEX1(MODRM_REG_REG(reg1_, reg2_));          LST("and %s, %s\n",             \
+                                                                                                                sreg(reg1_), sreg(reg2_));  )
 
-#define CVTSD2SI_REG_REG(reg1_, reg2_)                                                                  \
-                                WRAPPER(            HEX1(0xf2); HEX1(REX_W); HEX2(0x2d0f);              \
-                                                                HEX1(MODRM_REG_REG(reg2_, reg1_))       )
+#define CVTSD2SI_REG_REG(reg1_, reg2_)      \
+                                    WRAPPER(HEX1(0xf2); HEX1(REX_W); HEX2(0x2d0f);                          \
+                                                                HEX1(MODRM_REG_REG(reg2_, reg1_));          LST("cvtsd2si %s, xmm%d\n", \
+                                                                                                                sreg(reg1_), reg2_);    )
 
-#define CVTSD2SI_REG_STK(reg_)                                                                          \
-                                WRAPPER(            HEX1(0xf2); HEX1(REX_W); HEX2(0x2d0f);              \
-                                                                HEX1(MODRM_REG_MEM(reg_)); HEX1(SIB_STK()))
+#define CVTSD2SI_REG_STK(reg_)      WRAPPER(HEX1(0xf2); HEX1(REX_W); HEX2(0x2d0f);                          \
+                                                                HEX1(MODRM_REG_MEM(reg_)); HEX1(SIB_STK()); LST("cvtsd2si %s, [rsp]\n", \
+                                                                                                                sreg(reg_));            )
 
-#define CVTTSD2SI_REG_REG(reg1_, reg2_)                                                                 \
-                                WRAPPER(            HEX1(0xf2); HEX1(REX_W); HEX2(0x2c0f);              \
-                                                                HEX1(MODRM_REG_REG(reg2_, reg1_))       )
+#define CVTTSD2SI_REG_REG(reg1_, reg2_)                                                                     \
+                                    WRAPPER(HEX1(0xf2); HEX1(REX_W); HEX2(0x2c0f);                          \
+                                                                HEX1(MODRM_REG_REG(reg2_, reg1_));          LST("cvttsd2si %s, xmm%d\n",\
+                                                                                                                sreg(reg1_), reg2_);    )
 
-#define ANDPD_REG_RODATA(reg_, rodata_)                                                                 \
-                                WRAPPER(            HEX3(0x540f66);                                     \
-                                                                HEX1(MODRM_REG_MEM(reg_)); HEX1(SIB_ABS()); HEX4(rodata_))
+#define ANDPD_REG_RODATA(reg_, rodata_, rodata_str_)                                                        \
+                                    WRAPPER(HEX3(0x540f66);     HEX1(MODRM_REG_MEM(reg_));                  \
+                                                                HEX1(SIB_ABS()); HEX4(rodata_);             LST("andpd xmm%d, "             \
+                                                                                                              "[" rodata_str_ "]\n", reg_); )
 
-#define COMISD_REG_RODATA(reg_, rodata_)                                                                \
-                                WRAPPER(            HEX3(0x2f0f66);                                     \
-                                                                HEX1(MODRM_REG_MEM(reg_)); HEX1(SIB_ABS()); HEX4(rodata_))
+#define COMISD_REG_RODATA(reg_, rodata_, rodata_str_)                                                       \
+                                    WRAPPER(HEX3(0x2f0f66);     HEX1(MODRM_REG_MEM(reg_));                  \
+                                                                HEX1(SIB_ABS()); HEX4(rodata_);             LST("comisd xmm%d, "            \
+                                                                                                              "[" rodata_str_ "]\n", reg_); )
 
-#define COMISD_REG_REG(reg1_, reg2_)                                                                    \
-                                WRAPPER(            HEX3(0x2f0f66);                                     \
-                                                                HEX1(MODRM_REG_REG(reg2_, reg1_))       )
+#define COMISD_REG_REG(reg1_, reg2_)                                                                        \
+                                    WRAPPER(HEX3(0x2f0f66);     HEX1(MODRM_REG_REG(reg2_, reg1_));          LST("comisd xmm%zu, xmm%zu\n",  \
+                                                                                                                reg1_, reg2_);              )
 
-#define MOV_REG_IMM64(reg_, imm_)                                                                       \
-                                WRAPPER(            HEX1(REX_W); HEX1(0xb8 + reg_); HEX8(imm_)          )
+#define MOV_REG_IMM64(reg_, imm_)   WRAPPER(HEX1(REX_W);        HEX1(0xb8 + reg_); HEX8(imm_);              LST("mov %s, 0x%lx\n",      \
+                                                                                                                sreg(reg_), imm_);      )
 
-#define MOV_RMOP_REG(rmop_, reg_)                                                                       \
-                                WRAPPER(            HEX1(REX_W); HEX1(0x89);                            \
-                                                                REG_RMOP(reg_, rmop_)                   )
-#define MOV_REG_RMOP(reg_, rmop_)                                                                       \
-                                WRAPPER(            HEX1(REX_W); HEX1(0x8b);                            \
-                                                                REG_RMOP(reg_, rmop_)                   )
+#define MOV_RMOP_REG(rmop_, reg_)   WRAPPER(HEX1(REX_W);        HEX1(0x89); REG_RMOP(reg_, rmop_);          LST("mov %s, %s\n\n",       \
+                                                                                                                rmop_.str, sreg(reg_)); )
 
-#define MOVQ_XMM_RMOP(xmm_, rmop_)                                                                      \
-                                WRAPPER(            HEX3(0x7e0ff3);                                     \
-                                                                REG_RMOP((unsigned char)(xmm_), rmop_)  )
+#define MOV_REG_RMOP(reg_, rmop_)   WRAPPER(HEX1(REX_W);        HEX1(0x8b); REG_RMOP(reg_, rmop_);          LST("mov %s, %s\n\n",       \
+                                                                                                                sreg(reg_), rmop_.str); )
 
-#define MOVQ_RMOP_XMM(rmop_, xmm_)                                                                      \
-                                WRAPPER(            HEX3(0xd60f66);                                     \
-                                                                REG_RMOP((unsigned char)(xmm_), rmop_)  )
+#define MOVQ_XMM_RMOP(xmm_, rmop_)  WRAPPER(HEX3(0x7e0ff3);     REG_RMOP((unsigned char)(xmm_), rmop_);     LST("movq xmm%d, %s\n",     \
+                                                                                                                xmm_, rmop_.str);       )
 
-#define MOVQ_XMM_REGRMOP(reg_, rmop_)                                                                   \
-                                WRAPPER(            HEX1(0x66); HEX1(REX_W); HEX2(0x6e0f);              \
-                                                                REG_RMOP((unsigned char)(reg_), rmop_)  )
+#define MOVQ_RMOP_XMM(rmop_, xmm_)  WRAPPER(HEX3(0xd60f66);     REG_RMOP((unsigned char)(xmm_), rmop_);     LST("movq %s, xmm%d\n",     \
+                                                                                                                rmop_.str, xmm_);       )
 
-#define MOVQ_REGRMOP_XMM(rmop_, reg_)                                                                   \
-                                WRAPPER(            HEX1(0x66); HEX1(REX_W); HEX2(0x7e0f);              \
-                                                                REG_RMOP((unsigned char)(reg_), rmop_)  )
+#define MOVQ_XMM_REGRMOP(reg_, rmop_)                                                                       \
+                                    WRAPPER(HEX1(0x66); HEX1(REX_W); HEX2(0x6e0f);                          \
+                                                                REG_RMOP((unsigned char)(reg_), rmop_);     LST("movq xmm%d, %s\n",     \
+                                                                                                                reg_, rmop_.str);       )
+
+#define MOVQ_REGRMOP_XMM(rmop_, reg_)                                                                       \
+                                    WRAPPER(HEX1(0x66); HEX1(REX_W); HEX2(0x7e0f);                          \
+                                                                REG_RMOP((unsigned char)(reg_), rmop_);     LST("movq %s, xmm%d\n",     \
+                                                                                                                rmop_.str, reg_);       )
 
 #define MOVQ_RMOP_RMOP(rmop1_, rmop2_)                                  \
             WRAPPER(                                                    \
@@ -290,21 +297,24 @@ inline Status::Statuses write_rmop(ElfData* elf, Operand op) {
                     return Status::LIST_ERROR;                          \
                 })
 
-#define MOVQ_XMM_XMM(xmm1_, xmm2_)  \
-                WRAPPER(            \
-                    Operand op_xmm1_ = {.modrm = {.mod = 3, .rm = (unsigned char)(xmm1_)}};  \
-                    MOVQ_RMOP_XMM(op_xmm1_, xmm2_);                \
+#define MOVQ_XMM_XMM(xmm1_, xmm2_)                                                              \
+                WRAPPER(                                                                        \
+                    Operand op_xmm1_ = {.modrm = {.mod = 3, .rm = (unsigned char)(xmm1_)}};     \
+                    STR_VAR(op_xmm1_.str, "xmm%d", xmm1_);                                      \
+                    MOVQ_RMOP_XMM(op_xmm1_, xmm2_);                                             \
                 )
 
 #define MOVQ_XMM_REG(xmm_, reg_)                                                                \
                 WRAPPER(                                                                        \
                     Operand op_reg_ = {.modrm = {.mod = 3, .rm = (unsigned char)(reg_)}};       \
+                    STR_VAR(op_reg_.str, "%s", sreg(reg_));                                     \
                     MOVQ_XMM_REGRMOP(xmm_, op_reg_);                                            \
                 )
 
 #define MOVQ_REG_XMM(reg_, xmm_)                                                                \
                 WRAPPER(                                                                        \
                     Operand op_reg_ = {.modrm = {.mod = 3, .rm = (unsigned char)(reg_)}};       \
+                    STR_VAR(op_reg_.str, "%s", sreg(reg_));                                     \
                     MOVQ_REGRMOP_XMM(op_reg_, xmm_);                                            \
                 )
 // Registers
@@ -323,14 +333,29 @@ enum Regs {
     // r8 - r15 are not supported
 };
 
+inline const char* sreg(size_t reg) {
+    static const char* REGS_STR[] = {"rax", "rcx", "rdx", "rbx", "rsp", "rbp", "rsi", "rdi"};
+
+    if (reg >= sizeof(REGS_STR) / sizeof(*REGS_STR)) {
+        assert(0 && "invalid reg number");
+        return "invalreg";
+    }
+
+    return REGS_STR[reg];
+};
+
 // Math and bitw codes
 
-#define MATH_ADDSD_CODE  0x58
-#define MATH_SUBSD_CODE  0x5c
-#define MATH_MULSD_CODE  0x59
-#define MATH_DIVSD_CODE  0x5e
-#define MATH_SQRTSD_CODE 0x51
-#define BITW_AND_CODE    0x21
-#define BITW_XOR_CODE    0x31
+#define MATH_ADDSD_CODE     0x58
+#define MATH_SUBSD_CODE     0x5c
+#define MATH_MULSD_CODE     0x59
+#define MATH_DIVSD_CODE     0x5e
+#define MATH_SQRTSD_CODE    0x51
+#define BITW_AND_CODE       0x21
+#define BITW_XOR_CODE       0x31
+
+// Syscalls
+
+#define SYSCALL_EXIT_CODE   0x3c
 
 #endif //< #ifndef x86_64_OPCODES_H_
