@@ -119,6 +119,24 @@ ArgsMode read_listing_filename(const Argument args_dict[], const int args_dict_l
     return ArgsMode::CONTINUE;
 }
 
+ArgsMode read_lib_filename(const Argument args_dict[], const int args_dict_len,
+                           int* arg_i, int argc, char* argv[], ArgsVars* args_vars) {
+    (void) args_dict_len;
+
+    assert(args_dict);
+    assert(arg_i);
+    assert(argv);
+    assert(args_vars);
+
+    if (++(*arg_i) >= argc) {
+        fprintf(stderr, "No lib file name found\n");
+        return ArgsMode::ERROR;
+    }
+
+    args_vars->lib_filename = argv[*arg_i];
+    return ArgsMode::CONTINUE;
+}
+
 ArgsMode enable_debug_mode(const Argument args_dict[], const int args_dict_len,
                            int* arg_i, int argc, char* argv[], ArgsVars* args_vars) {
     (void) args_dict_len;

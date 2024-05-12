@@ -91,6 +91,12 @@ struct IRNode {
     } subtype;
 
     DebugInfo debug_info = {};
+
+    // This vector is only used in ir_backend and isn't initialised by default
+    Vector addr_fixups = {};
+
+    static const ssize_t NO_OFFSET = -1;
+    ssize_t bin_offset = NO_OFFSET;
 };
 
 const size_t IRARGTYPE_NUM = 3;

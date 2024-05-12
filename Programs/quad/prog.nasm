@@ -1,16 +1,16 @@
 ___ir_block_1:
 %include "doubleiolib.nasm"
 
-section .data
-
-GLOBAL_SECTION: times 0 dq 0
-
 section .rodata
 
 align 8
-EPSILON: dq 0x3eb0c6f7a0b5ed8d ; 1e-06
+EPSILON: dq 0x3eb0c6f7a0b5ed8d
 align 16
 DOUBLE_NEG_CONST: dq -1 >> 1, 0
+
+section .data
+
+GLOBAL_SECTION: times 0 dq 0
 
 ; Program start
 
@@ -198,12 +198,12 @@ ___ir_block_51:
                 jc ___ir_block_57
 ___ir_block_52:
 ___ir_block_53:
-                mov rdx, 0x0 ; 0
+                mov rdx, 0x0
                 movq xmm0, rdx
                 call doubleio_out
 ___ir_block_54:
 ___ir_block_55:
-                mov qword rdx, 0x0 ; 0
+                mov rdx, 0x0 ; 0
                 movq xmm0, rdx
 ___ir_block_56:
                 leave
@@ -244,15 +244,15 @@ ___ir_block_62:
                 jc ___ir_block_75
 ___ir_block_63:
 ___ir_block_64:
-                mov rdx, 0x3ff0000000000000 ; 1
+                mov rdx, 0x3ff0000000000000
                 movq xmm0, rdx
                 call doubleio_out
 ___ir_block_65:
 ___ir_block_66:
                 mov rdx, 9223372036854775808
                 sub rsp, 8
-                mov r8, qword [rbp - 8 - 8]
-                mov qword [rsp], r8
+                mov rax, qword [rbp - 8 - 8]
+                mov qword [rsp], rax
                 xor qword [rsp], rdx
 ___ir_block_67:
                 sub rsp, 8
@@ -274,7 +274,7 @@ ___ir_block_71:
                 call doubleio_out
 ___ir_block_72:
 ___ir_block_73:
-                mov qword rdx, 0x0 ; 0
+                mov rdx, 0x0 ; 0
                 movq xmm0, rdx
 ___ir_block_74:
                 leave
@@ -288,15 +288,15 @@ ___ir_block_77:
 ___ir_block_78:
 ___ir_block_79:
 ___ir_block_80:
-                mov rdx, 0x4000000000000000 ; 2
+                mov rdx, 0x4000000000000000
                 movq xmm0, rdx
                 call doubleio_out
 ___ir_block_81:
 ___ir_block_82:
                 mov rdx, 9223372036854775808
                 sub rsp, 8
-                mov r8, qword [rbp - 8 - 8]
-                mov qword [rsp], r8
+                mov rax, qword [rbp - 8 - 8]
+                mov qword [rsp], rax
                 xor qword [rsp], rdx
 ___ir_block_83:
 ___ir_block_84:
@@ -325,8 +325,8 @@ ___ir_block_90:
 ___ir_block_91:
                 mov rdx, 9223372036854775808
                 sub rsp, 8
-                mov r8, qword [rbp - 8 - 8]
-                mov qword [rsp], r8
+                mov rax, qword [rbp - 8 - 8]
+                mov qword [rsp], rax
                 xor qword [rsp], rdx
 ___ir_block_92:
 ___ir_block_93:
@@ -353,7 +353,7 @@ ___ir_block_98:
                 call doubleio_out
 ___ir_block_99:
 ___ir_block_100:
-                mov qword rdx, 0x0 ; 0
+                mov rdx, 0x0 ; 0
                 movq xmm0, rdx
 ___ir_block_101:
                 leave
@@ -437,12 +437,12 @@ ___ir_block_113:
                 jc ___ir_block_119
 ___ir_block_114:
 ___ir_block_115:
-                mov rdx, 0xbff0000000000000 ; -1
+                mov rdx, 0xbff0000000000000
                 movq xmm0, rdx
                 call doubleio_out
 ___ir_block_116:
 ___ir_block_117:
-                mov qword rdx, 0x0 ; 0
+                mov rdx, 0x0 ; 0
                 movq xmm0, rdx
 ___ir_block_118:
                 leave
@@ -451,12 +451,12 @@ ___ir_block_118:
 ___ir_block_119:
 ___ir_block_120:
 ___ir_block_121:
-                mov rdx, 0x0 ; 0
+                mov rdx, 0x0
                 movq xmm0, rdx
                 call doubleio_out
 ___ir_block_122:
 ___ir_block_123:
-                mov qword rdx, 0x0 ; 0
+                mov rdx, 0x0 ; 0
                 movq xmm0, rdx
 ___ir_block_124:
                 leave
@@ -465,15 +465,15 @@ ___ir_block_124:
 ___ir_block_125:
 ___ir_block_126:
 ___ir_block_127:
-                mov rdx, 0x3ff0000000000000 ; 1
+                mov rdx, 0x3ff0000000000000
                 movq xmm0, rdx
                 call doubleio_out
 ___ir_block_128:
 ___ir_block_129:
                 mov rdx, 9223372036854775808
                 sub rsp, 8
-                mov r8, qword [rbp - 8 - 8]
-                mov qword [rsp], r8
+                mov rax, qword [rbp - 8 - 8]
+                mov qword [rsp], rax
                 xor qword [rsp], rdx
 ___ir_block_130:
 ___ir_block_131:
@@ -486,7 +486,7 @@ ___ir_block_132:
                 call doubleio_out
 ___ir_block_133:
 ___ir_block_134:
-                mov qword rdx, 0x0 ; 0
+                mov rdx, 0x0 ; 0
                 movq xmm0, rdx
 ___ir_block_135:
                 leave

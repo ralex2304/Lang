@@ -4,6 +4,7 @@
 #include "List/list.h"
 #include "ir_reader/ir_reader.h"
 #include "config.h"
+#include "utils/args_parser.h"
 
 bool is_irval_equal(IRVal* val1, IRVal* val2);
 
@@ -13,25 +14,28 @@ struct IRBackData {
     char* ir_text = nullptr;
 
     FILE* listing = nullptr;
-    char* bin = nullptr;
+    const char* bin_filename = nullptr;
+    const char* iolib_obj_filename = nullptr;
 
     Arches arch = Arches::NONE;
 
-    bool ctor(const char* input_filename_, const char* listing_filename_, const Arches arch_) {
-        assert(input_filename_);
+    bool ctor(const ArgsVars* args) {
+        assert(args);
 
         bool res = true;
 
-        res &= read_ir(&ir, &ir_text, input_filename_) == Status::NORMAL_WORK;
+        res &= read_ir(&ir, &ir_text, args->input_filename) == Status::NORMAL_WORK;
 
-        if (listing_filename_ != nullptr)
-            res &= file_open(&listing, listing_filename_, "wb");
+        if (args->listing_filename != nullptr)
+            res &= file_open(&listing, args->listing_filename, "wb");
 
         if (!res)
             FREE(ir_text);
 
-        assert(arch_ != Arches::NONE);
-        arch = arch_;
+        assert(args->arch != Arches::NONE);
+        arch = args->arch;
+        bin_filename = args->output_filename;
+        iolib_obj_filename = args->lib_filename;
 
         return res;
     };
@@ -43,10 +47,13 @@ struct IRBackData {
 
         res &= list_dtor(&ir) == List::OK;
 
-        if (listing != nullptr)
+        if (listing != nullptr) {
             res &= file_close(listing);
+            listing = nullptr;
+        }
 
         arch = Arches::NONE;
+        bin_filename = NULL;
 
         return res;
     };

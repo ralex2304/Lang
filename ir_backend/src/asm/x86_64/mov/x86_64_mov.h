@@ -6,6 +6,8 @@
 #include "config.h"
 #include "utils/statuses.h"
 #include "../../../ir_backend_objects.h"
+#include "../x86_64_utils.h"
+#include "../opcodes.h"
 
 namespace X86_64_Mov {
     inline uint64_t get_bin_double(const double num) {
@@ -17,16 +19,16 @@ namespace X86_64_Mov {
         return res;
     }
 
-    Status::Statuses get_location(char* str, IRVal* val, const char* err_msg);
+    Status::Statuses get_modrm_operand(Operand* oper, ElfData* elf, IRVal* val, const char* err_msg);
 
     // srcs:
-    Status::Statuses src_const(IRBackData* data, IRVal* src, IRVal* dest);
+    Status::Statuses src_const(IRBackData* data, ElfData* elf, IRVal* src, IRVal* dest);
 
-    Status::Statuses src_stk  (IRBackData* data, IRVal* src, IRVal* dest);
+    Status::Statuses src_stk  (IRBackData* data, ElfData* elf, IRVal* src, IRVal* dest);
 
-    Status::Statuses src_reg  (IRBackData* data, IRVal* src, IRVal* dest);
+    Status::Statuses src_reg  (IRBackData* data, ElfData* elf, IRVal* src, IRVal* dest);
 
-    Status::Statuses src_var  (IRBackData* data, IRVal* src, IRVal* dest);
+    Status::Statuses src_var  (IRBackData* data, ElfData* elf, IRVal* src, IRVal* dest);
 };
 
 #endif //< ##ifndef X86_64_MOV_H_

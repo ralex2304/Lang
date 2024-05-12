@@ -23,9 +23,9 @@ backend:
 	@LANG=ru_RU.CP1251 luit ./backend/./main -i $(PROG_PATH)/prog.treopt -o $(PROG_PATH)/prog.ir
 
 ir_backend:
-	@LANG=ru_RU.CP1251 luit ./ir_backend/./main -i $(PROG_PATH)/prog.ir -l $(PROG_PATH)/prog.nasm -a x86_64
+	@LANG=ru_RU.CP1251 luit ./ir_backend/./main -i $(PROG_PATH)/prog.ir -S $(PROG_PATH)/prog.nasm -o $(PROG_PATH)/prog -m x86_64
 
-run: asm
+run: #asm
 	@./$(PROG_PATH)/prog
 
 asm:

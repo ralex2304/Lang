@@ -21,6 +21,7 @@ struct ArgsVars {
     const char* output_filename = nullptr;
 
     const char* listing_filename = nullptr;
+    const char* lib_filename = nullptr;
 
     bool debug_mode = false;
 
@@ -92,7 +93,21 @@ ArgsMode read_output_filename(const Argument args_dict[], const int args_dict_le
  * @return ArgsMode
  */
 ArgsMode read_listing_filename(const Argument args_dict[], const int args_dict_len,
-                             int* arg_i, int argc, char* argv[], ArgsVars* args_vars);
+                               int* arg_i, int argc, char* argv[], ArgsVars* args_vars);
+
+/**
+ * @brief Reads library file name from console
+ *
+ * @param[in] args_dict
+ * @param[in] args_dict_len
+ * @param[in] arg_i number of current argument
+ * @param[in] argc  int main() argc
+ * @param[in] argv  int main() argv
+ * @param[out] args_vars
+ * @return ArgsMode
+ */
+ArgsMode read_lib_filename(const Argument args_dict[], const int args_dict_len,
+                           int* arg_i, int argc, char* argv[], ArgsVars* args_vars);
 
 
 /**

@@ -28,13 +28,48 @@ struct Vector {
             elem_size_ = UNITIALISED_VAL_;
         }
 
+        inline bool is_initialised() { return capacity_ != UNITIALISED_VAL_; };
+
         inline bool push_back(const void* new_elem) {
             assert(new_elem);
-            if (size_ >= capacity_)
-                if (!resize((size_t)capacity_ * 2)) return false;
+            if (!prepare_space_for_elems(1))
+                return false;
 
-            memcpy((char*)data_ + elem_size_ * (size_++), new_elem, (size_t)elem_size_);
+            memcpy((char*)data_ + elem_size_ * size_++, new_elem, (size_t)elem_size_);
             return true;
+        }
+
+        inline bool push_back_several(const void* new_elems, const size_t num) {
+            assert(new_elems);
+            if (!prepare_space_for_elems(num))
+                return false;
+
+            memcpy((char*)data_ + elem_size_ * size_, new_elems, (size_t)elem_size_ * num);
+            size_ += num;
+            return true;
+        }
+
+        inline bool push_zero_elems(size_t num) {
+            bool res = prepare_space_for_elems(num);
+            size_ += num;
+            return res;
+        }
+
+        inline bool prepare_space_for_elems(size_t num) {
+            if (size_ + (ssize_t)num < capacity_)
+                return true;
+
+            size_t new_cap = (size_t)capacity_;
+
+            while ((size_t)size_ + num >= new_cap) new_cap *= 2;
+
+            return resize(new_cap);
+        }
+
+        inline bool align(size_t elems_alignment) {
+            if ((size_t)size() % elems_alignment == 0) return true;
+
+            return push_zero_elems(elems_alignment - ((size_t)size() % elems_alignment));
         }
 
         inline bool resize(size_t new_cap) {
@@ -49,6 +84,16 @@ struct Vector {
 
             capacity_ = (ssize_t)new_cap;
             return true;
+        }
+
+        inline void fixup(size_t index, const void* elem) {
+            assert(elem);
+            fixup_several(index, elem, 1);
+        }
+
+        inline void fixup_several(size_t index, const void* elems, size_t num) {
+            assert(elems);
+            memcpy((char*)data_ + index * (size_t)elem_size_, elems, num * (size_t)elem_size_);
         }
 
         inline ssize_t size() {

@@ -1,16 +1,16 @@
 ___ir_block_1:
 %include "doubleiolib.nasm"
 
-section .data
-
-GLOBAL_SECTION: times 0 dq 0
-
 section .rodata
 
 align 8
-EPSILON: dq 0x3eb0c6f7a0b5ed8d ; 1e-06
+EPSILON: dq 0x3eb0c6f7a0b5ed8d
 align 16
 DOUBLE_NEG_CONST: dq -1 >> 1, 0
+
+section .data
+
+GLOBAL_SECTION: times 0 dq 0
 
 ; Program start
 
@@ -49,7 +49,7 @@ ___ir_block_9:
                 call doubleio_out
 ___ir_block_10:
 ___ir_block_11:
-                mov qword rdx, 0x0 ; 0
+                mov rdx, 0x0 ; 0
                 movq xmm0, rdx
 ___ir_block_12:
                 leave
@@ -132,7 +132,7 @@ ___ir_block_29:
 ___ir_block_30:
 ___ir_block_31:
 ___ir_block_32:
-                mov qword rdx, 0x3ff0000000000000 ; 1
+                mov rdx, 0x3ff0000000000000 ; 1
                 movq xmm0, rdx
 ___ir_block_33:
                 leave

@@ -27,13 +27,6 @@
             if (snprintf(str_, STR_MAXLEN, format_, ## __VA_ARGS__) < 0)    \
                 return Status::OUTPUT_ERROR
 
-#define LOCAL_VAR_FMT_STR  "qword [rbp - 8 - %zu]"
-#define GLOBAL_VAR_FMT_STR "qword GLOBAL_SECTION[%zu]"
-#define ARG_VAR_FMT_STR    "qword [rsp - 8 - 16 - %zu]"
-#define ARR_VAR_FMT_STR    "qword [rcx]"
-#define STK_FMT_STR        "qword [rsp]"
-#define REG_FMT_STR        "xmm%zu"
-
 static const size_t STR_MAXLEN = 64;
 
 #endif //< #ifndef X86_64_UTILS_H_
