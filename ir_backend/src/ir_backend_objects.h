@@ -45,6 +45,12 @@ struct IRBackData {
 
         FREE(ir_text);
 
+        ssize_t phys_i = list_head(&ir);
+        ssize_t log_i  = 0;
+        LIST_FOREACH(ir, phys_i, log_i)
+            if (ir.arr[phys_i].elem.addr_fixups.is_initialised())
+                ir.arr[phys_i].elem.addr_fixups.dtor();
+
         res &= list_dtor(&ir) == List::OK;
 
         if (listing != nullptr) {
