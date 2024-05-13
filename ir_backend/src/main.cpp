@@ -30,7 +30,7 @@ int main(int argc, char* argv[]) {
     ArgsVars args_vars = {};
     args_vars.input_filename   = "Programs/main/prog.tre";  //< default values
     args_vars.output_filename  = "Programs/main/prog";
-    args_vars.listing_filename = "Programs/main/prog.nasm";
+    args_vars.listing_filename = nullptr;
     args_vars.lib_filename     = "Programs/doubleiolib.o";
     args_vars.arch             = Arches::X86_64;
 

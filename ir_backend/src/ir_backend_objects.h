@@ -22,22 +22,22 @@ struct IRBackData {
     bool ctor(const ArgsVars* args) {
         assert(args);
 
-        bool res = true;
-
-        res &= read_ir(&ir, &ir_text, args->input_filename) == Status::NORMAL_WORK;
+        if (read_ir(&ir, &ir_text, args->input_filename) != Status::NORMAL_WORK)
+            return false;
 
         if (args->listing_filename != nullptr)
-            res &= file_open(&listing, args->listing_filename, "wb");
-
-        if (!res)
-            FREE(ir_text);
+            if (!file_open(&listing, args->listing_filename, "wb")) {
+                FREE(ir_text);
+                list_dtor(&ir);
+                return false;
+            }
 
         assert(args->arch != Arches::NONE);
         arch = args->arch;
         bin_filename = args->output_filename;
         iolib_obj_filename = args->lib_filename;
 
-        return res;
+        return true;
     };
 
     bool dtor() {
