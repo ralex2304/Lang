@@ -19,8 +19,7 @@ Status::Statuses mid_process(const char* input_filename, const char* output_file
     assert(output_filename);
 
     MidData data = {};
-    if (!data.ctor())
-        return Status::MEMORY_EXCEED;
+    STATUS_CHECK(data.ctor());
 
     char* text = nullptr;
     STATUS_CHECK(read_tree(&data.tree, &data.vars, &text, input_filename), LOCAL_DTOR_());
@@ -41,7 +40,8 @@ Status::Statuses mid_process(const char* input_filename, const char* output_file
 
     STATUS_CHECK(write_tree(&data.tree, &data.vars, output_filename), LOCAL_DTOR_());
 
-    LOCAL_DTOR_();
+    FREE(text);
+    STATUS_CHECK(data.dtor());
 
     return Status::NORMAL_WORK;
 }

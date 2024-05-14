@@ -8,15 +8,14 @@
 #include "ir_writer/ir_writer.h"
 
 #define LOCAL_DTOR_()   FREE(text); \
-                        data.dtor()
+                        data.dtor();
 
 Status::Statuses back_process(const char* input_filename, const char* output_filename) {
     assert(input_filename);
     assert(output_filename);
 
     IRBackData data = {};
-    if (!data.ctor(output_filename))
-        return Status::MEMORY_EXCEED;
+    STATUS_CHECK(data.ctor(output_filename));
 
     char* text = nullptr;
     STATUS_CHECK(read_tree(&data.tree, &data.vars, &text, input_filename), LOCAL_DTOR_());
@@ -25,7 +24,8 @@ Status::Statuses back_process(const char* input_filename, const char* output_fil
 
     STATUS_CHECK(write_ir(&data.ir_d.ir, data.ir_d.filename), LOCAL_DTOR_());
 
-    LOCAL_DTOR_();
+    FREE(text);
+    STATUS_CHECK(data.dtor());
 
     return Status::NORMAL_WORK;
 }

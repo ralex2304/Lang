@@ -19,29 +19,28 @@ struct IRBackData {
 
     Arches arch = Arches::NONE;
 
-    bool ctor(const ArgsVars* args) {
+    Status::Statuses ctor(const ArgsVars* args) {
         assert(args);
 
-        if (read_ir(&ir, &ir_text, args->input_filename) != Status::NORMAL_WORK)
-            return false;
+        STATUS_CHECK(read_ir(&ir, &ir_text, args->input_filename));
 
         if (args->listing_filename != nullptr)
             if (!file_open(&listing, args->listing_filename, "wb")) {
                 FREE(ir_text);
                 list_dtor(&ir);
-                return false;
+                return Status::FILE_ERROR;
             }
 
         assert(args->arch != Arches::NONE);
-        arch = args->arch;
-        bin_filename = args->output_filename;
+        arch               = args->arch;
+        bin_filename       = args->output_filename;
         iolib_obj_filename = args->lib_filename;
 
-        return true;
+        return Status::NORMAL_WORK;
     };
 
-    bool dtor() {
-        bool res = true;
+    Status::Statuses dtor() {
+        Status::Statuses res = Status::NORMAL_WORK;
 
         FREE(ir_text);
 
@@ -51,12 +50,12 @@ struct IRBackData {
             if (ir.arr[phys_i].elem.addr_fixups.is_initialised())
                 ir.arr[phys_i].elem.addr_fixups.dtor();
 
-        res &= list_dtor(&ir) == List::OK;
-
         if (listing != nullptr) {
-            res &= file_close(listing);
+            res = file_close(listing) ? res : Status::FILE_ERROR;
             listing = nullptr;
         }
+
+        res = (list_dtor(&ir) == List::OK) ? res : Status::LIST_ERROR;
 
         arch = Arches::NONE;
         bin_filename = NULL;

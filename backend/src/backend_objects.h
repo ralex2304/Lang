@@ -25,47 +25,61 @@ struct IRBackData {
 
     FuncTable func_table = {};
 
-    inline bool ctor(const char* output_filename) {
-        if (TREE_CTOR(&tree, sizeof(TreeElem), &tree_elem_dtor, &tree_elem_verify,
-                                               &tree_elem_str_val) != Tree::OK)
-            return false;
-
+    inline Status::Statuses ctor(const char* output_filename) {
         if (!vars.ctor(sizeof(String)))
-            return false;
+            return Status::MEMORY_EXCEED;
 
-        if (STK_CTOR(&scopes) != Stack::OK)
-            return false;
+        if (!func_table.ctor()) {
+            vars.dtor();
+            return Status::MEMORY_EXCEED;
+        }
 
-        if (!func_table.ctor())
-            return false;
+        if (!ir_d.ctor(output_filename)) {
+            vars.dtor();
+            func_table.dtor();
+            return Status::MEMORY_EXCEED;
+        }
 
-        if (!ir_d.ctor(output_filename))
-            return false;
+        if (STK_CTOR(&scopes) != Stack::OK) {
+            vars.dtor();
+            func_table.dtor();
+            ir_d.dtor();
+            return Status::STACK_ERROR;
+        }
 
-        return true;
+        if (TREE_CTOR(&tree, sizeof(TreeElem), &tree_elem_dtor, &tree_elem_verify,
+                                               &tree_elem_str_val) != Tree::OK) {
+            vars.dtor();
+            func_table.dtor();
+            ir_d.dtor();
+            stk_dtor(&scopes);
+            return Status::TREE_ERROR;
+        }
+
+        return Status::NORMAL_WORK;
     };
 
-    inline bool dtor() {
-        bool no_error = true;
+    inline Status::Statuses dtor() {
+        Status::Statuses res = Status::NORMAL_WORK;
 
-        no_error &= tree_dtor(&tree) == Tree::OK;
+        res = (tree_dtor(&tree) == Tree::OK) ? res : Status::TREE_ERROR;
 
         vars.dtor();
 
         Elem_t tmp = {};
         while (scopes.size > 0) {
-            no_error &= stk_pop(&scopes, &tmp) == Stack::OK;
+            res = (stk_pop(&scopes, &tmp) == Stack::OK) ? res : Status::STACK_ERROR;
 
             tmp.dtor();
         }
 
-        no_error &= stk_dtor(&scopes) == Stack::OK;
+        res = (stk_dtor(&scopes) == Stack::OK) ? res : Status::STACK_ERROR;
 
         func_table.dtor();
 
-        no_error &= ir_d.dtor();
+        res = ir_d.dtor() ? res : Status::LIST_ERROR;
 
-        return no_error;
+        return res;
     };
 };
 

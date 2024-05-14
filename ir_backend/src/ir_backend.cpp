@@ -9,15 +9,13 @@ Status::Statuses ir_back_process(const ArgsVars* args) {
     assert(args);
 
     IRBackData data = {};
-    if (!data.ctor(args))
-        return Status::MEMORY_EXCEED;
+    STATUS_CHECK(data.ctor(args));
 
     STATUS_CHECK(ir_optimise(&data),         data.dtor());
 
     STATUS_CHECK(ir_blocks_traversal(&data), data.dtor());
 
-    if (!data.dtor())
-        return Status::LIST_ERROR;
+    STATUS_CHECK(data.dtor());
 
     return Status::NORMAL_WORK;
 }

@@ -6,6 +6,7 @@
 #include "utils/macros.h"
 #include "objects.h"
 #include "utils/vector.h"
+#include "utils/statuses.h"
 
 #include "config.h"
 #include TREE_INCLUDE
@@ -91,15 +92,24 @@ struct ParseData {
 
     Tree tree = {};
 
-    inline bool ctor() {
-        if (!tokens.ctor(sizeof(Token))) return false;
-        if (!vars.ctor(sizeof(String)))  return false;
+    inline Status::Statuses ctor() {
+        if (!tokens.ctor(sizeof(Token)))
+            return Status::MEMORY_EXCEED;
+
+        if (!vars.ctor(sizeof(String))) {
+            tokens.dtor();
+            return Status::MEMORY_EXCEED;
+        }
+
         if (TREE_CTOR(&tree, sizeof(TreeElem), &tree_elem_dtor,
                                                &tree_elem_verify,
-                                               &tree_elem_str_val) != Tree::OK)
-            return false;
+                                               &tree_elem_str_val) != Tree::OK) {
+            tokens.dtor();
+            vars.dtor();
+            return Status::TREE_ERROR;
+        }
 
-        return true;
+        return Status::NORMAL_WORK;
     };
 
     inline void dtor() {

@@ -19,8 +19,7 @@ Status::Statuses front_process(const char* input_filename, const char* output_fi
     STATUS_CHECK(file_open_read_close(input_filename, &text));
 
     ParseData data = {};
-    if (!data.ctor())
-        return Status::MEMORY_EXCEED;
+    STATUS_CHECK(data.ctor());
 
     STATUS_CHECK(tokenizer_process(text, &data.tokens, &data.vars, input_filename), LOCAL_DTOR_());
 
