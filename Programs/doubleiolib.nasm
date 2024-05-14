@@ -63,7 +63,8 @@ doubleio_in:
                 jmp .whileClause
 .whileBody:
                 mul r11
-                lea rax, [rbx - '0']
+                lea rbx, [rbx - '0']
+                add rax, rbx
 
                 add r10, r9 ; inc exp10
                 inc rsi
