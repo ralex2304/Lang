@@ -154,7 +154,7 @@ inline Status::Statuses write_rmop(ElfData* elf, Operand op) {
 
 #define SET_RMOP_STK_OFFS(op_, offs_)                                               \
             do {                                                                    \
-                STR_VAR((op_)->str, "[rsp + %zd]", (ssize_t)offs_);                 \
+                STR_VAR((op_)->str, "[%s + %zd]", sreg(STK_REG), (ssize_t)offs_);   \
                 (op_)->modrm          = {.mod = 2, .rm = 4};                        \
                 (op_)->is_sib_used    = true;                                       \
                 (op_)->sib            = {.scale = 0, .index = 4, .base = RSP};      \
@@ -163,7 +163,7 @@ inline Status::Statuses write_rmop(ElfData* elf, Operand op) {
             } while (0)
 
 #define RMOP_STK()      {.modrm = {.mod = 0, .rm = 4}, .is_sib_used = true, \
-                         .sib   = {.scale = 0, .index = 4, .base = RSP}, .str = "[rsp]"}
+                         .sib   = {.scale = 0, .index = 4, .base = RSP}}
 
 #define RMOP_REG(reg_)  {.modrm = {.mod = 3, .rm = (unsigned char)(reg_)}}
 
@@ -239,8 +239,8 @@ inline Status::Statuses write_rmop(ElfData* elf, Operand op) {
                                                                                                                 sreg(reg1_), reg2_);    )
 
 #define CVTSD2SI_REG_STK(reg_)      WRAPPER(HEX1(0xf2); HEX1(REX_W); HEX2(0x2d0f);                          \
-                                                                HEX1(MODRM_REG_MEM(reg_)); HEX1(SIB_STK()); LST("cvtsd2si %s, [rsp]\n", \
-                                                                                                                sreg(reg_));            )
+                                                                HEX1(MODRM_REG_MEM(reg_)); HEX1(SIB_STK()); LST("cvtsd2si %s, [%s]\n",      \
+                                                                                                                sreg(reg_), sreg(STK_REG)); )
 
 #define CVTTSD2SI_REG_REG(reg1_, reg2_)                                                                     \
                                     WRAPPER(HEX1(0xf2); HEX1(REX_W); HEX2(0x2c0f);                          \
