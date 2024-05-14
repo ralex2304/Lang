@@ -1,3 +1,6 @@
+SHELL = /bin/bash
+.SHELLFLAGS = -o pipefail -c
+
 sanitizer = 1
 
 DOCS_DIR = docs
@@ -16,16 +19,16 @@ PROG_PATH = Programs/$(prog)
 IOLIB_PATH = Programs/doubleiolib
 
 frontend:
-	@LANG=ru_RU.CP1251 luit ./frontend/./main -i $(PROG_PATH)/prog.snb -o $(PROG_PATH)/prog.tre
+	@./frontend/./main -i $(PROG_PATH)/prog.snb -o $(PROG_PATH)/prog.tre 2>&1 | iconv -f cp1251 -t utf8 || (echo "Error raised by frontend"; exit 1)
 
 middleend:
-	@LANG=ru_RU.CP1251 luit ./middleend/./main -i $(PROG_PATH)/prog.tre -o $(PROG_PATH)/prog.treopt
+	@./middleend/./main -i $(PROG_PATH)/prog.tre -o $(PROG_PATH)/prog.treopt 2>&1 | iconv -f cp1251 -t utf8 || (echo "Error raised by middleend"; exit 1)
 
 backend:
-	@LANG=ru_RU.CP1251 luit ./backend/./main -i $(PROG_PATH)/prog.treopt -o $(PROG_PATH)/prog.ir
+	@./backend/./main -i $(PROG_PATH)/prog.treopt -o $(PROG_PATH)/prog.ir 2>&1 | iconv -f cp1251 -t utf8 || (echo "Error raised by backend"; exit 1)
 
 ir_backend: $(IOLIB_PATH).o
-	@LANG=ru_RU.CP1251 luit ./ir_backend/./main -i $(PROG_PATH)/prog.ir -S $(PROG_PATH)/prog.nasm -o $(PROG_PATH)/prog -m x86_64
+	@./ir_backend/./main -i $(PROG_PATH)/prog.ir -S $(PROG_PATH)/prog.nasm -o $(PROG_PATH)/prog -m x86_64 2>&1 | iconv -f cp1251 -t utf8 || (echo "Error raised by ir_backend"; exit 1)
 
 run: asm
 	@./$(PROG_PATH)/prog

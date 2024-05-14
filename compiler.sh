@@ -1,4 +1,14 @@
 #!/bin/bash
+set -o pipefail
+
+onerror() {
+  echo "Error raised by ${CUR_PROG}"
+  exit 1
+}
+
+trap "onerror" ERR
+
+CUR_PROG="compiler.sh"
 
 HELP_TEXT="\
 Usage: compiler.sh [options] file
@@ -72,16 +82,18 @@ AST_FILE="${INPUT_FILE%.*}.tre"
 AST_OPT_FILE="${INPUT_FILE%.*}.treopt"
 IR_FILE="${INPUT_FILE%.*}.ir"
 
-export LANG=ru_RU.CP1251
+CUR_PROG="frontend"
+./frontend/main -i ${INPUT_FILE} -o ${AST_FILE} 2>&1 | iconv -f cp1251 -t utf8
 
-luit ./frontend/main -i ${INPUT_FILE} -o ${AST_FILE}
+CUR_PROG="middleend"
+./middleend/main -i ${AST_FILE} -o ${AST_OPT_FILE} 2>&1 | iconv -f cp1251 -t utf8
 
-luit ./middleend/main -i ${AST_FILE} -o ${AST_OPT_FILE}
+CUR_PROG="backend"
+./backend/main -i ${AST_OPT_FILE} -o ${IR_FILE} 2>&1 | iconv -f cp1251 -t utf8
 
-luit ./backend/main -i ${AST_OPT_FILE} -o ${IR_FILE}
-
+CUR_PROG="ir_backend"
 if [[ ${LISTING} == 0 ]] then
-  luit ./ir_backend/main -i ${IR_FILE} -o ${OUTPUT_FILE} -m ${ARCH}
+  ./ir_backend/main -i ${IR_FILE} -o ${OUTPUT_FILE} -m ${ARCH} 2>&1 | iconv -f cp1251 -t utf8
 else
-  luit ./ir_backend/main -i ${IR_FILE} -o ${OUTPUT_FILE} -m ${ARCH} -S ${LISTING_FILE}
+  ./ir_backend/main -i ${IR_FILE} -o ${OUTPUT_FILE} -m ${ARCH} -S ${LISTING_FILE} 2>&1 | iconv -f cp1251 -t utf8
 fi
