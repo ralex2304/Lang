@@ -10,7 +10,7 @@ Status::Statuses X86_64_Mov::get_modrm_operand(IRBackData* data, Operand* oper, 
 
     switch (val->type) {
         case IRVal::LOCAL_VAR:
-            STR_VAR(oper->str, "qword [rbp - 8 - %zu]", val->num.offset * 8);
+            STR_VAR(oper->str, "qword [%s - 8 - %zu]", sreg(FRAME_REG), val->num.offset * 8);
             oper->modrm          = {.mod = 2, .rm = RBP};
             oper->is_disp32_used = true;
             oper->disp32         = (uint32_t)(-8 - (ssize_t)val->num.offset * 8);
@@ -22,22 +22,22 @@ Status::Statuses X86_64_Mov::get_modrm_operand(IRBackData* data, Operand* oper, 
             oper->disp32         = (uint32_t)(GLOBAL_SECTION + val->num.offset * 8);
             break;
         case IRVal::ARG_VAR:
-            STR_VAR(oper->str, "qword [rsp - 8 - 16 - %zu]", val->num.offset * 8);
+            STR_VAR(oper->str, "qword [%s - 8 - 16 - %zu]", sreg(STK_REG), val->num.offset * 8);
             oper->modrm          = {.mod = 2, .rm = 4};
             oper->is_sib_used    = true;
-            oper->sib            = {.scale = 0, .index = 4, .base = RSP};
+            oper->sib            = {.scale = 0, .index = 4, .base = STK_REG};
             oper->is_disp32_used = true;
             oper->disp32         = (uint32_t)(-8 - 16 - (ssize_t)val->num.offset * 8);
             break;
         case IRVal::ARR_VAR:
-            STR_VAR(oper->str, "qword [rcx]");
+            STR_VAR(oper->str, "qword [%s]", sreg(ARR_I_REG));
             oper->modrm          = {.mod = 0, .rm = RCX};
             break;
         case IRVal::STK:
-            STR_VAR(oper->str, "qword [rsp]");
+            STR_VAR(oper->str, "qword [%s]", sreg(STK_REG));
             oper->modrm          = {.mod = 0, .rm = 4};
             oper->is_sib_used    = true;
-            oper->sib            = {.scale = 0, .index = 4, .base = RSP};
+            oper->sib            = {.scale = 0, .index = 4, .base = STK_REG};
             break;
         case IRVal::REG:
             STR_VAR(oper->str, "xmm%zu", val->num.reg);
@@ -64,8 +64,8 @@ Status::Statuses X86_64_Mov::src_const(IRBackData* data, ElfData* elf, IRVal* sr
     const uint64_t k_double = get_bin_double(src->num.k_double);
 
     if (dest->type == IRVal::REG) {
-        MOV_REG_IMM64(RDX, k_double);
-        MOVQ_XMM_REG(XMM + (uint8_t)dest->num.reg, RDX);
+        MOV_REG_IMM64(CALC_REG1, k_double);
+        MOVQ_XMM_REG(XMM + (uint8_t)dest->num.reg, CALC_REG1);
         return Status::NORMAL_WORK;
     }
 
@@ -74,10 +74,10 @@ Status::Statuses X86_64_Mov::src_const(IRBackData* data, ElfData* elf, IRVal* sr
                  "MOV must have dest with type STK, REG, LOCAL_VAR, GLOBAL_VAR, ARG_VAR or ARR_VAR"));
 
     if (dest->type == IRVal::STK)
-        SUB_REG_IMM(RSP, 8);
+        SUB_REG_IMM(STK_REG, 8);
 
-    MOV_REG_IMM64(RDX, k_double);
-    MOV_RMOP_REG(dest_op, RDX);
+    MOV_REG_IMM64(CALC_REG1, k_double);
+    MOV_RMOP_REG(dest_op, CALC_REG1);
 
     return Status::NORMAL_WORK;
 }
@@ -105,10 +105,10 @@ Status::Statuses X86_64_Mov::src_var(IRBackData* data, ElfData* elf, IRVal* src,
                  "MOV must have dest with type STK, REG, LOCAL_VAR, GLOBAL_VAR, ARG_VAR or ARR_VAR"));
 
     if (dest->type == IRVal::STK)
-        SUB_REG_IMM(RSP, 8);
+        SUB_REG_IMM(STK_REG, 8);
 
-    MOV_REG_RMOP(RDX, src_op);
-    MOV_RMOP_REG(dest_op, RDX);
+    MOV_REG_RMOP(CALC_REG1, src_op);
+    MOV_RMOP_REG(dest_op, CALC_REG1);
 
     return Status::NORMAL_WORK;
 }
@@ -125,8 +125,9 @@ Status::Statuses X86_64_Mov::src_stk(IRBackData* data, ElfData* elf, IRVal* src,
 
     if (dest->type == IRVal::REG) {
         Operand stk = RMOP_STK();
+        STR_VAR(stk.str, "[%s]", sreg(STK_REG));
         MOVQ_XMM_RMOP(XMM + (uint8_t)dest->num.reg, stk);
-        ADD_REG_IMM(RSP, 8);
+        ADD_REG_IMM(STK_REG, 8);
         return Status::NORMAL_WORK;
     }
 
@@ -135,10 +136,11 @@ Status::Statuses X86_64_Mov::src_stk(IRBackData* data, ElfData* elf, IRVal* src,
                  "MOV must have dest with type STK, REG, LOCAL_VAR, GLOBAL_VAR, ARG_VAR or ARR_VAR"));
 
     Operand stk = RMOP_STK();
-    MOV_REG_RMOP(RDX, stk);
+    STR_VAR(stk.str, "[%s]", sreg(STK_REG));
+    MOV_REG_RMOP(CALC_REG1, stk);
 
-    ADD_REG_IMM(RSP, 8);
-    MOV_RMOP_REG(dest_op, RDX);
+    ADD_REG_IMM(STK_REG, 8);
+    MOV_RMOP_REG(dest_op, CALC_REG1);
 
     return Status::NORMAL_WORK;
 }
@@ -164,7 +166,7 @@ Status::Statuses X86_64_Mov::src_reg(IRBackData* data, ElfData* elf, IRVal* src,
                  "MOV must have dest with type STK, REG, LOCAL_VAR, GLOBAL_VAR, ARG_VAR or ARR_VAR"));
 
     if (dest->type == IRVal::STK)
-        SUB_REG_IMM(RSP, 8);
+        SUB_REG_IMM(STK_REG, 8);
 
     MOVQ_RMOP_XMM(dest_op, XMM + (uint8_t)src->num.reg);
 

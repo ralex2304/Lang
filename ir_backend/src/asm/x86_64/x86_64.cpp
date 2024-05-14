@@ -23,15 +23,6 @@ static Status::Statuses store_cmp_res_prepare_regs_(IRBackData* data, ElfData* e
 static Status::Statuses get_comp_params_(const CmpType cmp_type, CompRes* with_zero, CompRes* opers,
                                          const char** oper);
 
-/*
-register usage:
-    xmm0 - func return val
-    rbp - local var addr frame
-    rcx - array elem index
-    rdx, rax               - calculations
-    xmm1, xmm2, xmm3       - calculations
-*/
-
 #include "opcodes.h"
 
 Status::Statuses asm_x86_64_begin_ir_block(IRBackData* data, ElfData* elf,
@@ -116,7 +107,7 @@ Status::Statuses asm_x86_64_END(IRBackData* data, ElfData* elf, [[maybe_unused]]
     LEAVE();
 
     MOV_REG_IMM64(RAX, (size_t)SYSCALL_EXIT_CODE);
-    CVTTSD2SI_REG_REG(RDI, XMM + 0);
+    CVTTSD2SI_REG_REG(RDI, RET_XMM);
     SYSCALL();
 
     return Status::NORMAL_WORK;
@@ -148,7 +139,7 @@ Status::Statuses asm_x86_64_END_FUNC_DEF(IRBackData* data, ElfData* elf,
     SOLVE_FIXUPS();
 
     LEAVE();
-    PXOR_REG_REG(XMM + 0, XMM + 0);
+    PXOR_REG_REG(RET_XMM, RET_XMM);
     RET();
 
     LST_NO_TAB("; ------------------------- Function definition end -----------------------\n\n\n");
@@ -193,12 +184,12 @@ Status::Statuses asm_x86_64_COUNT_ARR_ELEM_ADDR_CONST(IRBackData* data, ElfData*
     SOLVE_FIXUPS();
 
     if (block->src[0].type == IRVal::GLOBAL_VAR) {
-        LEA_MODRM_ABS(MODRM_REG_MEM(RCX), SIB_ABS(), GLOBAL_SECTION + block->src[0].num.offset * 8);
+        LEA_MODRM_ABS(MODRM_REG_MEM(ARR_I_REG), SIB_ABS(), GLOBAL_SECTION + block->src[0].num.offset * 8);
 
         LST("lea rcx, qword GLOBAL_SECTION[%zu]\n", block->src[0].num.offset * 8);
 
     } else if (block->src[0].type == IRVal::LOCAL_VAR) {
-        LEA_MODRM_OFFS(MODRM_REG_REG_MEM_OFFS(RCX, RBP), -8 - block->src[0].num.offset * 8);
+        LEA_MODRM_OFFS(MODRM_REG_REG_MEM_OFFS(ARR_I_REG, FRAME_REG), -8 - block->src[0].num.offset * 8);
 
         LST("lea rcx, qword [rbp - 8 - %zu]\n", block->src[0].num.offset * 8);
 
@@ -216,19 +207,19 @@ Status::Statuses asm_x86_64_ARR_ELEM_ADDR_ADD_INDEX(IRBackData* data, ElfData* e
     SOLVE_FIXUPS();
 
     if (block->src[0].type == IRVal::STK) {
-        CVTSD2SI_REG_STK(RDX);
-        ADD_REG_IMM(RSP, 8);
+        CVTSD2SI_REG_STK(CALC_REG1);
+        ADD_REG_IMM(STK_REG, 8);
     } else if (block->src[0].type == IRVal::REG)
-        CVTSD2SI_REG_REG(RDX, XMM + (uint8_t)block->src[0].num.reg);
+        CVTSD2SI_REG_REG(CALC_REG1, XMM + (uint8_t)block->src[0].num.reg);
     else
         ERR("ARR_ELEM_ADDR_ADD_INDEX must have src[0] with type STK or REG");
 
-    SHL_REG_IMM(RDX, 3);
+    SHL_REG_IMM(CALC_REG1, 3);
 
     if (block->src[1].type == IRVal::GLOBAL_VAR)
-        ADD_REG_REG(RCX, RDX);
+        ADD_REG_REG(ARR_I_REG, CALC_REG1);
     else if (block->src[1].type == IRVal::LOCAL_VAR)
-        SUB_REG_REG(RCX, RDX);
+        SUB_REG_REG(ARR_I_REG, CALC_REG1);
     else
         ERR("COUNT_ARR_ELEM_ADDR_CONST must have src[1] with type GLOBAL_VAR or LOCAL_VAR");
 
@@ -289,14 +280,14 @@ Status::Statuses asm_x86_64_SWAP(IRBackData* data, ElfData* elf, IRNode* block, 
                  "SWAP must have src[1] with type LOCAL_VAR, GLOBAL_VAR, ARG_VAR, ARR_VAR, STK or REG"));
 
     if (block->src[0].type != IRVal::REG && block->src[1].type != IRVal::REG) {
-        MOVQ_XMM_RMOP(XMM + 1, src0);
-        MOVQ_XMM_RMOP(XMM + 2, src1);
-        MOVQ_RMOP_XMM(src0, XMM + 2);
-        MOVQ_RMOP_XMM(src1, XMM + 1);
+        MOVQ_XMM_RMOP(CALC_XMM1, src0);
+        MOVQ_XMM_RMOP(CALC_XMM2, src1);
+        MOVQ_RMOP_XMM(src0, CALC_XMM2);
+        MOVQ_RMOP_XMM(src1, CALC_XMM1);
     } else {
-        MOVQ_XMM_RMOP(XMM + 1, src0);
+        MOVQ_XMM_RMOP(CALC_XMM1, src0);
         MOVQ_RMOP_RMOP(src0, src1);
-        MOVQ_RMOP_XMM(src1, XMM + 1);
+        MOVQ_RMOP_XMM(src1, CALC_XMM1);
     }
 
     return Status::NORMAL_WORK;
@@ -315,14 +306,14 @@ static Status::Statuses store_cmp_res_prepare_regs_(IRBackData* data, ElfData* e
     if (block->src[0].type == IRVal::REG)
         *op1_reg = block->src[0].num.reg;
     else {
-        *op1_reg = 1;
+        *op1_reg = CALC_XMM1;
 
         Operand src0 = {};
 
         if (block->src[0].type == IRVal::CONST) {
             size_t imm = get_bin_double(block->src[0].num.k_double);
-            MOV_REG_IMM64(RDX, imm);
-            MOVQ_XMM_REG(XMM + (uint8_t)*op1_reg, RDX);
+            MOV_REG_IMM64(CALC_REG1, imm);
+            MOVQ_XMM_REG(XMM + (uint8_t)*op1_reg, CALC_REG1);
         } else {
             if (block->src[0].type == IRVal::STK && block->src[1].type == IRVal::STK)
                 SET_RMOP_STK_OFFS(&src0, 8);
@@ -338,14 +329,14 @@ static Status::Statuses store_cmp_res_prepare_regs_(IRBackData* data, ElfData* e
     if (block->src[1].type == IRVal::REG)
         *op2_reg = block->src[1].num.reg;
     else {
-        *op2_reg = 2;
+        *op2_reg = CALC_XMM2;
 
         Operand src1 = {};
 
         if (block->src[1].type == IRVal::CONST) {
             size_t imm = get_bin_double(block->src[1].num.k_double);
-            MOV_REG_IMM64(RDX, imm);
-            MOVQ_XMM_REG(XMM + (uint8_t)*op2_reg, RDX);
+            MOV_REG_IMM64(CALC_REG1, imm);
+            MOVQ_XMM_REG(XMM + (uint8_t)*op2_reg, CALC_REG1);
         } else {
             STATUS_CHECK(X86_64_Mov::get_modrm_operand(data, &src1, elf, &block->src[1],
                             "STORE_CMP_RES must have src[1] with type "
@@ -359,15 +350,15 @@ static Status::Statuses store_cmp_res_prepare_regs_(IRBackData* data, ElfData* e
                             - (block->dest.type   == IRVal::STK);
 
     if (stk_vals_needed != 0)
-        ADD_REG_IMM(RSP, (int32_t)stk_vals_needed * 8);
+        ADD_REG_IMM(STK_REG, (int32_t)stk_vals_needed * 8);
 
-    MOVQ_XMM_XMM(XMM + 3, XMM + (uint8_t)*op1_reg);
+    MOVQ_XMM_XMM(CALC_XMM3, XMM + (uint8_t)*op1_reg);
 
     Operand op2 = RMOP_REG(XMM + *op2_reg);
     STR_VAR(op2.str, "xmm%d", XMM + (uint8_t)*op2_reg);
-    MATH_REG_RMOP(MATH_SUBSD_CODE, "subsd", XMM + 3, op2);
+    MATH_REG_RMOP(MATH_SUBSD_CODE, "subsd", CALC_XMM3, op2);
 
-    ANDPD_REG_RODATA(XMM + 3, DOUBLE_NEG_CONST, "DOUBLE_NEG_CONST");
+    ANDPD_REG_RODATA(CALC_XMM3, DOUBLE_NEG_CONST, "DOUBLE_NEG_CONST");
 
     return Status::NORMAL_WORK;
 }
@@ -419,12 +410,12 @@ Status::Statuses asm_x86_64_STORE_CMP_RES(IRBackData* data, ElfData* elf, IRNode
     size_t op2_reg = 0;
     STATUS_CHECK(store_cmp_res_prepare_regs_(data, elf, block, &op1_reg, &op2_reg));
 
-    LST("; xmm%zu - op1; xmm%zu - op2; xmm3 - fabs(op1 - op2)\n\n", op1_reg, op2_reg);
+    LST("; xmm%zu - op1; xmm%zu - op2; xmm%d - fabs(op1 - op2)\n\n", op1_reg, op2_reg, CALC_XMM3);
 
     size_t label_false_fixups[2] = {0, 0};
 
     if (comp_with_zero != CompRes::INDIFF) {
-        COMISD_REG_RODATA(XMM + 3, EPSILON_CONST, "EPSILON");
+        COMISD_REG_RODATA(CALC_XMM3, EPSILON_CONST, "EPSILON");
         LST("; fabs(op1 - op2) {'<' | '>'} EPSILON\n");
 
         if (comp_with_zero == CompRes::TRUE) {
@@ -450,24 +441,24 @@ Status::Statuses asm_x86_64_STORE_CMP_RES(IRBackData* data, ElfData* elf, IRNode
     uint64_t bin_double_0 = X86_64_Mov::get_bin_double(0);
     uint64_t bin_double_1 = X86_64_Mov::get_bin_double(1);
 
-    MOV_REG_IMM64(RDX, bin_double_1);
+    MOV_REG_IMM64(CALC_REG1, bin_double_1);
     REL_JMP(0);                             LST("jmp ___compare_%zu_end\n\n", phys_i);
     size_t label_end_fixup = CUR_OFFS() - sizeof(int32_t);
 
     FIXUP(label_false_fixups[0]);
     FIXUP(label_false_fixups[1]);           LST_NO_TAB("___compare_%zu_false:\n", phys_i);
-    MOV_REG_IMM64(RDX, bin_double_0);
+    MOV_REG_IMM64(CALC_REG1, bin_double_0);
 
     FIXUP(label_end_fixup);                 LST_NO_TAB("___compare_%zu_end:\n", phys_i);
 
     if (block->dest.type == IRVal::REG) {
-        MOVQ_XMM_REG(XMM + 0, RDX);
+        MOVQ_XMM_REG(RET_XMM, CALC_REG1);
     } else {
         Operand dest = {};
         STATUS_CHECK(X86_64_Mov::get_modrm_operand(data, &dest, elf, &block->dest, "STORE_CMP_RES "
                      "must have dest with type STK, REG, LOCAL_VAR, GLOBAL_VAR, ARG_VAR or ARR_VAR"));
 
-        MOV_RMOP_REG(dest, RDX);
+        MOV_RMOP_REG(dest, CALC_REG1);
     }
 
     return Status::NORMAL_WORK;
@@ -485,23 +476,23 @@ Status::Statuses asm_x86_64_SET_FLAGS_CMP_WITH_ZERO(IRBackData* data, ElfData* e
     STATUS_CHECK(X86_64_Mov::get_modrm_operand(data, &src, elf, &block->src[0], "SET_FLAGS_CMP_WITH_ZERO "
                 "must have src[0] with type STK, REG, LOCAL_VAR, GLOBAL_VAR, ARG_VAR or ARR_VAR"));
 
-    MOV_REG_IMM64(RDX, -1ul >> 1);
+    MOV_REG_IMM64(CALC_REG1, -1ul >> 1);
 
     if (block->src[0].type == IRVal::REG) {
-        MOVQ_REG_XMM(RAX, src.modrm.rm);
-        AND_REG_REG(RAX, RDX);
-        MOVQ_XMM_REG(XMM + 0, RAX);
-        COMISD_REG_RODATA(XMM + 1, EPSILON_CONST, "EPSILON");
+        MOVQ_REG_XMM(CALC_REG2, src.modrm.rm);
+        AND_REG_REG(CALC_REG2, CALC_REG1);
+        MOVQ_XMM_REG(RET_XMM, CALC_REG2);
+        COMISD_REG_RODATA(CALC_XMM1, EPSILON_CONST, "EPSILON");
         return Status::NORMAL_WORK;
     }
 
-    BITW_RMOP_REG(BITW_AND_CODE, "and", src, RDX);
-    MOVQ_XMM_RMOP(XMM + 1, src);
+    BITW_RMOP_REG(BITW_AND_CODE, "and", src, CALC_REG1);
+    MOVQ_XMM_RMOP(CALC_XMM1, src);
 
     if (block->src[0].type == IRVal::STK)
-        ADD_REG_IMM(RSP, 8);
+        ADD_REG_IMM(STK_REG, 8);
 
-    COMISD_REG_RODATA(XMM + 1, EPSILON_CONST, "EPSILON");
+    COMISD_REG_RODATA(CALC_XMM1, EPSILON_CONST, "EPSILON");
 
     return Status::NORMAL_WORK;
 }
@@ -540,23 +531,23 @@ Status::Statuses math_binary_oper_(IRBackData* data, ElfData* elf, IRNode* block
         MATH_REG_RMOP(oper, str_oper, XMM + dest.modrm.rm, src1);
 
         if (needed_stk_values > 0) {
-            ADD_REG_IMM(RSP, (int32_t)needed_stk_values * 8);
+            ADD_REG_IMM(STK_REG, (int32_t)needed_stk_values * 8);
         }
 
         return Status::NORMAL_WORK;
     }
 
     if (needed_stk_values < 0) {
-        SUB_REG_IMM(RSP, -(int32_t)needed_stk_values * 8);
+        SUB_REG_IMM(STK_REG, -(int32_t)needed_stk_values * 8);
     }
 
-    MOVQ_XMM_RMOP(      XMM + 0, src0);
-    MATH_REG_RMOP(oper, str_oper, XMM + 0, src1);
+    MOVQ_XMM_RMOP(      RET_XMM, src0);
+    MATH_REG_RMOP(oper, str_oper, RET_XMM, src1);
 
     if (needed_stk_values > 0)
-        ADD_REG_IMM(RSP, (int32_t)needed_stk_values * 8);
+        ADD_REG_IMM(STK_REG, (int32_t)needed_stk_values * 8);
 
-    MOVQ_RMOP_XMM(dest, XMM + 0);
+    MOVQ_RMOP_XMM(dest, RET_XMM);
 
     return Status::NORMAL_WORK;
 }
@@ -582,19 +573,19 @@ Status::Statuses math_unary_oper_(IRBackData* data, ElfData* elf, IRNode* block,
         MATH_REG_RMOP(oper, str_oper, XMM + dest.modrm.rm, src);
 
         if (block->src[0].type == IRVal::STK)
-            ADD_REG_IMM(RSP, 8);
+            ADD_REG_IMM(STK_REG, 8);
 
         return Status::NORMAL_WORK;
     }
 
     if (block->src[0].type != IRVal::STK && block->dest.type == IRVal::STK)
-        SUB_REG_IMM(RSP, 8);
+        SUB_REG_IMM(STK_REG, 8);
 
-    MATH_REG_RMOP(oper, str_oper, XMM + 0, src);
-    MOVQ_RMOP_XMM(dest, XMM + 0);
+    MATH_REG_RMOP(oper, str_oper, RET_XMM, src);
+    MOVQ_RMOP_XMM(dest, RET_XMM);
 
     if (block->src[0].type == IRVal::STK && block->dest.type != IRVal::STK)
-        ADD_REG_IMM(RSP, 8);
+        ADD_REG_IMM(STK_REG, 8);
 
     return Status::NORMAL_WORK;
 }
@@ -607,7 +598,7 @@ static Status::Statuses math_unary_bitwise_oper_(IRBackData* data, ElfData* elf,
     assert(elf);
     assert(str_oper);
 
-    MOV_REG_IMM64(RDX, const_operand);
+    MOV_REG_IMM64(CALC_REG1, const_operand);
 
     Operand src  = {};
     Operand dest = {};
@@ -620,35 +611,36 @@ static Status::Statuses math_unary_bitwise_oper_(IRBackData* data, ElfData* elf,
 
     if (block->dest.type == IRVal::REG) {
         if (block->src[0].type == IRVal::REG)
-            MOVQ_REG_XMM(RAX, src.modrm.rm);
+            MOVQ_REG_XMM(CALC_REG2, src.modrm.rm);
         else
-            MOV_REG_RMOP(RAX, src);
+            MOV_REG_RMOP(CALC_REG2, src);
 
-        Operand rax = RMOP_REG(RAX);
-        STR_VAR(rax.str, "rax");
-        BITW_RMOP_REG(oper, str_oper, rax, RDX);
-        MOVQ_XMM_REG(dest.modrm.rm, RAX);
+        Operand calc_reg2 = RMOP_REG(CALC_REG2);
+        STR_VAR(calc_reg2.str, "%s", sreg(CALC_REG2));
+
+        BITW_RMOP_REG(oper, str_oper, calc_reg2, CALC_REG1);
+        MOVQ_XMM_REG(dest.modrm.rm, CALC_REG2);
 
         if (block->src[0].type == IRVal::STK)
-            ADD_REG_IMM(RSP, 8);
+            ADD_REG_IMM(STK_REG, 8);
 
         return Status::NORMAL_WORK;
     }
 
     if (block->src[0].type != IRVal::STK && block->dest.type == IRVal::STK)
-        SUB_REG_IMM(RSP, 8);
+        SUB_REG_IMM(STK_REG, 8);
 
     if (block->src[0].type == IRVal::REG)
         MOVQ_RMOP_RMOP(dest, src);
     else if (!is_irval_equal(&block->src[0], &block->dest)) {
-        MOV_REG_RMOP(RAX, src);
-        MOV_RMOP_REG(dest, RAX);
+        MOV_REG_RMOP(CALC_REG2, src);
+        MOV_RMOP_REG(dest, CALC_REG2);
     }
 
-    BITW_RMOP_REG(oper, str_oper, dest, RDX);
+    BITW_RMOP_REG(oper, str_oper, dest, CALC_REG1);
 
     if (block->src[0].type == IRVal::STK && block->dest.type != IRVal::STK)
-        ADD_REG_IMM(RSP, 8);
+        ADD_REG_IMM(STK_REG, 8);
 
     return Status::NORMAL_WORK;
 }
@@ -736,9 +728,9 @@ Status::Statuses asm_x86_64_READ_DOUBLE(IRBackData* data, ElfData* elf, IRNode* 
             "READ_DOUBLE must have dest with type STK, REG, LOCAL_VAR, GLOBAL_VAR, ARG_VAR or ARR_VAR"));
 
     if (block->dest.type == IRVal::STK)
-        SUB_REG_IMM(RSP, 8);
+        SUB_REG_IMM(STK_REG, 8);
 
-    MOVQ_RMOP_XMM(dest, XMM + 0);
+    MOVQ_RMOP_XMM(dest, RET_XMM);
 
     return Status::NORMAL_WORK;
 }
@@ -752,8 +744,8 @@ Status::Statuses asm_x86_64_PRINT_DOUBLE(IRBackData* data, ElfData* elf, IRNode*
     if (block->src[0].type == IRVal::CONST) {
         size_t imm = X86_64_Mov::get_bin_double(block->src[0].num.k_double);
 
-        MOV_REG_IMM64(RDX, imm);
-        MOVQ_XMM_REG(XMM + 0, RDX);
+        MOV_REG_IMM64(CALC_REG1, imm);
+        MOVQ_XMM_REG(RET_XMM, CALC_REG1);
         REL_CALL(elf->iolib.funcs_offs.out); LST("call doubleio_out\n");
         return Status::NORMAL_WORK;
     }
@@ -762,10 +754,10 @@ Status::Statuses asm_x86_64_PRINT_DOUBLE(IRBackData* data, ElfData* elf, IRNode*
     STATUS_CHECK(X86_64_Mov::get_modrm_operand(data, &src, elf, &block->src[0],  "PRINT_DOUBLE must have src[0] "
                  "with type CONST, LOCAL_VAR, GLOBAL_VAR, ARG_VAR, ARR_VAR, STK or REG"));
 
-    MOVQ_XMM_RMOP(XMM + 0, src);
+    MOVQ_XMM_RMOP(RET_XMM, src);
 
     if (block->src[0].type == IRVal::STK)
-        ADD_REG_IMM(RSP, 8);
+        ADD_REG_IMM(STK_REG, 8);
 
     REL_CALL(elf->iolib.funcs_offs.out);     LST("call doubleio_out\n");
 

@@ -48,21 +48,21 @@ ___ir_block_9:                            ; offs: 0x403266
 ___ir_block_10:                            ; offs: 0x403273
 ___ir_block_11:                            ; offs: 0x403273
 ___ir_block_12:                            ; offs: 0x403273
-                mov rdx, qword [rbp - 8 - 0]
+                mov rax, qword [rbp - 8 - 0]
 
-                mov qword [rsp - 8 - 16 - 0], rdx
+                mov qword [rsp - 8 - 16 - 0], rax
 
 ___ir_block_13:                            ; offs: 0x403282
 ___ir_block_14:                            ; offs: 0x403282
-                mov rdx, qword [rbp - 8 - 8]
+                mov rax, qword [rbp - 8 - 8]
 
-                mov qword [rsp - 8 - 16 - 8], rdx
+                mov qword [rsp - 8 - 16 - 8], rax
 
 ___ir_block_15:                            ; offs: 0x403291
 ___ir_block_16:                            ; offs: 0x403291
-                mov rdx, qword [rbp - 8 - 16]
+                mov rax, qword [rbp - 8 - 16]
 
-                mov qword [rsp - 8 - 16 - 16], rdx
+                mov qword [rsp - 8 - 16 - 16], rax
 
 ___ir_block_17:                            ; offs: 0x4032a0
                 call ___func_22
@@ -89,8 +89,8 @@ ___ir_block_24:                            ; offs: 0x4032b1
 ___ir_block_25:                            ; offs: 0x4032b1
                 ; operands comparison: op1 == op2
                 movq xmm1, qword [rbp - 8 - 0]
-                mov rdx, 0x0
-                movq xmm2, rdx
+                mov rax, 0x0
+                movq xmm2, rax
                 add rsp, -8
                 movq xmm3, xmm1
                 subsd xmm3, xmm2
@@ -101,17 +101,17 @@ ___ir_block_25:                            ; offs: 0x4032b1
                 ; fabs(op1 - op2) {'<' | '>'} EPSILON
                 jnc ___compare_25_false
 
-                mov rdx, 0x3ff0000000000000
+                mov rax, 0x3ff0000000000000
                 jmp ___compare_25_end
 
 ___compare_25_false:
-                mov rdx, 0x0
+                mov rax, 0x0
 ___compare_25_end:
-                mov qword [rsp], rdx
+                mov qword [rsp], rax
 
 ___ir_block_26:                            ; offs: 0x40330c
-                mov rdx, 0x7fffffffffffffff
-                and qword [rsp], rdx
+                mov rax, 0x7fffffffffffffff
+                and qword [rsp], rax
                 movq xmm1, qword [rsp]
                 add rsp, 8
                 comisd xmm1, [EPSILON]
@@ -119,15 +119,15 @@ ___ir_block_27:                            ; offs: 0x40332f
                 jc ___ir_block_36
 ___ir_block_28:                            ; offs: 0x403335
 ___ir_block_29:                            ; offs: 0x403335
-                mov rdx, qword [rbp - 8 - 8]
+                mov rax, qword [rbp - 8 - 8]
 
-                mov qword [rsp - 8 - 16 - 0], rdx
+                mov qword [rsp - 8 - 16 - 0], rax
 
 ___ir_block_30:                            ; offs: 0x403344
 ___ir_block_31:                            ; offs: 0x403344
-                mov rdx, qword [rbp - 8 - 16]
+                mov rax, qword [rbp - 8 - 16]
 
-                mov qword [rsp - 8 - 16 - 8], rdx
+                mov qword [rsp - 8 - 16 - 8], rax
 
 ___ir_block_32:                            ; offs: 0x403353
                 call ___func_103
@@ -148,8 +148,8 @@ ___ir_block_39:                            ; offs: 0x40335a
                 movq qword [rsp], xmm0
 ___ir_block_40:                            ; offs: 0x403376
                 sub rsp, 8
-                mov rdx, 0x4010000000000000
-                mov qword [rsp], rdx
+                mov rax, 0x4010000000000000
+                mov qword [rsp], rax
 
 ___ir_block_41:                            ; offs: 0x40338b
 ___ir_block_42:                            ; offs: 0x40338b
@@ -174,8 +174,8 @@ ___ir_block_48:                            ; offs: 0x4033de
 ___ir_block_49:                            ; offs: 0x4033de
                 ; operands comparison: op1 < op2
                 movq xmm1, qword [rbp - 8 - 24]
-                mov rdx, 0x0
-                movq xmm2, rdx
+                mov rax, 0x0
+                movq xmm2, rax
                 add rsp, -8
                 movq xmm3, xmm1
                 subsd xmm3, xmm2
@@ -190,17 +190,17 @@ ___ir_block_49:                            ; offs: 0x4033de
                 ; op1 {'<' | '>'} op2
                 jnc ___compare_49_false
 
-                mov rdx, 0x3ff0000000000000
+                mov rax, 0x3ff0000000000000
                 jmp ___compare_49_end
 
 ___compare_49_false:
-                mov rdx, 0x0
+                mov rax, 0x0
 ___compare_49_end:
-                mov qword [rsp], rdx
+                mov qword [rsp], rax
 
 ___ir_block_50:                            ; offs: 0x403443
-                mov rdx, 0x7fffffffffffffff
-                and qword [rsp], rdx
+                mov rax, 0x7fffffffffffffff
+                and qword [rsp], rax
                 movq xmm1, qword [rsp]
                 add rsp, 8
                 comisd xmm1, [EPSILON]
@@ -208,13 +208,13 @@ ___ir_block_51:                            ; offs: 0x403466
                 jc ___ir_block_57
 ___ir_block_52:                            ; offs: 0x40346c
 ___ir_block_53:                            ; offs: 0x40346c
-                mov rdx, 0x0
-                movq xmm0, rdx
+                mov rax, 0x0
+                movq xmm0, rax
                 call doubleio_out
 ___ir_block_54:                            ; offs: 0x403480
 ___ir_block_55:                            ; offs: 0x403480
-                mov rdx, 0x0
-                movq xmm0, rdx
+                mov rax, 0x0
+                movq xmm0, rax
 ___ir_block_56:                            ; offs: 0x40348f
                 leave
                 ret
@@ -224,8 +224,8 @@ ___ir_block_59:                            ; offs: 0x403491
 ___ir_block_60:                            ; offs: 0x403491
                 ; operands comparison: op1 == op2
                 movq xmm1, qword [rbp - 8 - 24]
-                mov rdx, 0x0
-                movq xmm2, rdx
+                mov rax, 0x0
+                movq xmm2, rax
                 add rsp, -8
                 movq xmm3, xmm1
                 subsd xmm3, xmm2
@@ -236,17 +236,17 @@ ___ir_block_60:                            ; offs: 0x403491
                 ; fabs(op1 - op2) {'<' | '>'} EPSILON
                 jnc ___compare_60_false
 
-                mov rdx, 0x3ff0000000000000
+                mov rax, 0x3ff0000000000000
                 jmp ___compare_60_end
 
 ___compare_60_false:
-                mov rdx, 0x0
+                mov rax, 0x0
 ___compare_60_end:
-                mov qword [rsp], rdx
+                mov qword [rsp], rax
 
 ___ir_block_61:                            ; offs: 0x4034ec
-                mov rdx, 0x7fffffffffffffff
-                and qword [rsp], rdx
+                mov rax, 0x7fffffffffffffff
+                and qword [rsp], rax
                 movq xmm1, qword [rsp]
                 add rsp, 8
                 comisd xmm1, [EPSILON]
@@ -254,22 +254,22 @@ ___ir_block_62:                            ; offs: 0x40350f
                 jc ___ir_block_75
 ___ir_block_63:                            ; offs: 0x403515
 ___ir_block_64:                            ; offs: 0x403515
-                mov rdx, 0x3ff0000000000000
-                movq xmm0, rdx
+                mov rax, 0x3ff0000000000000
+                movq xmm0, rax
                 call doubleio_out
 ___ir_block_65:                            ; offs: 0x403529
 ___ir_block_66:                            ; offs: 0x403529
-                mov rdx, 0x8000000000000000
+                mov rax, 0x8000000000000000
                 sub rsp, 8
-                mov rax, qword [rbp - 8 - 8]
+                mov rdx, qword [rbp - 8 - 8]
 
-                mov qword [rsp], rax
+                mov qword [rsp], rdx
 
-                xor qword [rsp], rdx
+                xor qword [rsp], rax
 ___ir_block_67:                            ; offs: 0x403549
                 sub rsp, 8
-                mov rdx, 0x4000000000000000
-                mov qword [rsp], rdx
+                mov rax, 0x4000000000000000
+                mov qword [rsp], rax
 
 ___ir_block_68:                            ; offs: 0x40355e
 ___ir_block_69:                            ; offs: 0x40355e
@@ -287,8 +287,8 @@ ___ir_block_71:                            ; offs: 0x40358a
                 call doubleio_out
 ___ir_block_72:                            ; offs: 0x40359b
 ___ir_block_73:                            ; offs: 0x40359b
-                mov rdx, 0x0
-                movq xmm0, rdx
+                mov rax, 0x0
+                movq xmm0, rax
 ___ir_block_74:                            ; offs: 0x4035aa
                 leave
                 ret
@@ -300,18 +300,18 @@ ___ir_block_77:                            ; offs: 0x4035ac
 ___ir_block_78:                            ; offs: 0x4035bc
 ___ir_block_79:                            ; offs: 0x4035bc
 ___ir_block_80:                            ; offs: 0x4035bc
-                mov rdx, 0x4000000000000000
-                movq xmm0, rdx
+                mov rax, 0x4000000000000000
+                movq xmm0, rax
                 call doubleio_out
 ___ir_block_81:                            ; offs: 0x4035d0
 ___ir_block_82:                            ; offs: 0x4035d0
-                mov rdx, 0x8000000000000000
+                mov rax, 0x8000000000000000
                 sub rsp, 8
-                mov rax, qword [rbp - 8 - 8]
+                mov rdx, qword [rbp - 8 - 8]
 
-                mov qword [rsp], rax
+                mov qword [rsp], rdx
 
-                xor qword [rsp], rdx
+                xor qword [rsp], rax
 ___ir_block_83:                            ; offs: 0x4035f0
 ___ir_block_84:                            ; offs: 0x4035f0
                 movq xmm0, qword [rsp]
@@ -319,8 +319,8 @@ ___ir_block_84:                            ; offs: 0x4035f0
                 movq qword [rsp], xmm0
 ___ir_block_85:                            ; offs: 0x403602
                 sub rsp, 8
-                mov rdx, 0x4000000000000000
-                mov qword [rsp], rdx
+                mov rax, 0x4000000000000000
+                mov qword [rsp], rax
 
 ___ir_block_86:                            ; offs: 0x403617
 ___ir_block_87:                            ; offs: 0x403617
@@ -338,13 +338,13 @@ ___ir_block_89:                            ; offs: 0x403643
                 call doubleio_out
 ___ir_block_90:                            ; offs: 0x403654
 ___ir_block_91:                            ; offs: 0x403654
-                mov rdx, 0x8000000000000000
+                mov rax, 0x8000000000000000
                 sub rsp, 8
-                mov rax, qword [rbp - 8 - 8]
+                mov rdx, qword [rbp - 8 - 8]
 
-                mov qword [rsp], rax
+                mov qword [rsp], rdx
 
-                xor qword [rsp], rdx
+                xor qword [rsp], rax
 ___ir_block_92:                            ; offs: 0x403674
 ___ir_block_93:                            ; offs: 0x403674
                 movq xmm0, qword [rsp]
@@ -352,8 +352,8 @@ ___ir_block_93:                            ; offs: 0x403674
                 movq qword [rsp], xmm0
 ___ir_block_94:                            ; offs: 0x403686
                 sub rsp, 8
-                mov rdx, 0x4000000000000000
-                mov qword [rsp], rdx
+                mov rax, 0x4000000000000000
+                mov qword [rsp], rax
 
 ___ir_block_95:                            ; offs: 0x40369b
 ___ir_block_96:                            ; offs: 0x40369b
@@ -371,8 +371,8 @@ ___ir_block_98:                            ; offs: 0x4036c7
                 call doubleio_out
 ___ir_block_99:                            ; offs: 0x4036d8
 ___ir_block_100:                            ; offs: 0x4036d8
-                mov rdx, 0x0
-                movq xmm0, rdx
+                mov rax, 0x0
+                movq xmm0, rax
 ___ir_block_101:                            ; offs: 0x4036e7
                 leave
                 ret
@@ -392,8 +392,8 @@ ___ir_block_105:                            ; offs: 0x4036f3
 ___ir_block_106:                            ; offs: 0x4036f3
                 ; operands comparison: op1 == op2
                 movq xmm1, qword [rbp - 8 - 0]
-                mov rdx, 0x0
-                movq xmm2, rdx
+                mov rax, 0x0
+                movq xmm2, rax
                 add rsp, -8
                 movq xmm3, xmm1
                 subsd xmm3, xmm2
@@ -404,17 +404,17 @@ ___ir_block_106:                            ; offs: 0x4036f3
                 ; fabs(op1 - op2) {'<' | '>'} EPSILON
                 jnc ___compare_106_false
 
-                mov rdx, 0x3ff0000000000000
+                mov rax, 0x3ff0000000000000
                 jmp ___compare_106_end
 
 ___compare_106_false:
-                mov rdx, 0x0
+                mov rax, 0x0
 ___compare_106_end:
-                mov qword [rsp], rdx
+                mov qword [rsp], rax
 
 ___ir_block_107:                            ; offs: 0x40374e
-                mov rdx, 0x7fffffffffffffff
-                and qword [rsp], rdx
+                mov rax, 0x7fffffffffffffff
+                and qword [rsp], rax
                 movq xmm1, qword [rsp]
                 add rsp, 8
                 comisd xmm1, [EPSILON]
@@ -425,8 +425,8 @@ ___ir_block_110:                            ; offs: 0x403777
 ___ir_block_111:                            ; offs: 0x403777
                 ; operands comparison: op1 == op2
                 movq xmm1, qword [rbp - 8 - 8]
-                mov rdx, 0x0
-                movq xmm2, rdx
+                mov rax, 0x0
+                movq xmm2, rax
                 add rsp, -8
                 movq xmm3, xmm1
                 subsd xmm3, xmm2
@@ -437,17 +437,17 @@ ___ir_block_111:                            ; offs: 0x403777
                 ; fabs(op1 - op2) {'<' | '>'} EPSILON
                 jnc ___compare_111_false
 
-                mov rdx, 0x3ff0000000000000
+                mov rax, 0x3ff0000000000000
                 jmp ___compare_111_end
 
 ___compare_111_false:
-                mov rdx, 0x0
+                mov rax, 0x0
 ___compare_111_end:
-                mov qword [rsp], rdx
+                mov qword [rsp], rax
 
 ___ir_block_112:                            ; offs: 0x4037d2
-                mov rdx, 0x7fffffffffffffff
-                and qword [rsp], rdx
+                mov rax, 0x7fffffffffffffff
+                and qword [rsp], rax
                 movq xmm1, qword [rsp]
                 add rsp, 8
                 comisd xmm1, [EPSILON]
@@ -455,44 +455,44 @@ ___ir_block_113:                            ; offs: 0x4037f5
                 jc ___ir_block_119
 ___ir_block_114:                            ; offs: 0x4037fb
 ___ir_block_115:                            ; offs: 0x4037fb
-                mov rdx, 0xbff0000000000000
-                movq xmm0, rdx
+                mov rax, 0xbff0000000000000
+                movq xmm0, rax
                 call doubleio_out
 ___ir_block_116:                            ; offs: 0x40380f
 ___ir_block_117:                            ; offs: 0x40380f
-                mov rdx, 0x0
-                movq xmm0, rdx
+                mov rax, 0x0
+                movq xmm0, rax
 ___ir_block_118:                            ; offs: 0x40381e
                 leave
                 ret
 ___ir_block_119:                            ; offs: 0x403820
 ___ir_block_120:                            ; offs: 0x403820
 ___ir_block_121:                            ; offs: 0x403820
-                mov rdx, 0x0
-                movq xmm0, rdx
+                mov rax, 0x0
+                movq xmm0, rax
                 call doubleio_out
 ___ir_block_122:                            ; offs: 0x403834
 ___ir_block_123:                            ; offs: 0x403834
-                mov rdx, 0x0
-                movq xmm0, rdx
+                mov rax, 0x0
+                movq xmm0, rax
 ___ir_block_124:                            ; offs: 0x403843
                 leave
                 ret
 ___ir_block_125:                            ; offs: 0x403845
 ___ir_block_126:                            ; offs: 0x403845
 ___ir_block_127:                            ; offs: 0x403845
-                mov rdx, 0x3ff0000000000000
-                movq xmm0, rdx
+                mov rax, 0x3ff0000000000000
+                movq xmm0, rax
                 call doubleio_out
 ___ir_block_128:                            ; offs: 0x403859
 ___ir_block_129:                            ; offs: 0x403859
-                mov rdx, 0x8000000000000000
+                mov rax, 0x8000000000000000
                 sub rsp, 8
-                mov rax, qword [rbp - 8 - 8]
+                mov rdx, qword [rbp - 8 - 8]
 
-                mov qword [rsp], rax
+                mov qword [rsp], rdx
 
-                xor qword [rsp], rdx
+                xor qword [rsp], rax
 ___ir_block_130:                            ; offs: 0x403879
 ___ir_block_131:                            ; offs: 0x403879
                 movq xmm0, qword [rsp]
@@ -504,8 +504,8 @@ ___ir_block_132:                            ; offs: 0x40388b
                 call doubleio_out
 ___ir_block_133:                            ; offs: 0x40389c
 ___ir_block_134:                            ; offs: 0x40389c
-                mov rdx, 0x0
-                movq xmm0, rdx
+                mov rax, 0x0
+                movq xmm0, rax
 ___ir_block_135:                            ; offs: 0x4038ab
                 leave
                 ret

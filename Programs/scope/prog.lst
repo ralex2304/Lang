@@ -311,9 +311,9 @@
     36 00000243 C8100000                                enter 16, 0
     37                                  ___ir_block_5:                            ; offs: 0x40324c
     38                                  ___ir_block_6:                            ; offs: 0x40324c
-    39 00000247 48BA00000000000014-                     mov rdx, 0x4014000000000000
+    39 00000247 48B800000000000014-                     mov rax, 0x4014000000000000
     39 00000250 40                 
-    40 00000251 488955F8                                mov qword [rbp - 8 - 0], rdx
+    40 00000251 488945F8                                mov qword [rbp - 8 - 0], rax
     41                                  
     42                                  ___ir_block_7:                            ; offs: 0x40325d
     43                                  ___ir_block_8:                            ; offs: 0x40325d
@@ -321,9 +321,9 @@
     45 0000025A E814FFFFFF                              call doubleio_out
     46                                  ___ir_block_9:                            ; offs: 0x40326a
     47                                  ___ir_block_10:                            ; offs: 0x40326a
-    48 0000025F 48BA00000000000024-                     mov rdx, 0x4024000000000000
+    48 0000025F 48B800000000000024-                     mov rax, 0x4024000000000000
     48 00000268 40                 
-    49 00000269 488955F0                                mov qword [rbp - 8 - 8], rdx
+    49 00000269 488945F0                                mov qword [rbp - 8 - 8], rax
     50                                  
     51                                  ___ir_block_11:                            ; offs: 0x40327b
     52                                  ___ir_block_12:                            ; offs: 0x40327b
@@ -331,15 +331,15 @@
     54 00000272 E8FCFEFFFF                              call doubleio_out
     55                                  ___ir_block_13:                            ; offs: 0x403288
     56 00000277 4883EC08                                sub rsp, 8
-    57 0000027B 48BA00000000000024-                     mov rdx, 0x4024000000000000
+    57 0000027B 48B800000000000024-                     mov rax, 0x4024000000000000
     57 00000284 40                 
-    58 00000285 48891424                                mov qword [rsp], rdx
+    58 00000285 48890424                                mov qword [rsp], rax
     59                                  
     60                                  ___ir_block_14:                            ; offs: 0x40329d
     61 00000289 4883EC08                                sub rsp, 8
-    62 0000028D 488B55F0                                mov rdx, qword [rbp - 8 - 8]
+    62 0000028D 488B45F0                                mov rax, qword [rbp - 8 - 8]
     63                                  
-    64 00000291 48891424                                mov qword [rsp], rdx
+    64 00000291 48890424                                mov qword [rsp], rax
     65                                  
     66                                  ___ir_block_15:                            ; offs: 0x4032af
     67 00000295 F30F7E4C2408                            movq xmm1, [rsp + 8]
@@ -362,8 +362,8 @@
     84 000002CE E8A0FEFFFF                              call doubleio_out
     85                                  ___ir_block_22:                            ; offs: 0x403302
     86                                  ___ir_block_23:                            ; offs: 0x403302
-    87 000002D3 BA00000000                              mov rdx, 0x0
-    88 000002D8 66480F6EC2                              movq xmm0, rdx
+    87 000002D3 B800000000                              mov rax, 0x0
+    88 000002D8 66480F6EC0                              movq xmm0, rax
     89                                  ___ir_block_24:                            ; offs: 0x403311
     90 000002DD C9                                      leave
     91 000002DE C3                                      ret

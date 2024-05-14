@@ -33,4 +33,14 @@
 
 static const size_t STR_MAXLEN = 64;
 
+#define RET_XMM   (XMM + 0)
+#define FRAME_REG RBP
+#define ARR_I_REG RCX
+#define STK_REG   RSP
+#define CALC_REG1 RAX
+#define CALC_REG2 RDX
+#define CALC_XMM1 (XMM + 1)
+#define CALC_XMM2 (XMM + 2)
+#define CALC_XMM3 (XMM + 3)
+
 #endif //< #ifndef X86_64_UTILS_H_

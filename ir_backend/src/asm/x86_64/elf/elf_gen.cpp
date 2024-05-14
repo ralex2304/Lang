@@ -52,18 +52,18 @@ Status::Statuses IOLibObj::ctor(const char* obj_filename) {
         else if (hdr.sh_type == SHT_RELA     && strcmp(".rela.text", str_table + hdr.sh_name) == 0)
             s_rela_h = s_hdrs_arr + i;
 
-        else if (hdr.sh_type == SHT_SYMTAB)
+        else if (hdr.sh_type == SHT_SYMTAB   && strcmp(".symtab",    str_table + hdr.sh_name) == 0)
             s_symtab_h = s_hdrs_arr + i;
 
-        else if (hdr.sh_type == SHT_STRTAB)
+        else if (hdr.sh_type == SHT_STRTAB   && strcmp(".strtab",    str_table + hdr.sh_name) == 0)
             s_strtab_h = s_hdrs_arr + i;
     }
 
-    OBJ_CHECK_(s_rodata_h != nullptr, ".rodata segment not found");
-    OBJ_CHECK_(s_data_h   != nullptr, ".data segment not found");
-    OBJ_CHECK_(s_text_h   != nullptr, ".text segment not found");
-    OBJ_CHECK_(s_rela_h   != nullptr, ".rela_text segment not found");
-    OBJ_CHECK_(s_symtab_h != nullptr, ".symtab segment not found");
+    OBJ_CHECK_(s_rodata_h != nullptr, "\".rodata\" segment not found");
+    OBJ_CHECK_(s_data_h   != nullptr, "\".data\" segment not found");
+    OBJ_CHECK_(s_text_h   != nullptr, "\".text\" segment not found");
+    OBJ_CHECK_(s_rela_h   != nullptr, "\".rela_text\" segment not found");
+    OBJ_CHECK_(s_symtab_h != nullptr, "\".symtab\" segment not found");
 
     STATUS_CHECK(get_symbol_offset("doubleio_in",  &funcs_offs.in));
     STATUS_CHECK(get_symbol_offset("doubleio_out", &funcs_offs.out));
@@ -108,7 +108,7 @@ Status::Statuses IOLibObj::fixup_rela(const Elf64_Phdr* rodata, const Elf64_Phdr
         if      (s_hdrs_arr + sym.st_shndx == s_rodata_h) segm_vmem_begin = rodata->p_vaddr;
         else if (s_hdrs_arr + sym.st_shndx == s_data_h)   segm_vmem_begin = data->p_vaddr;
         else {
-            fprintf(stderr, "IOLib obj file error: unsoppoerted segment for fixup");
+            fprintf(stderr, "IOLib obj file error: unsupported segment for fixup");
             return Status::NORMAL_WORK;
         }
 
@@ -191,8 +191,8 @@ Status::Statuses ElfData::init_elf_phdrs_() {
         return Status::MEMORY_EXCEED;
 
     // info phdr
-    phdr.p_type = PT_LOAD;
-    phdr.p_flags = PF_R;
+    phdr.p_type   = PT_LOAD;
+    phdr.p_flags  = PF_R;
     phdr.p_offset = 0;
     phdr.p_vaddr  = ElfData::VMEM_START;
     phdr.p_paddr  = ElfData::VMEM_START;

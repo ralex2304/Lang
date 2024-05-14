@@ -36,8 +36,8 @@ ___func_4:
                 enter 16, 0
 ___ir_block_5:                            ; offs: 0x40324c
 ___ir_block_6:                            ; offs: 0x40324c
-                mov rdx, 0x4014000000000000
-                mov qword [rbp - 8 - 0], rdx
+                mov rax, 0x4014000000000000
+                mov qword [rbp - 8 - 0], rax
 
 ___ir_block_7:                            ; offs: 0x40325d
 ___ir_block_8:                            ; offs: 0x40325d
@@ -45,8 +45,8 @@ ___ir_block_8:                            ; offs: 0x40325d
                 call doubleio_out
 ___ir_block_9:                            ; offs: 0x40326a
 ___ir_block_10:                            ; offs: 0x40326a
-                mov rdx, 0x4024000000000000
-                mov qword [rbp - 8 - 8], rdx
+                mov rax, 0x4024000000000000
+                mov qword [rbp - 8 - 8], rax
 
 ___ir_block_11:                            ; offs: 0x40327b
 ___ir_block_12:                            ; offs: 0x40327b
@@ -54,14 +54,14 @@ ___ir_block_12:                            ; offs: 0x40327b
                 call doubleio_out
 ___ir_block_13:                            ; offs: 0x403288
                 sub rsp, 8
-                mov rdx, 0x4024000000000000
-                mov qword [rsp], rdx
+                mov rax, 0x4024000000000000
+                mov qword [rsp], rax
 
 ___ir_block_14:                            ; offs: 0x40329d
                 sub rsp, 8
-                mov rdx, qword [rbp - 8 - 8]
+                mov rax, qword [rbp - 8 - 8]
 
-                mov qword [rsp], rdx
+                mov qword [rsp], rax
 
 ___ir_block_15:                            ; offs: 0x4032af
                 movq xmm1, [rsp + 8]
@@ -84,8 +84,8 @@ ___ir_block_21:                            ; offs: 0x4032f5
                 call doubleio_out
 ___ir_block_22:                            ; offs: 0x403302
 ___ir_block_23:                            ; offs: 0x403302
-                mov rdx, 0x0
-                movq xmm0, rdx
+                mov rax, 0x0
+                movq xmm0, rax
 ___ir_block_24:                            ; offs: 0x403311
                 leave
                 ret
