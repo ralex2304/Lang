@@ -21,7 +21,7 @@ Status::Statuses file_open_read_close(const char* filename, char** buf, long* si
 
     *buf = (char*)calloc((size_t)file_len + 1, sizeof(char));
     if (*buf == nullptr) {
-        printf("Memory alloc error\n");
+        fprintf(stderr, "Memory alloc error\n");
         file_close(file);
         return Status::MEMORY_EXCEED;
     }
@@ -61,7 +61,8 @@ bool file_open(FILE** file, const char* filename, const char* mode) {
 
     *file = fopen(filename, mode);
     if (*file == nullptr || ferror(*file)) {
-        perror("Error opening text file");
+        fprintf(stderr, "Error opening file \"%s\": ", filename);
+        perror("");
         return false;
     }
     return true;
