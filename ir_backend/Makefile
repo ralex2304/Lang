@@ -1,22 +1,27 @@
 .PHONY: all clean
 
-CC = bear --append --output ../compile_commands.json -- clang++
+CC = $(if $(nobear),,bear --append --output ../compile_commands.json -- )clang++
 CFLAGS = -fdiagnostics-color=always -Wshadow -Winit-self -Wredundant-decls -Wcast-align -Wundef			 \
 		 -Wfloat-equal -Winline -Wunreachable-code -Wmissing-declarations -Wmissing-include-dirs 		 \
-		 -Wswitch-enum -Wswitch-default -Weffc++ -Wmain -Wextra -Wall -g -pipe -fexceptions -Wcast-qual	 \
+		 -Wswitch-enum -Wswitch-default -Weffc++ -Wmain -Wextra -Wall -pipe -fexceptions -Wcast-qual	 \
 		 -Wconversion -Wctor-dtor-privacy -Wempty-body -Wformat-security -Wformat=2 -Wignored-qualifiers \
 		 -Wlogical-op -Wno-missing-field-initializers -Wnon-virtual-dtor -Woverloaded-virtual 			 \
 		 -Wpointer-arith -Wsign-promo -Wstack-usage=8192 -Wstrict-aliasing -Wstrict-null-sentinel 		 \
-		 -Wtype-limits -Wwrite-strings -Werror=vla -D_DEBUG -D_EJUDGE_CLIENT_SIDE						 \
-		 -Wno-invalid-source-encoding -Og -Wno-unknown-warning-option
+		 -Wtype-limits -Wwrite-strings -Werror=vla -Wno-invalid-source-encoding 						 \
+		 -Wno-unknown-warning-option
 
 CFLAGS_SANITIZER = -fsanitize=address,alignment,bool,bounds,enum,float-cast-overflow,$\
 				   float-divide-by-zero,integer-divide-by-zero,leak,nonnull-attribute,null,$\
 				   object-size,return,returns-nonnull-attribute,shift,signed-integer-overflow,$\
 				   undefined,unreachable,vla-bound,vptr
 
+RELEASE_CFLAGS = -O2 -DNDEBUG
+DEBUG_CFLAGS   = $(CFLAGS_SANITIZER) -Og -g -D_DEBUG
+
+OPT_FLAGS = $(if $(release),$(RELEASE_CFLAGS),$(DEBUG_CFLAGS))
+
 LIB_DIR = ../lib
-LIB_FILES = TreeDebug/TreeDebug.a
+LIB_FILES = $(if $(release),Tree/Tree.a,TreeDebug/TreeDebug.a)
 
 EXTERNAL_DIR = ../shared
 IFLAGS = -I$(EXTERNAL_DIR)/
@@ -51,9 +56,12 @@ LIBS = $(LIB_FILES:%=$(LIB_DIR)/%)
 all: $(TARGET)
 
 $(TARGET): $(OBJECTS)
-	@$(CC) $(if $(sanitizer), $(CFLAGS_SANITIZER)) $(CFLAGS) $(IFLAGS) -I$(LIB_DIR) $^ -o $@ $(LIBS)
+	@$(CC) $(OPT_FLAGS) $(CFLAGS) $(IFLAGS) -I$(LIB_DIR) $^ -o $@ $(LIBS)
 
-$(OWN_BUILD_DIR):
+$(BUILD_DIR):
+	@mkdir ./$@
+
+$(OWN_BUILD_DIR): | $(BUILD_DIR)
 	@mkdir ./$@
 
 $(MAKE_DIRS): | $(OWN_BUILD_DIR)
@@ -61,8 +69,8 @@ $(MAKE_DIRS): | $(OWN_BUILD_DIR)
 
 -include $(DEPENDS)
 
-$(OWN_BUILD_DIR)/%.o: %.cpp | $(OWN_BUILD_DIR) $(MAKE_DIRS)
-	@$(CC) $(if $(sanitizer), $(CFLAGS_SANITIZER)) $(CFLAGS) $(IFLAGS) -I"$(LIB_DIR)" -MMD -MP -c $< -o $@
+$(OWN_BUILD_DIR)/%.o: %.cpp | $(MAKE_DIRS)
+	@$(CC) $(OPT_FLAGS) $(CFLAGS) $(IFLAGS) -I$(LIB_DIR) -MMD -MP -c $< -o $@
 
 .PHONY: doxygen dox
 

@@ -21,10 +21,9 @@ struct TextData {
 
 static const Terminal* find_terminal_by_text_(TextData* text, size_t* token_len);
 
-static Status::Statuses add_cmd_separator_(TextData* text, Vector* tokens, Vector* vars);
+static Status::Statuses add_cmd_separator_(TextData* text, Vector* tokens);
 
-static Status::Statuses tokenizer_parse_cmd_separator_(TextData* text, Vector* tokens, Vector* vars,
-                                                       bool* is_found);
+static Status::Statuses tokenizer_parse_cmd_separator_(TextData* text, Vector* tokens, bool* is_found);
 
 static Status::Statuses tokenizer_skip_spaces_(TextData* text, bool* is_found);
 
@@ -61,7 +60,7 @@ Status::Statuses tokenizer_process(const char* text_str, Vector* tokens, Vector*
 
         bool is_found = false;
 
-        STATUS_CHECK(tokenizer_parse_cmd_separator_(&text, tokens, vars, &is_found));
+        STATUS_CHECK(tokenizer_parse_cmd_separator_(&text, tokens, &is_found));
         if (is_found) continue;
 
         STATUS_CHECK(tokenizer_skip_spaces_(&text, &is_found));
@@ -93,11 +92,10 @@ Status::Statuses tokenizer_process(const char* text_str, Vector* tokens, Vector*
     return Status::NORMAL_WORK;
 }
 
-static Status::Statuses tokenizer_parse_cmd_separator_(TextData* text, Vector* tokens, Vector* vars,
+static Status::Statuses tokenizer_parse_cmd_separator_(TextData* text, Vector* tokens,
                                                        bool* is_found) {
     assert(text);
     assert(tokens);
-    assert(vars);
     assert(is_found);
     assert(!*is_found);
 
@@ -107,7 +105,7 @@ static Status::Statuses tokenizer_parse_cmd_separator_(TextData* text, Vector* t
     if (terminal == nullptr || terminal->num != TerminalNum::CMD_SEPARATOR)
         return Status::NORMAL_WORK;
 
-    STATUS_CHECK(add_cmd_separator_(text, tokens, vars));
+    STATUS_CHECK(add_cmd_separator_(text, tokens));
 
     text->line++;
     text->pos += token_len;
@@ -187,10 +185,9 @@ static Status::Statuses tokenizer_skip_multiline_comment_(TextData* text, bool* 
 
 #define GET_TOKEN_(i_)    ((Token*)((*tokens)[(size_t)i_]))
 
-static Status::Statuses add_cmd_separator_(TextData* text, Vector* tokens, Vector* vars) {
+static Status::Statuses add_cmd_separator_(TextData* text, Vector* tokens) {
     assert(text);
     assert(tokens);
-    assert(vars);
 
     if (tokens->size() && !(GET_TOKEN_(tokens->size() - 1)->type      == TokenType::TERM &&
                             GET_TOKEN_(tokens->size() - 1)->data.term == TerminalNum::CMD_SEPARATOR)) {

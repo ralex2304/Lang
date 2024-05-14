@@ -44,7 +44,7 @@ Status::Statuses SPU_Mov::src_var(IRBackData* data, IRVal* src, IRVal* dest) {
 
 Status::Statuses SPU_Mov::src_stk(IRBackData* data, IRVal* src0, IRVal* src1, IRVal* dest) {
     assert(data);
-    assert(src0);
+    assert(src0);                       (void) src0;
     assert(src0->type == IRVal::STK);
     assert(dest);
 

@@ -35,7 +35,7 @@ Status::Statuses tree_dtor_untied_subtree(TreeNode** node) {
 }
 
 Status::Statuses tree_is_damaged(Tree* tree, const char* err_msg) {
-    assert(tree);
+    assert(tree); (void) tree;
 
     if (err_msg == nullptr)
         err_msg = "message was not specified";

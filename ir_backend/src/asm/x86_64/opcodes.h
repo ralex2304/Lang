@@ -87,8 +87,7 @@ inline Status::Statuses solve_fixups(ElfData* elf, IRNode* block) {
     return Status::NORMAL_WORK;
 }
 
-inline Status::Statuses add_offs_fixup(ElfData* elf, IRNode* dest_block, size_t offs) {
-    assert(elf);
+inline Status::Statuses add_offs_fixup(IRNode* dest_block, size_t offs) {
     assert(dest_block);
     assert(offs);
 
@@ -100,7 +99,7 @@ inline Status::Statuses add_offs_fixup(ElfData* elf, IRNode* dest_block, size_t 
     return Status::NORMAL_WORK;
 }
 
-#define ADD_OFFS_FIXUP(dest_block_, offs_) STATUS_CHECK(add_offs_fixup(elf, dest_block_, offs_))
+#define ADD_OFFS_FIXUP(dest_block_, offs_) STATUS_CHECK(add_offs_fixup(dest_block_, offs_))
 
 #define SOLVE_FIXUPS()  STATUS_CHECK(solve_fixups(elf, block))
 

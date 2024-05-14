@@ -47,11 +47,12 @@ Status::Statuses args_parse(int argc, char* argv[], ArgsVars* args_vars,
 
 ArgsMode print_help(const Argument args_dict[], const int args_dict_len,
                     int* arg_i, const int argc, char* argv[], ArgsVars* args_vars) {
+
     assert(args_dict);
-    assert(arg_i);
-    assert(argc);
-    assert(argv);
-    assert(args_vars);
+    assert(arg_i);      (void) arg_i;
+    assert(argc);       (void) argc;
+    assert(argv);       (void) argv;
+    assert(args_vars);  (void) args_vars;
 
     printf("# Lang compiler: frontend, middleend, backend\n"
            "# Console args:\n");
@@ -67,9 +68,9 @@ ArgsMode print_help(const Argument args_dict[], const int args_dict_len,
 
 ArgsMode read_input_filename(const Argument args_dict[], const int args_dict_len,
                              int* arg_i, int argc, char* argv[], ArgsVars* args_vars) {
-    (void) args_dict_len;
 
-    assert(args_dict);
+                        (void) args_dict_len;
+    assert(args_dict);  (void) args_dict;
     assert(arg_i);
     assert(argv);
     assert(args_vars);
@@ -85,9 +86,9 @@ ArgsMode read_input_filename(const Argument args_dict[], const int args_dict_len
 
 ArgsMode read_output_filename(const Argument args_dict[], const int args_dict_len,
                               int* arg_i, int argc, char* argv[], ArgsVars* args_vars) {
-    (void) args_dict_len;
 
-    assert(args_dict);
+                        (void) args_dict_len;
+    assert(args_dict);  (void) args_dict;
     assert(arg_i);
     assert(argv);
     assert(args_vars);
@@ -105,7 +106,7 @@ ArgsMode read_listing_filename(const Argument args_dict[], const int args_dict_l
                                int* arg_i, int argc, char* argv[], ArgsVars* args_vars) {
     (void) args_dict_len;
 
-    assert(args_dict);
+    assert(args_dict); (void) args_dict;
     assert(arg_i);
     assert(argv);
     assert(args_vars);
@@ -123,7 +124,7 @@ ArgsMode read_lib_filename(const Argument args_dict[], const int args_dict_len,
                            int* arg_i, int argc, char* argv[], ArgsVars* args_vars) {
     (void) args_dict_len;
 
-    assert(args_dict);
+    assert(args_dict);  (void) args_dict;
     assert(arg_i);
     assert(argv);
     assert(args_vars);
@@ -141,10 +142,10 @@ ArgsMode enable_debug_mode(const Argument args_dict[], const int args_dict_len,
                            int* arg_i, int argc, char* argv[], ArgsVars* args_vars) {
     (void) args_dict_len;
 
-    assert(args_dict);
-    assert(arg_i);
-    assert(argc);
-    assert(argv);
+    assert(args_dict);  (void) args_dict;
+    assert(arg_i);      (void) arg_i;
+    assert(argc);       (void) argc;
+    assert(argv);       (void) argv;
     assert(args_vars);
 
     args_vars->debug_mode = true;

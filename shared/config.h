@@ -1,7 +1,11 @@
 #ifndef CONFIG_H_
 #define CONFIG_H_
 
+#ifndef NDEBUG
+
 #define DEBUG
+
+#endif //< #ifndef NDEBUG
 
 #ifdef DEBUG
 

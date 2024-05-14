@@ -69,7 +69,7 @@ Status::Statuses asm_spu_END(IRBackData* data, [[maybe_unused]] IRNode* block, s
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_spu_BEGIN_FUNC_DEF(IRBackData* data, IRNode* block, size_t phys_i) {
+Status::Statuses asm_spu_BEGIN_FUNC_DEF(IRBackData* data, [[maybe_unused]] IRNode* block, size_t phys_i) {
     assert(data);
     assert(block);
 
@@ -80,7 +80,7 @@ Status::Statuses asm_spu_BEGIN_FUNC_DEF(IRBackData* data, IRNode* block, size_t 
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_spu_END_FUNC_DEF(IRBackData* data, [[maybe_unused]]IRNode* block, size_t) {
+Status::Statuses asm_spu_END_FUNC_DEF(IRBackData* data, [[maybe_unused]] IRNode* block, size_t) {
     assert(data);
     assert(block);
 
@@ -252,7 +252,7 @@ Status::Statuses asm_spu_STORE_CMP_RES(IRBackData* data, IRNode* block, size_t p
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_spu_SET_FLAGS_CMP_WITH_ZERO(IRBackData* data, IRNode* block, size_t) {
+Status::Statuses asm_spu_SET_FLAGS_CMP_WITH_ZERO([[maybe_unused]] IRBackData* data, IRNode* block, size_t) {
     assert(data);
     assert(block);
 
@@ -367,7 +367,7 @@ Status::Statuses asm_spu_SET_FPS(IRBackData* data, IRNode* block, size_t) {
     return Status::NORMAL_WORK;
 }
 
-Status::Statuses asm_spu_SHOW_VIDEO_FRAME(IRBackData* data, IRNode* block, size_t) {
+Status::Statuses asm_spu_SHOW_VIDEO_FRAME(IRBackData* data, [[maybe_unused]] IRNode* block, size_t) {
     assert(data);
     assert(block);
 

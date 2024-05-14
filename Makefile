@@ -1,8 +1,6 @@
 SHELL = /bin/bash
 .SHELLFLAGS = -o pipefail -c
 
-sanitizer = 1
-
 DOCS_DIR = docs
 
 CFLAGS_SANITIZER = -fsanitize=address,alignment,bool,bounds,enum,float-cast-overflow,$\
@@ -44,16 +42,16 @@ $(IOLIB_PATH).o: $(IOLIB_PATH).nasm
 build: build_front build_middle build_back build_ir_back
 
 build_front:
-	@cd ./frontend && make $(if $(sanitizer), sanitizer=1)
+	@cd ./frontend && make $(if $(release), release=1) $(if $(nobear), nobear=1)
 
 build_middle:
-	@cd ./middleend && make $(if $(sanitizer), sanitizer=1)
+	@cd ./middleend && make $(if $(release), release=1) $(if $(nobear), nobear=1)
 
 build_back:
-	@cd ./backend && make $(if $(sanitizer), sanitizer=1)
+	@cd ./backend && make $(if $(release), release=1) $(if $(nobear), nobear=1)
 
 build_ir_back:
-	@cd ./ir_backend && make $(if $(sanitizer), sanitizer=1)
+	@cd ./ir_backend && make $(if $(release), release=1) $(if $(nobear), nobear=1)
 
 clean_front:
 	@cd ./frontend && make clean
@@ -79,4 +77,5 @@ $(DOCS_DIR):
 
 clean: clean_front clean_middle clean_back clean_ir_back
 	@rm -rf ./$(DOCS_TARGET)
+	@rm -rf ./compile_commands.json
 

@@ -117,7 +117,7 @@ Status::Statuses X86_64_Mov::src_stk(IRBackData* data, ElfData* elf, IRVal* src,
     assert(data);
     assert(elf);
     assert(src);
-    assert(src->type == IRVal::STK);
+    assert(src->type == IRVal::STK); (void) src;
     assert(dest);
 
     if (dest->type == IRVal::STK)
