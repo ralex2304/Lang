@@ -84,10 +84,10 @@ inline bool dsl_is_double_equal(const double a, const double b) {
 #define ASSIGNMENT_WITH_ACTION(cmd_)                            \
             EVAL_SUBTREE_GET_VAL(*R(node));                     \
             EVAL_SUBTREE_GET_VAL(*L(node)); /* get var value*/  \
-            ASM_SWAP_LAST_STK_VALS();                           \
-            ASM_MATH_OPERATOR(cmd_)
+            GEN_SWAP_LAST_STK_VALS();                           \
+            GEN_MATH_OPERATOR(cmd_)
 
-#define ASM_SWAP_LAST_STK_VALS()    \
+#define GEN_SWAP_LAST_STK_VALS()    \
             STATUS_CHECK(ir_block_swap_last_stk_vals(&data->ir_d))
 
 #define VAR_DEFINITION_ASSIGNMENT(node_)            \
@@ -159,19 +159,19 @@ inline bool dsl_is_double_equal(const double a, const double b) {
 #define UNARY_MATH()    \
             STATUS_CHECK(unary_math_(data, node, NODE_DATA(node)->oper, is_val_needed))
 
-#define ASM_MATH_OPERATOR(oper_)    \
+#define GEN_MATH_OPERATOR(oper_)    \
             STATUS_CHECK(ir_block_math_operator(&data->ir_d, oper_));
 
-#define ASM_READ_DOUBLE()   \
+#define GEN_READ_DOUBLE()   \
             STATUS_CHECK(ir_block_read_double(&data->ir_d, is_val_needed))
 
-#define ASM_PRINT_DOUBLE()  \
+#define GEN_PRINT_DOUBLE()  \
             STATUS_CHECK(ir_block_print_double(&data->ir_d))
 
-#define ASM_RET()   \
+#define GEN_RET()   \
             STATUS_CHECK(ir_block_ret(&data->ir_d))
 
-#define ASM_WRITE_RETURNED_VALUE()  \
+#define GEN_WRITE_RETURNED_VALUE()  \
             STATUS_CHECK(ir_block_write_returned_value(&data->ir_d))
 
 #define DAMAGED_TREE(err_msg_)  \
@@ -207,34 +207,34 @@ inline bool dsl_is_double_equal(const double a, const double b) {
 #define GET_ARR_ELEM_VAL()      \
             STATUS_CHECK(get_arr_elem_val_(data, node, is_val_needed))
 
-#define ASM_SET_FPS(value_node_)    \
+#define GEN_SET_FPS(value_node_)    \
             STATUS_CHECK(make_set_fps_(data, value_node_))
 
-#define ASM_VIDEO_SHOW_FRAME()  \
+#define GEN_VIDEO_SHOW_FRAME()  \
             STATUS_CHECK(ir_block_video_show_frame(&data->ir_d));
 
-#define ASM_MAKE_IF(node_)  \
+#define GEN_MAKE_IF(node_)  \
             STATUS_CHECK(make_if_(data, node_))
 
-#define ASM_MAKE_IF_ELSE(node_)     \
+#define GEN_MAKE_IF_ELSE(node_)     \
             STATUS_CHECK(make_if_else_(data, node_))
 
-#define ASM_MAKE_WHILE(node_)   \
+#define GEN_MAKE_WHILE(node_)   \
             STATUS_CHECK(make_while_(data, node_))
 
-#define ASM_MAKE_WHILE_ELSE(node_)   \
+#define GEN_MAKE_WHILE_ELSE(node_)   \
             STATUS_CHECK(make_while_else_(data, node_))
 
-#define ASM_MAKE_BREAK(node_)       \
+#define GEN_MAKE_BREAK(node_)       \
             STATUS_CHECK(make_break_(data, node_))
 
-#define ASM_MAKE_CONTINUE(node_)    \
+#define GEN_MAKE_CONTINUE(node_)    \
             STATUS_CHECK(make_continue_(data, node_))
 
-#define ASM_MAKE_DO_WHILE(node_)    \
+#define GEN_MAKE_DO_WHILE(node_)    \
             STATUS_CHECK(make_do_while_(data, node_))
 
-#define ASM_MAKE_DO_IF(node_)   \
+#define GEN_MAKE_DO_IF(node_)   \
             STATUS_CHECK(make_do_if_(data, node_))
 
 #define PREFIX_OPER(oper_)  \

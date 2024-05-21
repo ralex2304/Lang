@@ -2,7 +2,7 @@
 static_assert(0 && "DEF_OPER is not defined");
 #endif //< #ifndef DEF_OPER
 
-//   | NUM |      NAME      | TYPE | MATH_TYPE | IS_CHILD_VAL_NEEDED | ASM_COMMAND
+//   | NUM |      NAME      | TYPE | MATH_TYPE | IS_CHILD_VAL_NEEDED | GEN_COMMAND
 
 DEF_OPER(1,  CMD_SEPARATOR,    LIST,   MATH_L_R, NO_VAL, NO_VAL,   {
     EVAL_SUBTREE_NO_VAL(*L(node));
@@ -88,8 +88,8 @@ DEF_OPER(16, FUNC_CALL,        BINARY, MATH_R,   STOP, VAL,        { PROVIDE_FUN
 DEF_OPER(17, RETURN,           UNARY,  MATH_R,   STOP, VAL,        {
     EVAL_SUBTREE_GET_VAL(*R(node));
 
-    ASM_WRITE_RETURNED_VALUE();
-    ASM_RET();
+    GEN_WRITE_RETURNED_VALUE();
+    GEN_RET();
 })
 
 DEF_OPER(20, MATH_ADD,         BINARY, MATH,     INHERIT, INHERIT, { BINARY_MATH(); })
@@ -121,32 +121,32 @@ DEF_OPER(53, POSTFIX_SUB,      BINARY, MATH,     STOP, VAL,        { POSTFIX_OPE
 
 DEF_OPER(60, WHILE,            BINARY, MATH_L_R, VAL, NO_VAL,      {
     if (NODE_IS_OPER(*R(node), OperNum::ELSE)) {
-        ASM_MAKE_WHILE_ELSE(node);
+        GEN_MAKE_WHILE_ELSE(node);
     } else {
-        ASM_MAKE_WHILE(node);
+        GEN_MAKE_WHILE(node);
     }
 })
 
-DEF_OPER(61, DO_WHILE,         BINARY, MATH_L_R, VAL, NO_VAL,      { ASM_MAKE_DO_WHILE(node); })
+DEF_OPER(61, DO_WHILE,         BINARY, MATH_L_R, VAL, NO_VAL,      { GEN_MAKE_DO_WHILE(node); })
 
 DEF_OPER(63, IF,               BINARY, MATH_L_R, VAL, NO_VAL,      {
     EVAL_SUBTREE_GET_VAL(*L(node));
 
     if (NODE_IS_OPER(*R(node), OperNum::ELSE)) {
-        ASM_MAKE_IF_ELSE(*R(node));
+        GEN_MAKE_IF_ELSE(*R(node));
     } else {
-        ASM_MAKE_IF(*R(node));
+        GEN_MAKE_IF(*R(node));
     }
 })
 
-DEF_OPER(64, DO_IF,            BINARY, MATH_L_R, VAL, NO_VAL,      { ASM_MAKE_DO_IF(node); })
+DEF_OPER(64, DO_IF,            BINARY, MATH_L_R, VAL, NO_VAL,      { GEN_MAKE_DO_IF(node); })
 
 DEF_OPER(66, ELSE,             BINARY, MATH_L_R, NO_VAL, NO_VAL,   {
     return DAMAGED_TREE("unexpected ELSE node");
 })
 
-DEF_OPER(67, BREAK,            LEAF,   NO_MATH,  STOP, STOP,       { ASM_MAKE_BREAK(node); })
-DEF_OPER(68, CONTINUE,         LEAF,   NO_MATH,  STOP, STOP,       { ASM_MAKE_CONTINUE(node); })
+DEF_OPER(67, BREAK,            LEAF,   NO_MATH,  STOP, STOP,       { GEN_MAKE_BREAK(node); })
+DEF_OPER(68, CONTINUE,         LEAF,   NO_MATH,  STOP, STOP,       { GEN_MAKE_CONTINUE(node); })
 
 DEF_OPER(69, NEW_SCOPE,        UNARY,  MATH_R,   STOP, NO_VAL,     {
     ENTER_SCOPE(nullptr);
@@ -156,13 +156,13 @@ DEF_OPER(69, NEW_SCOPE,        UNARY,  MATH_R,   STOP, NO_VAL,     {
     EXIT_SCOPE();
 })
 
-DEF_OPER(70, IN,               LEAF,   NO_MATH,  STOP, STOP,       { ASM_READ_DOUBLE(); })
+DEF_OPER(70, IN,               LEAF,   NO_MATH,  STOP, STOP,       { GEN_READ_DOUBLE(); })
 
 DEF_OPER(71, OUT,              UNARY,  MATH_R,   STOP, VAL,        {
     EVAL_SUBTREE_GET_VAL(*R(node));
-    ASM_PRINT_DOUBLE();
+    GEN_PRINT_DOUBLE();
 })
 
-DEF_OPER(72, SHOW,             LEAF,   NO_MATH,  STOP, STOP,       { ASM_VIDEO_SHOW_FRAME(); })
+DEF_OPER(72, SHOW,             LEAF,   NO_MATH,  STOP, STOP,       { GEN_VIDEO_SHOW_FRAME(); })
 
-DEF_OPER(73, SET_FPS,          UNARY,  MATH_R,   STOP, VAL,        { ASM_SET_FPS(*R(node)); })
+DEF_OPER(73, SET_FPS,          UNARY,  MATH_R,   STOP, VAL,        { GEN_SET_FPS(*R(node)); })
