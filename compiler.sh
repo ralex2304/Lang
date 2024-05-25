@@ -26,10 +26,10 @@ OUTPUT_FILE=""
 ARCH="x86_64"
 IOLIB_FILE="./Programs/doubleiolib.o"
 
-while [[ $# -gt 0 ]]; do
-  case $1 in
+for i in "$@"; do
+  case $i in
     -o)
-      OUTPUT_FILE="$2"
+      OUTPUT_FILE="${i+1}"
       shift
       shift
       ;;
@@ -50,11 +50,11 @@ while [[ $# -gt 0 ]]; do
       exit 0
       ;;
     -*|--*)
-      echo "Unknown option $1"
+      echo "Unknown option $i"
       exit 1
       ;;
     *)
-      POSITIONAL_ARGS+=("$1")
+      POSITIONAL_ARGS+=("$i")
       shift
       ;;
   esac
@@ -74,7 +74,7 @@ if [[ "${ARCH}" == "x86_64" ]]; then
 elif [[ "${ARCH}" == "spu" ]]; then
     LISTING_FILE="${INPUT_FILE%.*}.code"
 else
-    echo "Unsupported arch specified"
+    echo "Unsupported arch specified: \"${ARCH}\""
     exit 1
 fi
 
