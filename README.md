@@ -17,6 +17,7 @@
         2. [Реализация оптимизаций](#реализация-оптимизаций)
         3. [Предупреждения](#предупреждения)
     3. [Backend](#backend)
+        1. [Стандарт IR](#стандарт-ir)
     4. [IR Backend](#ir-backend)
 2. [Возможности и особенности языка](#возможности-и-особенности-языка)
     1. [Синтаксические конструкции](#синтаксические-конструкции)
@@ -228,7 +229,55 @@ MathLvl5 := {{'MATH_SUB' MathLvl5} | {{'OPEN_BRACE' Expr 'CLOSE_BRACE'} | CH_Bin
 
 ### Backend
 
-// TODO описание бекенда
+Эта программа преобразует абстрактное синтаксическое дерево в линейное архитектурно-независимое промежуточное представление. Происходит инфиксный обход по дереву. Для упрощения написания и поддержки проекта был создан [DSL](/shared/dsl.h). Последовательности блоков IR, в которые разворачивается каждый тип узла дерева описаны в [соответствующем файле](/shared/operators.h).
+
+#### Стандарт IR
+
+Аналогично стандарту AST описан и формат IR. Подробная информация в том же [репозитории](https://github.com/ralex2304/LangStandard/#стандарт-ir---intermediate-representation).
+
+Любая программа представляет собой последовательность блоков IR. Для любого блока можно задать 2 входных и одно выходное значение (так называемое трёхадресное представление).
+
+Далее представлена таблица типов блоков IR:
+
+| Num | Name                      |   src[0]           |   src[1]        |   dest           |  subType   | Description |
+|:---:|:--------------------------|:------------------:|:---------------:|:----------------:|:----------:|:------------|
+|  0  | NONE                      |                    |                 |                  |            | Empty block. May be used for jump destination
+|  1  | START                     | global vars number |                 |                  |            | Program beginning, initialization and entry point start. Must be the first block
+|  2  | END                       |                    |                 |                  |            | Entry point end
+|  3  | BEGIN_FUNC_DEF            | local vars number  |                 |                  |            | Function definition beginning
+|  4  | END_FUNC_DEF              |                    |                 |                  |            | Function definition end
+|  5  | CALL_FUNC                 | local vars number  |                 | func block index |            | Function call
+|  6  | RET                       |                    |                 |                  |            | Return from function
+|  7  | COUNT_ARR_ELEM_ADDR_CONST | offset             |                 |                  |            | Count address of array element
+|  8  | ARR_ELEM_ADDR_ADD_INDEX   | index source       | global or local |                  |            | Add value from stack to address of array element
+|  9  | MOV                       | source             | special data    | destination      |            | Mov value from src[0] to dest (stack, memory, register)
+| 10  | SWAP                      | operand 1          | operand 2       |                  |            | Swap 2 values from src[0] and src[1]
+| 11  | STORE_CMP_RES             | operand 1          | operand 2       | result           | `CmpType`  | Push bool result of comparison to stack
+| 12  | SET_FLAGS_CMP_WITH_ZERO   | operand            |                 |                  |            | Compare with zero and set comparison flags
+| 13  | MATH_OPER                 | operand 1          | operand 2       | result           | `MathOper` | Math operation
+| 14  | JUMP                      |                    |                 | dest block index | `JmpType`  | Conditional or unconditional jump
+| 15  | READ_DOUBLE               |                    |                 | value            |            | Read double precision floating point number from user
+| 16  | PRINT_DOUBLE              | value              |                 |                  |            | Print double precision floating point number
+| 17  | SET_FPS                   | value              |                 |                  |            | SPU: asm `fps <value>` - set max fps count for video mode
+| 18  | SHOW_VIDEO_FRAME          |                    |                 |                  |            | SPU: asm `shw` - show image frame in video mode
+
+Типы входных и выходных значений:
+
+| # | Имя          | Описание |
+|:-:|:-------------|:---------|
+| 1 | `CONST`      | Константное число с плавающей точкой
+| 2 | `INT_CONST`  | Константное целое число
+| 3 | `LOCAL_VAR`  | Локальная переменная
+| 4 | `GLOBAL_VAR` | Глобальная переменная
+| 5 | `ARG_VAR`    | Аргумент функции (для передачи при вызове)
+| 6 | `ARR_VAR`    | Элемент массива
+| 7 | `STK`        | Стек
+| 8 | `REG`        | Регистр
+| 9 | `ADDR`       | Индекс другого блока IR (для вызовов функций и прыжков)
+
+Внутри программы последовательность блоков хранится в двусвязном списке ([List](https://github.com/ralex2304/List)). Это позволяет удобно удалять и вставлять блоки при дальнейших оптимизациях, так как тогда физические индексы блоков не меняются.
+
+Все математические операции производятся через стек. В дальнейшем небольшая часть неоптимальных перемещений значений будет соптимизирована.
 
 ### IR Backend
 
