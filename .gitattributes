@@ -1,0 +1,3 @@
+*.snb working-tree-encoding=CP1251
+/shared/objects.h working-tree-encoding=CP1251
+/frontend/src/terminals.h
