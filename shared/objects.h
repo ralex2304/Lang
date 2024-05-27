@@ -9,7 +9,7 @@
 
 constexpr size_t MAX_SYNONYMS_NUM = 3;
 
-const char* const MAIN_FUNC_NAMES[MAX_SYNONYMS_NUM] = {"main", "министерство", "остров_в_океане"};
+const char* const MAIN_FUNC_NAMES[MAX_SYNONYMS_NUM] = {"main", "РјРёРЅРёСЃС‚РµСЂСЃС‚РІРѕ", "РѕСЃС‚СЂРѕРІ_РІ_РѕРєРµР°РЅРµ"};
 
 struct String {
     const char* s = nullptr;
