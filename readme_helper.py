@@ -24,6 +24,8 @@ level = 1
 
 is_contents_section = 0
 
+is_code_section = 0
+
 for line in lines:
     if not is_contents_section and line == BEGIN_COMMENT:
         is_contents_section += 1
@@ -32,7 +34,10 @@ for line in lines:
         is_contents_section += 1
         continue
 
-    if not line.startswith("##") or is_contents_section % 2 != 0:
+    if line.startswith("```"):
+        is_code_section = not is_code_section
+
+    if not line.startswith("##") or is_contents_section % 2 != 0 or is_code_section:
         continue
 
     cur_level = 1
