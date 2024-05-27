@@ -21,6 +21,7 @@
 /Programs/*/*.o
 /Programs/*/prog
 /Programs/*/lstprog
+/Programs/*/gcc*prog
 /compile_commands.json
 /.cache
 .$*.bkp

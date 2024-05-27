@@ -2,6 +2,7 @@ SHELL = /bin/bash
 .SHELLFLAGS = -o pipefail -c
 
 DOCS_DIR = docs
+README_PATH = README.md
 
 CFLAGS_SANITIZER = -fsanitize=address,alignment,bool,bounds,enum,float-cast-overflow,$\
 				   float-divide-by-zero,integer-divide-by-zero,leak,nonnull-attribute,null,$\
@@ -10,7 +11,7 @@ CFLAGS_SANITIZER = -fsanitize=address,alignment,bool,bounds,enum,float-cast-over
 
 .PHONY: main frontend middleend backend ir_backend asm build_front build_middle build_back build_ir_back clean_front clean_middle clean_back clean_ir_back
 
-main: build frontend middleend backend ir_backend run
+main: $(README_PATH) build frontend middleend backend ir_backend run
 
 PROG_PATH = Programs/$(prog)
 
@@ -79,3 +80,11 @@ clean: clean_front clean_middle clean_back clean_ir_back
 	@rm -rf ./$(DOCS_TARGET)
 	@rm -rf ./compile_commands.json
 
+perf:
+	sudo perf record -o ./Programs/perf_test/$(name).data --call-graph dwarf ./Programs/perf_test/$(exec)
+	sudo chmod a=rwx ./Programs/perf_test/$(name).data
+
+$(README_PATH): FORCE
+	@python readme_helper.py ./$@
+
+FORCE:

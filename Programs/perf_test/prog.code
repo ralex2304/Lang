@@ -1,0 +1,153 @@
+___ir_block_1:
+; Program start
+
+jmp _start
+
+_start:
+                ; Regs initialisation
+                push 0
+                pop rax
+                push 0
+                pop rbx
+                ; Regs initialisation end
+
+___ir_block_2:
+                ; func call begin
+                push rbx
+                push rbx + 0
+                pop rbx
+                call ___func_25
+                pop rbx
+                ; func call end
+
+___ir_block_3:
+                hlt
+
+___ir_block_4:
+; =========================== Function definition =========================
+___func_4:
+___ir_block_5:
+                push [rbx + 0]
+___ir_block_6:
+                push 1
+___ir_block_7:
+                ja ___compare_7_true
+                push 0
+                jmp ___compare_7_end
+
+___compare_7_true:
+                push 1
+___compare_7_end:
+
+___ir_block_8:
+___ir_block_9:
+                push 0
+                je ___ir_block_20
+
+___ir_block_10:
+                push [rbx + 0]
+___ir_block_11:
+                push 1
+___ir_block_12:
+                sub
+___ir_block_13:
+                pop [rbx + 1]
+___ir_block_14:
+                ; func call begin
+                push rbx
+                push rbx + 1
+                pop rbx
+                call ___func_4
+                pop rbx
+                ; func call end
+
+___ir_block_15:
+                push rax
+___ir_block_16:
+                push [rbx + 0]
+___ir_block_17:
+                mul
+___ir_block_18:
+                pop rax
+
+___ir_block_19:
+                ret
+
+___ir_block_20:
+___ir_block_21:
+                push 1
+___ir_block_22:
+                pop rax
+
+___ir_block_23:
+                ret
+
+___ir_block_24:
+                ret
+; ------------------------- Function definition end -----------------------
+
+
+___ir_block_25:
+; =========================== Function definition =========================
+___func_25:
+___ir_block_26:
+                push 1e+07
+___ir_block_27:
+                pop [rbx + 0]
+___ir_block_28:
+___ir_block_29:
+                push [rbx + 0]
+___ir_block_30:
+                push [rbx + 0]
+___ir_block_31:
+                push 1
+___ir_block_32:
+                sub
+___ir_block_33:
+                pop [rbx + 0]
+___ir_block_34:
+                push 0
+___ir_block_35:
+                ja ___compare_35_true
+                push 0
+                jmp ___compare_35_end
+
+___compare_35_true:
+                push 1
+___compare_35_end:
+
+___ir_block_36:
+___ir_block_37:
+                push 0
+                je ___ir_block_42
+
+___ir_block_38:
+                push 20
+___ir_block_39:
+                pop [rbx + 1]
+___ir_block_40:
+                ; func call begin
+                push rbx
+                push rbx + 1
+                pop rbx
+                call ___func_4
+                pop rbx
+                ; func call end
+
+___ir_block_41:
+                jmp ___ir_block_28
+
+___ir_block_42:
+___ir_block_43:
+                push 0
+___ir_block_44:
+                pop rax
+
+___ir_block_45:
+                ret
+
+___ir_block_46:
+                ret
+; ------------------------- Function definition end -----------------------
+
+
