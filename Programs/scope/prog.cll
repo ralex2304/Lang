@@ -1,0 +1,21 @@
+
+main var() {
+
+    x var = 5
+
+    if (1) {
+        out x
+
+        x var = 10
+
+        out x
+
+        x += 10
+
+        out x
+    }
+
+    out x
+
+    return 0
+}

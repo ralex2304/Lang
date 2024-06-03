@@ -1,0 +1,9 @@
+
+main var() {
+    ded var const [10] = 0, 1, 2, 3, 4, 5, 6
+
+    index var = 0
+
+    while (ded[index++] != 5)
+        out(ded[index])
+}

@@ -1,0 +1,61 @@
+main var () {
+
+    A var = in
+    B var = in
+    C var = in
+
+    return quad(A, B, C)
+}
+
+quad var (A var const, B var const, C var const) {
+
+    if (A == 0)
+        return linear(B, C)
+
+    D var = B*B - 4 * A * C
+
+
+
+    if (D < 0) {
+        out 0
+
+        return 0
+    }
+
+    if (D == 0) {
+        out 1
+        out -B / 2 * A
+
+        return 0
+    }
+
+    D = sqrt(D)
+
+    out 2
+
+    out (-B - D) / (2 * A)
+
+    out (-B + D) / (2 * A)
+
+    return 0
+}
+
+linear var (A var const, B var const) {
+
+    if (A == 0) {
+
+        if (B == 0) {
+            out -1
+            return 0
+        }
+
+        out 0
+
+        return 0
+    }
+
+    out 1
+    out -B / A
+
+    return 0
+}

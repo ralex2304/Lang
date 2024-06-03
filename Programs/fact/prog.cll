@@ -1,0 +1,14 @@
+main var () {
+
+    out(fact(in))
+
+    return 0
+}
+
+fact var (i var) {
+
+    if (i > 1)
+        return fact(i - 1) * i
+
+    return 1
+}
